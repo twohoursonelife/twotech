@@ -1,7 +1,9 @@
 <template>
   <div id="app">
     <h1>
-      <router-link to="/">Crafting Reference for {{gameName}}</router-link>
+      <router-link to="/">Crafting Reference for Two Hours One Life</router-link>
+      <!-- I can't get the env variables to work, bugger it. Hard code it is.
+        <router-link to="/">Crafting Reference for {{gameName}}</router-link>-->
     </h1>
 
     <h2 v-if="loading">Loading...</h2>
@@ -20,7 +22,11 @@
           </a>
         </div>
       </div>
-      <div class="subtitle" v-else-if="gameUrl">
+      <div class="subtitle" v-else>
+        <a :href="twohoursonelife.com">Visit "Two Hours One Life</a>
+      </div>
+      <!-- I can't get the env variables to work, bugger it. Hard code it is.
+        <div class="subtitle" v-else-if="gameUrl">
         <a :href="gameUrl">Visit "{{gameName}}</a>
       </div>
       <div class="subtitle" v-else>
@@ -31,7 +37,7 @@
         <a :href="unreleasedContentUrl()">
           See Unreleased Content
         </a>
-      </div>
+      </div> -->
 
       <ObjectSearch />
 
