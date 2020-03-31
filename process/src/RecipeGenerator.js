@@ -16,6 +16,10 @@ class RecipeGenerator {
       root.collapseBranches();
     }
     catch(e){
+      console.log(" ");
+      console.log(e);
+      console.log(this.object);
+      console.log(" ");
     }
   }
 
