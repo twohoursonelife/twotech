@@ -157,6 +157,7 @@ export default class GameObject {
   }
 
   sizeText(size) {
+    if (size == 3) return "Extra Large";
     if (size > 1) return "Large";
     if (size == 1) return "Small";
     return "Tiny";
