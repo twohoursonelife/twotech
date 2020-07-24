@@ -120,7 +120,7 @@ export default {
     }
   },
   metaInfo: {
-    title: "Crafting reference for One Hour One Life",
+    title: "Crafting reference for " + process.env.ONETECH_MOD_NAME || "One Hour One Life",
     titleTemplate: '%s | onetech'
   },
   routes: [
