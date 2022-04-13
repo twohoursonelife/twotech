@@ -31,6 +31,13 @@ class Git {
   }
 
   fileContent(sha, path) {
+    // Dear future reader
+    // Curse object 8316. This is a last ditch effort to fix it.
+    // Broken commit causing errors. An object was removed before all references to it was.
+    // https://github.com/twohoursonelife/OneLifeData7/commit/8833527cbbb2d5d3d65f174a7d412cfa7fe5cbbe
+    if (path == "objects/8316.txt") {
+      path = "objects/8317.txt";
+    }
     return this.run("show", `${sha}:${path}`);
   }
 
