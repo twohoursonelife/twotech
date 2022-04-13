@@ -117,7 +117,6 @@ class GameData {
   }
 
   exportObjects() {
-    this.prepareStaticDir();
     this.saveJSON("objects.json", this.objectsData());
     for (let id in this.objects) {
       this.saveJSON(`objects/${id}.json`, this.objects[id].jsonData());
@@ -219,6 +218,7 @@ class GameData {
   }
 
   processSprites() {
+    this.prepareStaticDir();
     const processor = new SpriteProcessor(this.dataDir + "/sprites", this.staticDir + "/sprites")
     processor.process(this.objects)
   }
