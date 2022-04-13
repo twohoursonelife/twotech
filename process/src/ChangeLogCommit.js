@@ -25,12 +25,6 @@ class ChangeLogCommit {
       return false;
     if (this.message.startsWith("Merge branch"))
       return false;
-    
-    // Broken commit causing errors. An object was removed before all references to it was.
-    // https://github.com/twohoursonelife/OneLifeData7/commit/8833527cbbb2d5d3d65f174a7d412cfa7fe5cbbe
-    if (this.message.startsWith("Merchant test redo"))
-      return false;
-    
     return true
   }
 
