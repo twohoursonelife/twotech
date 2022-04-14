@@ -9,9 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "canvas": "^1.6.9",
-    "lodash": "^4.17.5",
-    "node-fetch": "^2.1.1",
+    "canvas": "^1.6.13",
+    "lodash": "^4.17.21",
+    "node-fetch": "^2.6.7",
     "sitemap": "^1.13.0"
   }
 }
