@@ -7,7 +7,7 @@ class SpriteProcessor {
   constructor(spritesDir, pngDir) {
     this.spritesDir = spritesDir;
     this.pngDir = pngDir;
-    this.canvas = new Canvas(512, 1024);
+    this.canvas = new Canvas.createCanvas(512, 1024);
     this.context = this.canvas.getContext('2d');
   }
 
@@ -74,7 +74,7 @@ class SpriteProcessor {
     const width = bounds.maxX - bounds.minX;
     const height = bounds.maxY - bounds.minY;
 
-    const newCanvas = new Canvas(width, height);
+    const newCanvas = new Canvas.createCanvas(width, height);
     const newContext = newCanvas.getContext('2d');
 
     newContext.setTransform(1, 0, 0, 1, 0, 0);
@@ -109,7 +109,7 @@ class SpriteProcessor {
   }
 
   drawSpriteWithOperation(sprite, operation) {
-    const newCanvas = new Canvas(this.canvas.width, this.canvas.height);
+    const newCanvas = new Canvas.createCanvas(this.canvas.width, this.canvas.height);
     const newContext = newCanvas.getContext('2d');
 
     this.drawSpriteDirectly(sprite, newContext);
@@ -149,7 +149,7 @@ class SpriteProcessor {
   }
 
   overlayColor(sprite, targetContext) {
-    const newCanvas = new Canvas(this.canvas.width, this.canvas.height);
+    const newCanvas = new Canvas.createCanvas(this.canvas.width, this.canvas.height);
     const newContext = newCanvas.getContext('2d');
 
     this.drawSpriteImage(sprite, newContext, false)
