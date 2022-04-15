@@ -18,7 +18,7 @@ class RecipeGenerator {
     catch(e){
       console.log(" ");
       console.log(e);
-      console.log(this.object);
+      console.log(this.object.name);
       console.log(" ");
     }
   }
