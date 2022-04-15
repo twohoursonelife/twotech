@@ -95,7 +95,7 @@ export default {
       return true;
     },
     gameName() {
-      return process.env.ONETECH_MOD_NAME || "One Hour One Life";
+      return process.env.ONETECH_MOD_NAME || "Two Hours One Life";
     },
     gameUrl() {
       return process.env.ONETECH_MOD_URL;
@@ -120,7 +120,7 @@ export default {
     }
   },
   metaInfo: {
-    title: "Crafting reference for " + process.env.ONETECH_MOD_NAME || "One Hour One Life",
+    title: "Crafting reference for " + process.env.ONETECH_MOD_NAME || "Two Hours One Life",
     titleTemplate: '%s | twotech'
   },
   routes: [
