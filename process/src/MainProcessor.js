@@ -19,7 +19,7 @@ class MainProcessor {
   }
 
   gitUrl() {
-    return process.env.ONETECH_PROCESS_GIT_URL || "https://github.com/jasonrohrer/OneLifeData7.git";
+    return process.env.ONETECH_PROCESS_GIT_URL || "https://github.com/twohoursonelife/OneLifeData7.git";
   }
 
   process(version) {
