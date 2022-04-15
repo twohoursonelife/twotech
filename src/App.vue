@@ -113,10 +113,10 @@ export default {
       this.$router.replace("/" + path.join("/"));
     },
     unreleasedContentUrl() {
-      return "https://edge.onetech.info" + window.location.pathname;
+      return "https://edge.twotech.twohoursonelife.com" + window.location.pathname;
     },
     releasedContentUrl() {
-      return "https://onetech.info" + window.location.pathname;
+      return "https://twotech.twohoursonelife.com" + window.location.pathname;
     }
   },
   metaInfo: {
