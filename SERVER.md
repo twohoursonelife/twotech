@@ -16,7 +16,7 @@ I first setup a $5/month droplet on [Digital Ocean](https://www.digitalocean.com
 Clone the onetech repo and build it:
 
 ```
-git clone https://github.com/Kazetsukai/onetech.git
+git clone https://github.com/twohoursonelife/twotech
 npm install
 npm run build
 ```
@@ -25,10 +25,10 @@ Setup the server config:
 
 ```
 server {
-  root /path/to/onetech/public;
+  root /var/www/twotech/public;
   index index.html;
 
-  server_name onetech.info edge.onetech.info www.onetech.info;
+  server_name twotech.twohoursonelife.com edge.twotech.twohoursonelife.com;
 
   location / {
     try_files $uri $uri/ /index.html;
