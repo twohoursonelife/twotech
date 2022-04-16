@@ -1,14 +1,14 @@
 # onetech
 
-> One Hour One Life Crafting Reference
+> Two Hours One Life Crafting Reference
 
-View here: https://onetech.info
+View here: https://twotech.twohoursonelife.com
 
-This site is built using the game data directly from [the game data repository](https://github.com/jasonrohrer/OneLifeData7).
+This site is built using the game data directly from [the game data repository](https://github.com/twohoursonelife/OneLifeData7).
 It shows the relationships between items, and lets you explore how things are crafted.
 
 Unlike the wiki, which contains "wisdom" about the game, this site contains only "knowledge".
-This is a reference. For a better guide, go to the [game wiki](https://onehouronelife.gamepedia.com/One_Hour_One_Life_Wiki).
+This is a reference. For a better guide, go to the [game wiki](https://twohoursonelife.fandom.com/wiki/Two_Hours,_One_Life_Wiki).
 
 
 ## Build Setup
@@ -64,6 +64,8 @@ node process
 
 
 ### Modded Support
+
+_Following forking this project, the following is less supported and we do not make use of this ourselves._
 
 If you have a modded version of `OneLifeData7`, consider forking this repository and setting these environment variables before processing:
 
