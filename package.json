@@ -15,7 +15,7 @@
     "vue": "^2.6.14",
     "vue-meta": "^2.4.0",
     "vue-router": "^3.5.3",
-    "vue-tippy": "^4.13.0"
+    "vue-tippy": "^2.1.3"
   },
   "browserslist": [
     "> 1%",
