@@ -1,9 +1,7 @@
 #!/bin/bash
 set -e
 
-cd /var/www/twotech/process/OneLifeData7
-
-if ./changes_upstream.sh; then
-    cd /var/www/twotech
+cd /var/www/twotech
+if ./utils/changes_upstream.sh "./process/OneLifeData7"; then
     node process download
 fi

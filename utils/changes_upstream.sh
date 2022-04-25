@@ -1,5 +1,7 @@
 #!/bin/bash
 
-git fetch
-test "$(git rev-parse HEAD)" != "$(git rev-parse @{upstream})"
+repo="${1:-.}"
+
+git -C "$repo" fetch
+test "$(git -C "$repo" rev-parse HEAD)" != "$(git -C "$repo" rev-parse @{upstream})"
 exit $?
