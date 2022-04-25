@@ -87,7 +87,7 @@ node process download
 Setup cron to run the update script every 5 minutes, this will watch both Git repos and update the site when they change.
 
 ```
-*/5 * * * * /path/to/onetech/bin/update_onetech
+*/5 * * * * /var/www/twotech/utils/update.sh
 ```
 
 That's it!

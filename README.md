@@ -1,4 +1,4 @@
-# onetech
+# twotech
 
 > Two Hours One Life Crafting Reference
 
