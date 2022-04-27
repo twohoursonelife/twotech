@@ -84,10 +84,10 @@ node process download
 
 ## Cron
 
-Setup cron to run the update script every 5 minutes, this will watch both Git repos and update the site when they change.
+Setup cron to run the update script every day, this will watch both Git repos and update the site when they change.
 
 ```
-*/5 * * * * bash /var/www/twotech/utils/update.sh >> ~/updateTwotech.log 2>&1
+0 0 * * * bash /var/www/twotech/utils/update.sh >> ~/updateTwotech.log 2>&1
 ```
 
 That's it!
