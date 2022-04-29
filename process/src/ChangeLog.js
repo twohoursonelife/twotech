@@ -38,7 +38,7 @@ class ChangeLog {
   }
 
   versionNumberFromTag(tag) {
-    let version = tag.replace(/OneLife_v|2HOL_v/, "");
+    const version = tag.replace(/OneLife_v|2HOL_v/, "");
     if (version == "Start") return 0;
     return parseInt(version);
   }
