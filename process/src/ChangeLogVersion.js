@@ -11,7 +11,7 @@ class ChangeLogVersion {
   }
 
   tag() {
-    if (this.id == 0) return "2HOL_vStart";
+    if (this.id == 0) return "OneLife_vStart";
     if (this.isUnreleased()) return "master";
     return "2HOL_v" + this.id;
   }
