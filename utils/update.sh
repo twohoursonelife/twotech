@@ -7,6 +7,7 @@ if ./utils/changes_upstream.sh; then
     npm run build
     cd process
     npm install
+    cd ..
 fi
 
 if ./utils/changes_upstream.sh "./process/OneLifeData7"; then
