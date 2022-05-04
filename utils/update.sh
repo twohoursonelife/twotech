@@ -24,5 +24,7 @@ if ./utils/changes_upstream.sh "./process/OneLifeData7"; then
     # git pull is not necessary here as the following command will handle that.
     node process download
 else
-    echo "$(timestamp) No upstream changes to data, update check complete."
+    echo "$(timestamp) No upstream changes to data, moving on..."
 fi
+
+echo "$(timestamp) Update check complete." 
