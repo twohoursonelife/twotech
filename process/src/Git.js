@@ -12,6 +12,7 @@ class Git {
     if (result.status > 0) {
       console.log("Git command failed with args", args);
       console.log(result.stderr);
+      console.trace();
       throw "Git command failed. See log for reason.";
     }
 
