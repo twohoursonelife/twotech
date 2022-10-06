@@ -36,7 +36,7 @@ class GameObject {
 
   parseName(name) {
     if (name)
-      this.data.name = name.replace('#', ' - ');
+      this.data.name = name.replace('/#/g', ' - ');
   }
 
   parseLine(line) {
