@@ -105,7 +105,7 @@ export default class GameObject {
   }
 
   subName() {
-    return this.name.split(' - ')[1];
+    return this.name.substring(this.name.indexOf(' - ')+3);
   }
 
   badges() {
