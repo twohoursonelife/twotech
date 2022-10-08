@@ -105,6 +105,9 @@ export default class GameObject {
   }
 
   subName() {
+    if (!this.name.includes(' - ')) {
+      return;
+    }
     return this.name.substring(this.name.indexOf(' - ')+3);
   }
 
