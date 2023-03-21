@@ -68,6 +68,9 @@ class GameObject {
     if (attribute == "numUses") {
       this.data.numUses = values[0];
       this.data.useChance = parseFloat(values[1] || 1.0);
+    } else if (attribute == "foodValue") {
+      if (values.length == 1) values.push(0);
+      this.data.foodValue = values; 
     } else if (attribute == "biomes" || attribute == "useAppearIndex" || attribute == "spritesAdditiveBlend") {
       this.data[attribute] = values;
     } else if (values.length == 1) {
@@ -97,7 +100,7 @@ class GameObject {
       result.version = this.version;
     }
 
-    if (this.data.foodValue > 0) {
+    if (this.data.foodValue[0] > 0) {
       result.foodValue = this.data.foodValue;
     }
 
