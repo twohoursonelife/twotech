@@ -17,9 +17,10 @@
       </div>
 
       <ul v-if="object.data">
-        <li v-if="foodWithBonus">
-          Food: {{foodWithBonus}}
-          <span class="details">({{foodBase}}+{{foodBonus}} bonus)</span>
+        <li v-if="foodWithBothBonus">
+          Food: {{foodWithBothBonus}}
+          <span class="details">({{foodBase}}+{{foodBaseBonus}}+{{foodEatBonus}} bonus)</span>
+          <span class="helpTip" v-tippy :title="foodTip">?</span>
         </li>
         <li v-if="object.data.heatValue">Heat: {{object.data.heatValue}}</li>
         <li v-if="object.clothingPart()">Clothing: {{object.clothingPart()}}</li>
@@ -227,16 +228,23 @@ export default {
     modName() {
       return process.env.ONETECH_MOD_NAME;
     },
-    foodBonus() {
-      return GameObject.foodBonus;
+    foodEatBonus() {
+      return GameObject.foodEatBonus;
+    },
+    foodBaseBonus() {
+      if (!this.object.data.foodValue) return;
+      return this.object.data.foodValue[1];
     },
     foodBase() {
       if (!this.object.data.foodValue) return;
-      return this.object.data.foodValue;
+      return this.object.data.foodValue[0];
     },
-    foodWithBonus() {
+    foodWithBothBonus() {
       if (!this.foodBase) return;
-      return this.foodBase + this.foodBonus;
+      return this.foodBase + this.foodBaseBonus + this.foodEatBonus;
+    },
+    foodTip() {
+      return `${this.foodBase} base + ${this.foodBaseBonus} base bonus + ${this.foodEatBonus} eat bonus`;
     },
     totalFood() {
       if (!this.foodValue || !this.numUses) return;
