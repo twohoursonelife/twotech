@@ -14,12 +14,12 @@ const Clothing = {
 const Food = {
   key: "food",
   filter(objects) {
-    return objects.filter(o => o.data.foodValue > 0);
+    return objects.filter(o => o.data.foodValue[0] > 0);
   },
   value(object) {
     if (object.data.numUses > 1)
-      return `${object.data.foodValue + parseInt(process.env.ONETECH_FOOD_BONUS)} x ${object.data.numUses}`;
-    return object.data.foodValue + parseInt(process.env.ONETECH_FOOD_BONUS);
+      return `${object.data.foodValue[0] + object.data.foodValue[1] + parseInt(process.env.ONETECH_FOOD_BONUS)} x ${object.data.numUses}`;
+    return object.data.foodValue[0] + object.data.foodValue[1] + parseInt(process.env.ONETECH_FOOD_BONUS);
   }
 }
 

@@ -12,7 +12,7 @@ const Food = {
   key: "food",
   name: "Food",
   filter(objects) {
-    return objects.filter(o => o.data.foodValue > 0);
+    return objects.filter(o => o.data.foodValue[0] > 0);
   }
 }
 

@@ -19,7 +19,6 @@
       <ul v-if="object.data">
         <li v-if="foodWithBothBonus">
           Food: {{foodWithBothBonus}}
-          <span class="details">({{foodBase}}+{{foodBaseBonus}}+{{foodEatBonus}} bonus)</span>
           <span class="helpTip" v-tippy :title="foodTip">?</span>
         </li>
         <li v-if="object.data.heatValue">Heat: {{object.data.heatValue}}</li>
