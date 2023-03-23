@@ -23,6 +23,7 @@ class GameData {
     this.objects = {};
     this.categories = [];
     this.biomes = [];
+    this.prepareStaticDir();
   }
 
   download(gitURL) {
@@ -218,7 +219,6 @@ class GameData {
   }
 
   processSprites() {
-    this.prepareStaticDir();
     const processor = new SpriteProcessor(this.dataDir + "/sprites", this.staticDir + "/sprites")
     processor.process(this.objects)
   }
