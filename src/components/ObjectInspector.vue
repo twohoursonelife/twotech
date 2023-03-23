@@ -19,7 +19,7 @@
       <ul v-if="object.data">
         <li v-if="foodWithBothBonus">
           Food: {{foodBase}}
-          <span class="details">(+{{foodBaseBonus}} bonus)</span>
+          <span class="details"> + {{foodBaseBonus}} bonus)</span>
         </li>
         <li v-if="object.data.heatValue">Heat: {{object.data.heatValue}}</li>
         <li v-if="object.clothingPart()">Clothing: {{object.clothingPart()}}</li>
