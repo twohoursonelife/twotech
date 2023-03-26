@@ -5,7 +5,7 @@ timestamp() {
    echo "[$(date +%F_%T)]"
 }
 
-cd /var/www/twotech
+cd /usr/local/twotech
 if ./utils/changes_upstream.sh; then
     echo "$(timestamp) Upstream changes made to twotech, pulling and updating..."
     git pull
