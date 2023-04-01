@@ -1,0 +1,32 @@
+version: '3'
+services:
+  twotech:
+    image: ghcr.io/twohoursonelife/twotech:latest
+    build:
+      context: .
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+    volumes:
+      - ./certbot/www:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/nginx/ssl/:ro
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-east-1
+        awslogs-create-group: true
+        awslogs-group: twotech
+        awslogs-stream: webserver
+  
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-east-1
+        awslogs-create-group: true
+        awslogs-group: twotech
+        awslogs-stream: certbot

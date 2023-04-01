@@ -25,11 +25,11 @@ RUN cd process && \
 COPY process/ process/
 COPY public/ public/
 
-#RUN node process download
+RUN node process download
 
 
 
-FROM node:8-alpine
+FROM node:8-alpine AS build
 
 WORKDIR /usr/local/twotech
 
@@ -44,13 +44,14 @@ COPY . .
 
 RUN npm run build
 
-COPY nginx.conf /etc/nginx/nginx.conf
-COPY twotech.twohoursonelife.com /etc/nginx/sites-available/default
-RUN mkdir -p /etc/nginx/sites-enabled && \
-    ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
-COPY --from=process /usr/local/twotech/public/ .
+
+FROM nginx:alpine
+
+COPY --from=process /usr/local/twotech/public/ /usr/share/nginx/html/
+COPY --from=build /usr/local/twotech/public/ /usr/share/nginx/html/
+
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY twotech.twohoursonelife.com /etc/nginx/conf/
 
 EXPOSE 80 443
-
-CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
