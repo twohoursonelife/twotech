@@ -7,6 +7,7 @@ WORKDIR /usr/local/twotech
 RUN apt-get update && apt-get install \
     --yes --no-install-recommends \
     build-essential \
+    git \
     g++ \
     imagemagick \
     libcairo2-dev \
