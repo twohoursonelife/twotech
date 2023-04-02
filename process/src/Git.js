@@ -40,6 +40,10 @@ class Git {
       path = "objects/8317.txt";
     }
 
+    if (path == "objects/13507.txt") {
+      path = "objects/8317.txt"
+    }
+
     // Another unpleasant fix for Data7 issues.
     // https://github.com/twohoursonelife/twotech/issues/15
     if (path == "transitions/11104_11110_CONT") {
