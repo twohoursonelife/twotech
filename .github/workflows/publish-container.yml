@@ -1,6 +1,9 @@
 name: Publish Twotech container
 
 on:
+  release:
+    types:
+      - created
   workflow_dispatch
 
 jobs:
@@ -16,6 +19,9 @@ jobs:
         with:
           images: ghcr.io/twohoursonelife/twotech
           tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
             type=sha
         
       - name: Set up Docker Buildx
@@ -33,7 +39,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }} #, ghcr.io/twohoursonelife/twotech:latest
+          tags: ${{ steps.meta.outputs.tags }}, ghcr.io/twohoursonelife/twotech:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
