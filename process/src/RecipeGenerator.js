@@ -16,10 +16,7 @@ class RecipeGenerator {
       root.collapseBranches();
     }
     catch(e){
-      console.log(" ");
-      console.log(e);
-      console.log(this.object.name);
-      console.log(" ");
+      console.log("Error generating recipe: ", this.object.name );
     }
   }
 
