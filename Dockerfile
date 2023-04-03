@@ -1,4 +1,4 @@
-FROM node:10-buster-slim AS process
+FROM node:12-buster-slim AS process
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -30,7 +30,7 @@ RUN node process download
 
 
 
-FROM node:10-alpine AS build
+FROM node:12-alpine AS build
 
 WORKDIR /usr/local/twotech
 
