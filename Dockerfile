@@ -1,4 +1,4 @@
-FROM node:12-buster-slim AS process
+FROM node:14-buster-slim AS process
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -26,11 +26,11 @@ RUN cd process && \
 COPY process/ process/
 COPY public/ public/
 
-RUN node process download
+#RUN node process download
 
 
 
-FROM node:12-alpine AS build
+FROM node:14-alpine AS build
 
 WORKDIR /usr/local/twotech
 
