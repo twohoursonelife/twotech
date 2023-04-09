@@ -6,7 +6,7 @@ timestamp() {
 }
 
 source_node() {
-    export NVM_DIR="/home/$USER/.nvm"
+    export NVM_DIR="/home/admin/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     cd $1
     nvm use
