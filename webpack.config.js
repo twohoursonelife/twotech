@@ -1,6 +1,7 @@
 var path = require('path')
 var webpack = require('webpack')
 var fs = require('fs')
+const { VueLoaderPlugin } = require('vue-loader')
 
 var rootPath = "/";
 
@@ -92,6 +93,7 @@ module.exports = {
     hints: false
   },
   plugins: [
+    new VueLoaderPlugin(),
     new webpack.DefinePlugin({
       'process.env': {
         ONETECH_MOD_NAME: JSON.stringify(process.env.ONETECH_MOD_NAME),
