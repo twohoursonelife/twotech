@@ -1,4 +1,4 @@
-FROM node:14-buster-slim AS process
+FROM node:14-buster-slim AS process # ready to update to Node 18
 
 ENV DEBIAN_FRONTEND=noninteractive
 
