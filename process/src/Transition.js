@@ -96,7 +96,17 @@ class Transition {
   }
 
   targetsPlayer() {
-    return this.targetID === '0' || this.targetID === '-1' && this.actor.data.foodValue > 0;
+    try {
+      // this.actor.data: TypeError: Cannot read properties of undefined (reading 'data')
+      // A secondary issue, proving harder to debug
+      // I suspect to be related to the initial issue where 
+      // transitions in git history have been commit but the object IDs within do not exist at that point in history
+      // It seems we're trying to lookup those non existent objects here so data does not exist
+      return this.targetID === '0' || this.targetID === '-1' && this.actor.data.foodValue > 0;
+    } catch (error) {
+      console.log(error)
+      return false;
+    }
   }
 
   totalDecaySeconds() {

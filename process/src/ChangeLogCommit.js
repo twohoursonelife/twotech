@@ -98,6 +98,8 @@ class ChangeLogCommit {
     if (this.legacyObjects[id])
       return this.legacyObjects[id];
 
+    // Here we lookup the object data when it is part of a transition
+    // We need to handle cases where this could return nothing
     const data = this.fileContent(path, mode);
 
     const object = new GameObject(data);
