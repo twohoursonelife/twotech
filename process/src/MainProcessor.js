@@ -68,8 +68,8 @@ class MainProcessor {
     console.log("Exporting objects...");
     gameData.exportObjects();
 
-    console.log("Exporting versions...");
-    gameData.exportVersions();
+    // console.log("Exporting versions...");
+    // gameData.exportVersions();
 
     console.log("Exporting biomes...");
     gameData.exportBiomes();
