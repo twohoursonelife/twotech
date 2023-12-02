@@ -96,6 +96,8 @@ export default class GameObject {
   constructor(id, name, difficulty) {
     this.id = id;
     this.name = name;
+    if(this.name)
+      this.lowerCaseName = name.toLocaleLowerCase(); // for guessing-engine (speed up)
     this.difficulty = difficulty;
     this.data = null;
   }
