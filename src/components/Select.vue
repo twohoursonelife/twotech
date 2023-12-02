@@ -640,6 +640,16 @@
         type: String,
         default: 'auto'
       },
+      /**
+       * if traditional substring search found no results then try to show best similar results.
+       * Should not be used in conjunction with taggable. and must be used with filterable.
+       * It is suggested to make the label values lowerCase when using this option.
+       * @author Eboubaker Bekkouche <eboubakkar@gmail.com>
+       */
+      useGuessingEngine: {
+        type: Boolean,
+        default: false,
+      },
     },
 
     data() {
@@ -913,6 +923,7 @@
           this.mutableOptions.push(option)
         }
       },
+
       similarText (first, second, percent) {
         //  discuss at: https://locutus.io/php/similar_text/
         // original by: Rafał Kukawski (https://blog.kukawski.pl)
@@ -1050,9 +1061,9 @@
         if (this.taggable && this.search.length && !this.optionExists(this.search)) {
           options.unshift(this.search)
         }
-        if(options.length === 0) {
+        if(options.length === 0 && this.useGuessingEngine) {
           const query = this.search.toLowerCase()
-          options = [...this.mutableOptions].sort((b, a) => this.similarText(a[this.label].toLowerCase(), query) - this.similarText(b[this.label].toLowerCase(), query))
+          options = [...this.mutableOptions].sort((b, a) => this.similarText(a[this.label], query) - this.similarText(b[this.label], query))
         }
         return _.take(options, 30);
       },
