@@ -6,7 +6,7 @@ module.exports = {
   },
 
   watch: {
-    filteredOptions() {
+    displayed_options() {
       this.typeAheadPointer = 0
     }
   },
@@ -32,7 +32,7 @@ module.exports = {
      * @return {void}
      */
     typeAheadDown() {
-      if (this.typeAheadPointer < this.filteredOptions.length - 1) {
+      if (this.typeAheadPointer < this.displayed_options.length - 1) {
         this.typeAheadPointer++
         if( this.maybeAdjustScroll ) {
           this.maybeAdjustScroll()
@@ -46,8 +46,8 @@ module.exports = {
      * @return {void}
      */
     typeAheadSelect() {
-      if( this.filteredOptions[ this.typeAheadPointer ] ) {
-        this.select( this.filteredOptions[ this.typeAheadPointer ] );
+      if( this.displayed_options[ this.typeAheadPointer ] ) {
+        this.select( this.displayed_options[ this.typeAheadPointer ] );
       } else if (this.taggable && this.search.length){
         this.select(this.search)
       }

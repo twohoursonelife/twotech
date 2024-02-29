@@ -14,6 +14,7 @@ const SpriteProcessor = require('./SpriteProcessor');
 const ObjectFilters = require('./ObjectFilters');
 const ObjectBadges = require('./ObjectBadges');
 const SitemapGenerator = require('./SitemapGenerator');
+const readFileNormalized = require('./readFileNormalized');
 
 class GameData {
   constructor(processDir, dataDir, staticDir) {
@@ -91,7 +92,7 @@ class GameData {
     });
     this.eachFileInDir("objects", ".txt", (path, filename) => {
       if (filename.startsWith("groundHeat")) {
-        const content = fs.readFileSync(path, "utf8");
+        const content = readFileNormalized(path);
         Biome.applyGroundHeat(this.biomes, filename, content);
       }
     });
@@ -234,7 +235,7 @@ class GameData {
 
   eachFileContent(dirName, extension, callback) {
     this.eachFileInDir(dirName, extension, (path, filename) => {
-      callback(fs.readFileSync(path, "utf8"), filename);
+      callback(readFileNormalized(path, "utf8"), filename);
     });
   }
 
