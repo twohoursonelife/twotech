@@ -6,10 +6,12 @@ Here's how I setup a VPS to run onetech.info.
 
 I first setup a $5/month droplet on [Digital Ocean](https://www.digitalocean.com) with Ubuntu 18.04 and followed these instructions.
 
-1. [Initial Server Setup](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04)
-2. [Install Nginx](https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-18-04)
-3. [Secure Nginx with Let's Encrypt](https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-18-04)
-4. [Setup Node.js for Production](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-18-04)
+1. [Initial Server Setup](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-22-04)
+2. [Passwordless sudo](https://serverfault.com/a/596988)
+3. [Install Nginx](https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-22-04)
+4. [Secure Nginx with Let's Encrypt](https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-22-04)
+5. [Install Node.js with NVM](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-22-04)
+6. [Setup Node.js for Production](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-22-04)
 
 ## Site
 
