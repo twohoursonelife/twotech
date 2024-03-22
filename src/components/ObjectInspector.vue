@@ -56,12 +56,10 @@
           Object ID: {{object.id}}
         </li>
         <li v-if="object.data.version < 20269">
-          Added in One Hour One Life
-          <router-link :to="versionUrl">v{{object.data.version}}</router-link>
+          Added in One Hour One Life v{{object.data.version}}
         </li>
         <li v-else-if="object.data.version">
-          Added in Two Hours One Life
-          <router-link :to="versionUrl">v{{object.data.version}}</router-link>
+          Added in Two Hours One Life v{{object.data.version}}
         </li>
         <li v-else-if="modName">
           Added in {{modName}}
