@@ -39,6 +39,9 @@ class MainProcessor {
       gameData.checkoutMaster();
     }
 
+    console.log("Preparing directories...");
+    gameData.prepareStaticDir();
+
     console.log("Importing objects...");
     gameData.importObjects();
     gameData.importCategories();

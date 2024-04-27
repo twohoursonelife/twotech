@@ -23,7 +23,6 @@ class GameData {
     this.objects = {};
     this.categories = [];
     this.biomes = [];
-    this.prepareStaticDir();
   }
 
   download(gitURL) {
