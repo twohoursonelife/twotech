@@ -54,3 +54,10 @@ This is a list of items and transitions to check to ensure everything is correct
 * [Hand Cart](https://onetech.info/484-Hand-Cart/recipe): 1 log, wooden disks
 * [Running Crude Car](https://onetech.info/2396-Running-Crude-Car/recipe): 5 yew branches
 * [Cistern](https://onetech.info/672-Cistern/recipe): 10 stones
+
+
+### Tinted sprites
+
+* [Glass Bottle](https://twotech.twohoursonelife.com/3338-Glass-Bottle): it should not be white
+* [Floor Blueprint](https://twotech.twohoursonelife.com/14064-Floor-Blueprint): should appear blue
+* [Green Linen Top](https://twotech.twohoursonelife.com/14730-Green-Linen-Top): should appear green
