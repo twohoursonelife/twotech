@@ -43,16 +43,23 @@ class MainProcessor {
     gameData.prepareStaticDir();
 
     console.log("Importing objects...");
-    gameData.importObjects();
-    gameData.importCategories();
-    gameData.importTransitions();
-    gameData.importBiomes();
+    if (this.doSlim) {
+      gameData.importObjects(this.selectedObjects);
+      gameData.importBiomes();
+    } else {
+      gameData.importObjects();
+      gameData.importCategories();
+      gameData.importTransitions();
+      gameData.importBiomes();
+    }
 
     console.log("Populating versions...");
     gameData.populateVersions();
 
-    console.log("Calculating object depth...");
-    gameData.calculateObjectDepth();
+    if (!this.doSlim) {
+      console.log("Calculating object depth...");
+      gameData.calculateObjectDepth();
+    }
 
     if (this.doSprites) {
       console.log("Converting sprite images...");
@@ -77,7 +84,7 @@ class MainProcessor {
     console.log("Exporting biomes...");
     gameData.exportBiomes();
 
-    if (version) {
+    if (version && !this.doSlim) {
       console.log("Generating sitemap...");
       gameData.generateSitemap();
       return null;

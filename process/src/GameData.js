@@ -50,11 +50,15 @@ class GameData {
     spawnSync("git", ["checkout", "master"], {cwd: this.dataDir});
   }
 
-  importObjects() {
+  importObjects(selectedObjects) {    
     this.eachFileContent("objects", ".txt", (content, _filename) => {
       const object = new GameObject(content);
       if (object.id) {
-        this.objects[object.id] = object;
+        if (!selectedObjects) {
+          this.objects[object.id] = object;  
+        } else if (selectedObjects.includes(object.id)) {
+          this.objects[object.id] = object;
+        }
       }
     });
     console.log("Object Count: " + Object.values(this.objects).length);
@@ -181,11 +185,19 @@ class GameData {
     };
   }
 
-  convertSpriteImages() {
+  // TODO - refactor to generate selectedSprites array based on selectedObjects
+  convertSpriteImages(selectedSprites) {
     const dir = this.dataDir + "/sprites";
     for (var filename of fs.readdirSync(dir)) {
       if (filename.endsWith(".tga")) {
         const id = filename.split('.')[0];
+        if (selectedSprites && !selectedSprites.includes(id)) {
+          continue;
+        }
+        // TODO - probably dont hard code this
+        if (id != 160) {
+          continue;
+        }
         const inPath = dir + "/" + filename;
         const outPath = this.staticDir + "/sprites/sprite_" + id + ".png";
         spawnSync("convert", [inPath, outPath]);
