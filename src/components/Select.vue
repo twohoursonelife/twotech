@@ -360,10 +360,14 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </span>
-
+      <!--
+        Note: v-model does not work properly on mobile, we update search manually
+        see: https://github.com/vuejs/vue/issues/9299
+      -->
       <input
               ref="search"
-              v-model="search"
+              :value="search"
+              @input="event => (search = event.target.value)"
               @keydown.delete="maybeDeleteValue"
               @keyup.esc="onEscape"
               @keydown.up.prevent="typeAheadUp"
