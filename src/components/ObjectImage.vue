@@ -15,7 +15,7 @@
     <div v-if="move" class="move">move</div>
     <div v-if="ground" class="ground"></div>
     <div v-if="object && !legacy" class="image">
-      <img :id="imageID" :src="imageUrl" :alt="title" />
+      <img :key="imageID" :src="imageUrl" :alt="title" />
     </div>
   </ObjectImageWrapper>
 </template>
