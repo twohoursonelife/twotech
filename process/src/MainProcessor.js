@@ -70,10 +70,10 @@ class MainProcessor {
       gameData.processSprites();
     }
 
-    if (this.doSounds) {
-      console.log("Converting sound files...");
-      gameData.convertSounds();
-    }
+    // if (this.doSounds) {
+    //   console.log("Converting sound files...");
+    //   gameData.convertSounds();
+    // }
 
     console.log("Exporting objects...");
     gameData.exportObjects();
@@ -81,8 +81,8 @@ class MainProcessor {
     // console.log("Exporting versions...");
     // gameData.exportVersions();
 
-    console.log("Exporting biomes...");
-    gameData.exportBiomes();
+    // console.log("Exporting biomes...");
+    // gameData.exportBiomes();
 
     if (version && !this.doSlim) {
       console.log("Generating sitemap...");

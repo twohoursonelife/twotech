@@ -195,12 +195,11 @@ class GameData {
           continue;
         }
         // TODO - probably dont hard code this
-        if (id != 160) {
-          continue;
+        if (id == 100864 || id == 1332 || id == 3023 || id == 3024 || id == 3025) {
+          const inPath = dir + "/" + filename;
+          const outPath = this.staticDir + "/sprites/sprite_" + id + ".png";
+          spawnSync("convert", [inPath, outPath]);
         }
-        const inPath = dir + "/" + filename;
-        const outPath = this.staticDir + "/sprites/sprite_" + id + ".png";
-        spawnSync("convert", [inPath, outPath]);
       }
     }
   }

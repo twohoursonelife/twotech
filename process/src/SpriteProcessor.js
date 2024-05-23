@@ -63,7 +63,10 @@ class SpriteProcessor {
 
   renderSprites(sprites, name) {
     this.context.setTransform(1, 0, 0, 1, 0, 0);
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    //this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.context.fillStyle = "#2b2b2b";
+    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    
 
     for (var sprite of sprites) {
       this.parseSpriteFile(sprite);
@@ -76,6 +79,9 @@ class SpriteProcessor {
 
     const newCanvas = new Canvas.createCanvas(width, height);
     const newContext = newCanvas.getContext('2d');
+
+    // newContext.fillStyle = "pink";
+    // newContext.fillRect(0, 0, newCanvas.width, newCanvas.height);
 
     newContext.setTransform(1, 0, 0, 1, 0, 0);
 
@@ -101,8 +107,10 @@ class SpriteProcessor {
   }
 
   drawSprite(sprite) {
+    console.log(`Drawing sprite ${sprite.id}...`)
     if (sprite.additiveBlend()) {
-      this.drawSpriteWithOperation(sprite, "screen");
+      console.log(`Sprite with additive ${sprite.id}...`)
+      this.drawSpriteWithOperation(sprite, "lighter");
     } else {
       this.drawSpriteDirectly(sprite, this.context);
     }
