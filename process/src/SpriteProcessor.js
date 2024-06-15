@@ -63,7 +63,8 @@ class SpriteProcessor {
 
   renderSprites(sprites, name) {
     this.context.setTransform(1, 0, 0, 1, 0, 0);
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.context.fillStyle = "#2b2b2b"
+    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     for (var sprite of sprites) {
       this.parseSpriteFile(sprite);
@@ -102,7 +103,7 @@ class SpriteProcessor {
 
   drawSprite(sprite) {
     if (sprite.additiveBlend()) {
-      this.drawSpriteWithOperation(sprite, "screen");
+      this.drawSpriteWithOperation(sprite, "lighter");
     } else {
       this.drawSpriteDirectly(sprite, this.context);
     }
