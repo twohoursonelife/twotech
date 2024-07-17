@@ -39,7 +39,9 @@ For detailed explanation on how things work, consult the [docs for vue-loader](h
 
 The script is under the folder `process`. It will pull the latest data from the game data repository (if provided `download` as a command line argument), and then generate JSON files for the objects. It will also composite the sprites and create PNGs for each object in the game.
 
-To get it running, you will need to install [ImageMagick](https://www.imagemagick.org/script/index.php), [Canvas dependencies](https://github.com/Automattic/node-canvas/blob/v1.x/Readme.md#installation), and [SoX](http://sox.sourceforge.net) and then:
+To get it running, you will need to install [ImageMagick](https://www.imagemagick.org/script/index.php), [Canvas dependencies](https://github.com/Automattic/node-canvas/blob/v1.x/Readme.md#installation), and [SoX](http://sox.sourceforge.net).
+
+A useful list of dependency packages can be found in the `Dockerfile`. It's not clear if the Dockerfile can actually be used as it is, but it gives a good list of `apt` dependencies to grab.
 
 ``` bash
 cd process
