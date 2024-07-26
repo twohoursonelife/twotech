@@ -64,6 +64,33 @@ node process sounds
 node process
 ```
 
+### Processing Script (Docker version)
+
+Note 1: This is for a Linux machine with Docker installed.
+
+Note 2: This creates a separate process directory, to not mess with the main build.
+
+To only generate the twotech processed data used for the website, first run:
+```
+./prepare-process-docker.sh
+```
+
+This will build the Docker image used for the build environment, and then set up the process directory for use.
+
+You can then run different build commands within a container of this image:
+```
+./docker-run.sh node process-docker
+```
+```
+./docker-run.sh node process-docker download
+```
+```
+./docker-run.sh node process-docker sprites
+```
+```
+./docker-run.sh node process-docker sounds
+```
+
 ### Modded Support
 
 _Following forking this project, the following is less supported and we do not make use of this ourselves._

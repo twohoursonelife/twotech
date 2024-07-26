@@ -1,4 +1,5 @@
-FROM node:14-buster-slim AS process # ready to update to Node 18
+FROM node:lts-bookworm AS process
+# ready to update to Node 18
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -8,6 +9,7 @@ RUN apt-get update && apt-get install \
     --yes --no-install-recommends \
     build-essential \
     git \
+    gosu \
     g++ \
     imagemagick \
     libcairo2-dev \
@@ -15,19 +17,23 @@ RUN apt-get update && apt-get install \
     libpango1.0-dev \
     libgif-dev \
     libsox-fmt-mp3 \
-    sox && \
-    rm -rf /var/lib/apt/lists/
+    sox \
+    && rm -rf /var/lib/apt/lists/
 
 COPY process/package*.json process/
-
-RUN cd process && \
-    npm clean-install
 
 COPY process/ process/
 COPY public/ public/
 
 #RUN node process download
 
+
+FROM process AS build_env
+
+WORKDIR /usr/local/twotech
+COPY patch /
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["/bin/bash"]
 
 
 FROM node:14-alpine AS build
