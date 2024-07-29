@@ -41,7 +41,11 @@ The script is under the folder `process`. It will pull the latest data from the 
 
 To get it running, you will need to install [ImageMagick](https://www.imagemagick.org/script/index.php), [Canvas dependencies](https://github.com/Automattic/node-canvas/blob/v1.x/Readme.md#installation), and [SoX](http://sox.sourceforge.net).
 
-A useful list of dependency packages can be found in the `Dockerfile`. It's not clear if the Dockerfile can actually be used as it is, but it gives a good list of `apt` dependencies to grab.
+```
+sudo apt-get install imagemagick libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev build-essential g++ libsox-fmt-mp3 sox
+```
+
+See [SERVER.md](/SERVER.md) for a thorough deployment setup guide.
 
 ``` bash
 cd process
@@ -66,9 +70,9 @@ node process
 
 ### Processing Script (Docker version)
 
-Note 1: This is for a Linux machine with Docker installed.
+> Note 1: This is for a Linux machine with Docker installed.
 
-Note 2: This creates a separate process directory, to not mess with the main build.
+> Note 2: This creates a separate process directory, to not mess with the main build.
 
 To only generate the twotech processed data used for the website, first run:
 ```
