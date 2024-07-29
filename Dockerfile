@@ -1,5 +1,4 @@
-FROM node:lts-bookworm AS process
-# ready to update to Node 18
+FROM node:18-bookworm AS process
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -36,7 +35,7 @@ ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["/bin/bash"]
 
 
-FROM node:14-alpine AS build
+FROM node:18-alpine AS build
 
 WORKDIR /usr/local/twotech
 
