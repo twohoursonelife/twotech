@@ -1,4 +1,4 @@
-FROM node:18-bookworm AS process
+FROM node:18-bookworm AS build_env
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -16,45 +16,38 @@ RUN apt-get update && apt-get install \
     libpango1.0-dev \
     libgif-dev \
     libsox-fmt-mp3 \
+    nginx \
     sox \
     && rm -rf /var/lib/apt/lists/
 
-COPY process/package*.json process/
-
-COPY process/ process/
-COPY public/ public/
-
-#RUN node process download
-
-
-FROM process AS build_env
+# An offshoot from the build environment, this standalone target can be build with ./docker-build_env_interactive.sh
+FROM build_env AS build_env_interactive
 
 WORKDIR /usr/local/twotech
 COPY patch /
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["/bin/bash"]
 
+# Processing the game data is intense. Make it its own layer so changes to server don't trigger rebuild of this layer
+FROM build_env AS prepare_process
+COPY process process
+COPY public public
+RUN cd process \
+    && npm i \
+    && node process download
 
-FROM node:18-alpine AS build
+# Build the actual server and all the assets needed for the site.
+FROM prepare_process AS build
 
 WORKDIR /usr/local/twotech
-
-RUN apk add --no-cache \
-    nginx
-
-COPY package*.json ./
-
-RUN npm clean-install
-
 COPY . .
+RUN npm i \
+    && npm clean-install \
+    && npm run build
 
-RUN npm run build
+# The actual container for running the web site.
+FROM nginx:alpine AS server
 
-
-
-FROM nginx:alpine
-
-COPY --from=process /usr/local/twotech/public/ /usr/share/nginx/html/
 COPY --from=build /usr/local/twotech/public/ /usr/share/nginx/html/
 
 COPY nginx.conf /etc/nginx/nginx.conf

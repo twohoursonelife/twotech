@@ -11,31 +11,39 @@ Unlike the wiki, which contains "wisdom" about the game, this site contains only
 This is a reference. For a better guide, go to the [game wiki](https://twohoursonelife.fandom.com/wiki/Two_Hours,_One_Life_Wiki).
 
 
-## Build Setup
+## Setting up, building and running twotech
 
 The project is split into two parts:
 - A node script that processes the latest data from the game data repository
 - The site itself, built in VueJS
 
+### Creating a live twotech website
 
-### Site
+For instructions on setting up a live twotech webpage on the internet, see [SERVER.md](SERVER.md).
 
-``` bash
-# install dependencies
-npm install
+### Running server in Docker
 
-# serve with hot reload at localhost:8080
-# to simulate edge subdomain visit edge.lvh.me:8080
-npm run dev
+This option lets you both build and run the twotech webpage localling in a Docker container, forwarding ports out to your host machine to access the website.
 
-# build for production with minification
-npm run build
+#### Build
+Do this anytime you want to fully rebuild the server data and server itself.
+```
+./docker-build.sh
 ```
 
-For detailed explanation on how things work, consult the [docs for vue-loader](http://vuejs.github.io/vue-loader).
+#### Run
+This runs the built Docker image, mapping the container's port 80 to the host's port 80 (change "PORT" environment variable to change the host-side port).
+```
+PORT=8080 ./docker-run.sh
+```
 
+To access the local twotech site, in a web browser, goto `<HOST_MACHINE_IP>:8080`
 
 ### Processing Script
+
+If all you're after is the twotech data used for the site, but not building/hosting the actual webserver, you could just run the process script.
+
+### Local Process build
 
 The script is under the folder `process`. It will pull the latest data from the game data repository (if provided `download` as a command line argument), and then generate JSON files for the objects. It will also composite the sprites and create PNGs for each object in the game.
 
@@ -68,7 +76,7 @@ node process sounds
 node process
 ```
 
-### Processing Script (Docker version)
+### Docker Process build
 
 > Note 1: This is for a Linux machine with Docker installed.
 
@@ -83,16 +91,16 @@ This will build the Docker image used for the build environment, and then set up
 
 You can then run different build commands within a container of this image:
 ```
-./docker-run.sh node process-docker
+./docker-env-run.sh node process-docker
 ```
 ```
-./docker-run.sh node process-docker download
+./docker-env-run.sh node process-docker download
 ```
 ```
-./docker-run.sh node process-docker sprites
+./docker-env-run.sh node process-docker sprites
 ```
 ```
-./docker-run.sh node process-docker sounds
+./docker-env-run.sh node process-docker sounds
 ```
 
 ### Modded Support
