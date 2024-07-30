@@ -178,7 +178,7 @@ export default {
     },
     moveType() {
       if (!this.object.data.moveType) return;
-      const types = ["None", "Chase", "Flee", "Random", "North", "South", "East", "West", "AdjacentInteraction"];
+      const types = ["None", "Chase", "Flee", "Random", "North", "South", "East", "West", "Find"];
       return types[this.object.data.moveType];
     },
     numUses() {
