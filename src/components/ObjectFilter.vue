@@ -13,7 +13,7 @@ export default {
   computed: {
     url() {
       if (this.selected) return "/";
-      return `/filter/${this.filter.key}`;
+      return `${this.filter.path}`;
     }
   }
 }

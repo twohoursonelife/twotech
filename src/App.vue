@@ -126,7 +126,7 @@ export default {
   routes: [
     {path: "/", component: ObjectBrowser},
     {path: "/not-found", component: NotFound},
-    {path: "/filter/:filter", component: ObjectBrowser},
+    {path: "/filter/:filter*", component: ObjectBrowser},
     {path: "/letters", component: RecipeForLetters},
     {path: "/versions", component: ChangeLog},
     {path: "/versions/:id", component: ChangeLog},
