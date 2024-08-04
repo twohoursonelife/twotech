@@ -171,6 +171,7 @@ class GameData {
       ids: objects.map(o => o.id),
       names: objects.map(o => o.name),
       difficulties: objects.map(o => o.difficulty()),
+      numSlots: objects.map(o => o.numSlots()),
       filters: ObjectFilters.jsonData(objects),
       badges: ObjectBadges.jsonData(objects),
       date: new Date(),

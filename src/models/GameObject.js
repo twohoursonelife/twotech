@@ -3,7 +3,7 @@ export default class GameObject {
     this.fetchObjects(data => {
       this.objectsMap = {};
       for (let i in data.ids) {
-        this.objectsMap[data.ids[i]] = new GameObject(data.ids[i], data.names[i], data.difficulties[i]);
+        this.objectsMap[data.ids[i]] = new GameObject(data.ids[i], data.names[i], data.difficulties[i], data.numSlots[i]);
       }
       this.ids = data.ids;
       this.filters = data.filters;
@@ -28,6 +28,8 @@ export default class GameObject {
         return objects.sort((a,b) => (a.difficulty || 0) - (b.difficulty || 0));
       case "name":
         return objects.sort((a,b) => a.name.localeCompare(b.name));
+      case "numSlots":
+        return objects.sort((a,b) => a.numSlots - b.numSlots);
       default: // recent
         return objects.sort((a,b) => b.id - a.id);
     }
@@ -101,12 +103,13 @@ export default class GameObject {
     this.legacyObjectsMap[object.id] = object;
   }
 
-  constructor(id, name, difficulty) {
+  constructor(id, name, difficulty, numSlots) {
     this.id = id;
     this.name = name;
     if(this.name)
       this.lowerCaseName = name.toLocaleLowerCase(); // for guessing-engine (speed up)
     this.difficulty = difficulty;
+    this.numSlots = numSlots;
     this.data = null;
   }
 
