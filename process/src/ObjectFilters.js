@@ -196,7 +196,7 @@ const ObjectFilters = {
     "food": Food,
     "tools": Tools,
     "containers": Containers,
-    "heatSources": HeatSources,
+    "heat": HeatSources,
     "natural": Natural,
   },
   jsonData(objects) {
