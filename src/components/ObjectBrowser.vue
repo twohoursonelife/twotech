@@ -11,6 +11,18 @@
       <BiomeList />
     </div>
 
+    <div v-if="showClothingFilters" class="filterList">
+      <div class="clothingFilter" v-for="filter in clothingFilters" >
+        <ObjectFilter :filter="filter" :selected="filter == selectedFilter" />
+      </div>
+    </div>
+
+    <div v-if="showContainerFilters" class="filterList">
+      <div class="containerFilter" v-for="filter in containerFilters" >
+        <ObjectFilter :filter="filter" :selected="filter == selectedFilter" />
+      </div>
+    </div>
+
     <div class="objectListWrapper">
       <div class="objectListHeader">
         <div class="objectListSorter">
@@ -72,9 +84,21 @@ export default {
     filters() {
       return GameObject.filters;
     },
+    clothingFilters() {
+      return GameObject.findFilter("clothing").subfilters;
+    },
+    containerFilters() {
+      return GameObject.findFilter("containers").subfilters;
+    },
     showBiomes() {
       return this.selectedFilter && this.selectedFilter.key === "natural";
     },
+    showClothingFilters() {
+      return this.selectedFilter && this.selectedFilter.path.startsWith("/filter/clothing");
+    },
+    showContainerFilters() {
+      return this.selectedFilter && this.selectedFilter.path.startsWith("/filter/containers");
+    }
   },
   methods: {
     handleScroll() {

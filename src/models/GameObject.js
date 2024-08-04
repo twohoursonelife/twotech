@@ -77,8 +77,16 @@ export default class GameObject {
     return object;
   }
 
-  static findFilter(key) {
-    return this.filters.find(f => f.key == key);
+  static findFilter(key_path) {
+    if (!key_path) {
+      return null;
+    }
+    let parts = key_path.split('/');
+    let filter = this.filters[parts.shift()];
+    for (let part of parts) (
+      filter = filter.subfilters[part]
+    )
+    return filter;
   }
 
   static addLegacyObject(attributes) {
