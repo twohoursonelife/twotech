@@ -3,7 +3,7 @@ export default class GameObject {
     this.fetchObjects(data => {
       this.objectsMap = {};
       for (let i in data.ids) {
-        this.objectsMap[data.ids[i]] = new GameObject(data.ids[i], data.names[i], data.difficulties[i]);
+        this.objectsMap[data.ids[i]] = new GameObject(data.ids[i], data.names[i], data.difficulties[i], data.craftable[i]);
       }
       this.ids = data.ids;
       this.filters = data.filters;
@@ -33,11 +33,17 @@ export default class GameObject {
     }
   }
 
-  static byNameLength() {
-    return Object.values(this.objectsMap).sort((a,b) => a.name.length - b.name.length);
+  static byNameLength(hideUncraftable) {
+    let objects = Object.values(this.objectsMap);
+    if (hideUncraftable) {
+      objects = objects.filter(o => {
+        return o.craftable === true;
+      });
+    }
+    return objects.sort((a,b) => a.name.length - b.name.length);
   }
 
-  static objects(amount, filter, sortBy, descending) {
+  static objects(amount, filter, sortBy, descending, hideUncraftable) {
     let objects;
     if (filter) {
       objects = filter.ids.map(id => this.objectsMap[id]);
@@ -45,6 +51,11 @@ export default class GameObject {
       objects = Object.values(this.objectsMap).filter(o => o.difficulty);
     } else {
       objects = Object.values(this.objectsMap);
+    }
+    if (hideUncraftable) {
+      objects = objects.filter(o => {
+        return o.craftable === true;
+      });
     }
     let sorted = this.sort(objects, sortBy);
     if (descending) {
@@ -101,11 +112,12 @@ export default class GameObject {
     this.legacyObjectsMap[object.id] = object;
   }
 
-  constructor(id, name, difficulty) {
+  constructor(id, name, difficulty, craftable) {
     this.id = id;
     this.name = name;
     if(this.name)
       this.lowerCaseName = name.toLocaleLowerCase(); // for guessing-engine (speed up)
+    this.craftable = craftable;
     this.difficulty = difficulty;
     this.data = null;
   }

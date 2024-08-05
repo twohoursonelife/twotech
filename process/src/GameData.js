@@ -167,10 +167,22 @@ class GameData {
 
   objectsData() {
     var objects = _.sortBy(this.objects, o => o.sortWeight()).filter(o => o.isVisible());
+    // Traverse objects array only once, pushing to each array the part it needs.
+    let objectsData = objects.reduce(
+      (acc, o) => {
+        acc.ids.push(o.id);
+        acc.names.push(o.name);
+        acc.difficulties.push(o.difficulty());
+        acc.craftable.push(o.craftable());
+        return acc;
+      },
+      { ids: [], names: [], difficulties: [], craftable: [] }
+    );
     return {
-      ids: objects.map(o => o.id),
-      names: objects.map(o => o.name),
-      difficulties: objects.map(o => o.difficulty()),
+      ids: objectsData.ids,
+      names: objectsData.names,
+      difficulties: objectsData.difficulties,
+      craftable: objectsData.craftable,
       filters: ObjectFilters.jsonData(objects),
       badges: ObjectBadges.jsonData(objects),
       date: new Date(),
