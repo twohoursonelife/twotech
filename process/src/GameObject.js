@@ -224,6 +224,10 @@ class GameObject {
     return false;
   }
 
+  craftable() {
+    return this.depth.craftable > 0 || this.isNatural();
+  }
+
   isCraftableContainer() {
     return this.data.numSlots > 0 && this.data.slotSize >= 1 && !this.isGrave();
   }
