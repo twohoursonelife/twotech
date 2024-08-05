@@ -12,10 +12,12 @@
 <script>
 import _ from 'lodash';
 
+import eventBus from '../eventBus'
 import GameObject from '../models/GameObject'
 
 import VueSelect from './Select';
 import ObjectImage from './ObjectImage';
+import BrowserStorage from '../models/BrowserStorage';
 
 export default {
   components: {
@@ -23,8 +25,12 @@ export default {
     ObjectImage
   },
   data() {
+    let hideUncraftable = BrowserStorage.getItem("ObjectBrowser.hideUncraftable") !== null 
+                      ? BrowserStorage.getItem("ObjectBrowser.hideUncraftable") === "true" 
+                      : true;
     return {
       selectedObject: GameObject.find(this.$route.params.id),
+      objects: GameObject.byNameLength(hideUncraftable),
     };
   },
   watch: {
@@ -32,17 +38,23 @@ export default {
       this.selectedObject = GameObject.find(this.$route.params.id);
     }
   },
-  computed: {
-    objects () {
-      return GameObject.byNameLength();
-    }
-  },
   methods: {
-    selectObject (object) {
+    selectObject: function(object) {
       if (object == this.selectedObject) return;
       this.$router.push(object ? object.url() : "/");
     }
-  }
+  },
+  mounted() {
+    // Listen for the hide-uncraftable checkbox even from ObjectBrowser, adjust objects accordingly
+    eventBus.$on('hide-uncraftable', (val) => {
+      console.log('hide-uncraftable event triggered! val = ' + val);
+      this.objects = GameObject.byNameLength(val);
+    })
+  },
+  beforeDestroy() {
+    // removing eventBus listener
+    eventBus.$off('hide-uncraftable')
+  },
 }
 </script>
 

@@ -36,6 +36,10 @@
           <span @click="sort(sortBy, false)" :class="{selected: !descending}">Asc</span>,
           <span @click="sort(sortBy, true)" :class="{selected: descending}">Desc</span>
         </div>
+        <div class="objectCraftableSelection">
+          Only craftable:
+          <input type="checkbox" :checked="hideUncraftable" @change="toggleHideUncraftable" />
+        </div>
       </div>
       <div class="objectList">
         <div class="object" v-for="object in shownObjects">
@@ -47,6 +51,7 @@
 </template>
 
 <script>
+import eventBus from '../eventBus';
 import GameObject from '../models/GameObject';
 import BrowserStorage from '../models/BrowserStorage';
 
@@ -65,7 +70,10 @@ export default {
       showAmount: 24,
       selectedFilter: GameObject.findFilter(this.$route.params.filter),
       sortBy: BrowserStorage.getItem("ObjectBrowser.sortBy") || "recent",
-      descending: BrowserStorage.getItem("ObjectBrowser.descending") === "true"
+      descending: BrowserStorage.getItem("ObjectBrowser.descending") === "true",
+      hideUncraftable: BrowserStorage.getItem("ObjectBrowser.hideUncraftable") !== null
+                      ? BrowserStorage.getItem("ObjectBrowser.hideUncraftable") === "true"
+                      : true,
     }
   },
   created () {
@@ -79,7 +87,7 @@ export default {
   },
   computed: {
     shownObjects() {
-      return GameObject.objects(this.showAmount, this.selectedFilter, this.sortBy, this.descending);
+      return GameObject.objects(this.showAmount, this.selectedFilter, this.sortBy, this.descending, this.hideUncraftable);
     },
     filters() {
       return GameObject.filters;
@@ -117,7 +125,12 @@ export default {
 
       BrowserStorage.setItem("ObjectBrowser.sortBy", sortBy);
       BrowserStorage.setItem("ObjectBrowser.descending", descending.toString());
-    }
+    },
+    toggleHideUncraftable(event) {
+      this.hideUncraftable = !this.hideUncraftable;
+      BrowserStorage.setItem("ObjectBrowser.hideUncraftable", this.hideUncraftable);
+      eventBus.$emit('hide-uncraftable', this.hideUncraftable);
+    },
   },
   metaInfo() {
     if (this.selectedFilter)
