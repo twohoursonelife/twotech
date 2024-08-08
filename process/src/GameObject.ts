@@ -1,10 +1,22 @@
 "use strict";
 
-const Sprite = require('./Sprite');
-const Depth = require('./Depth');
-const Recipe = require('./Recipe');
+import { Sprite } from "./Sprite";
+import { Depth } from "./Depth";
+import { Recipe } from "./Recipe";
 
 class GameObject {
+  legacy: boolean;
+  id: any;
+  data: any;
+  sprites: any[];
+  transitionsToward: any[];
+  transitionsAway: any[];
+  categories: any[];
+  biomes: any[];
+  depth: any;
+  name: any;
+  version: any;
+  category: any;
   constructor(dataText) {
     this.data = {};
     this.sprites = [];
@@ -12,7 +24,7 @@ class GameObject {
     this.transitionsAway = [];
     this.categories = [];
     this.biomes = [];
-    this.depth = new Depth({});
+    this.depth = new Depth({craftable: false, value: 0, difficulty: 0});
     this.parseData(dataText);
     if (!this.data.id)
       return;
@@ -42,7 +54,7 @@ class GameObject {
   parseLine(line) {
     const assignments = line.split(/[,#]/);
     let attribute = null;
-    let values = [];
+    let values: any[] = [];
     for (let assignment of assignments) {
       const parts = assignment.split(/[_=]/);
       if (parts.length > 1) {
@@ -88,7 +100,7 @@ class GameObject {
     const transitionsToward = this.transitionsToward;
     const transitionsAway = this.transitionsAway.filter(t => !t.decay);
     const transitionsTimed = this.transitionsAway.filter(t => t.decay);
-    const result = {
+    const result: any = {
       id: this.id,
       name: this.name,
       transitionsToward: transitionsToward.map(t => t.jsonData()),
@@ -299,7 +311,7 @@ class GameObject {
       return null;
     if (depth == 0)
       return []; // Empty array means tree goes deeper
-    var nodes = [];
+    var nodes: any[] = [];
     if (transition.decay)
       nodes.push({decay: transition.decay});
     if (transition.actor)
@@ -316,11 +328,13 @@ class GameObject {
     };
   }
 
-  insulation() {
+  insulation(): number {
     const parts = {'h': 0.25, 't': 0.35, 'b': 0.2, 's': 0.1, 'p': 0.1};
     if (parts[this.data.clothing])
       return parts[this.data.clothing]*this.data.rValue;
+    else
+      return 0;
   }
 }
 
-module.exports = GameObject;
+export { GameObject }

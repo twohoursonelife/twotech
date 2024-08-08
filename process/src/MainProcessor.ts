@@ -1,8 +1,12 @@
 "use strict";
 
-const GameData = require('./GameData');
+import { GameData } from "./GameData";
 
 class MainProcessor {
+  processDir: any;
+  doDownload: any;
+  doSprites: any;
+  doSounds: any;
   constructor(processDir) {
     this.processDir = processDir;
   }
@@ -91,4 +95,4 @@ class MainProcessor {
   }
 }
 
-module.exports = MainProcessor;
+export { MainProcessor }

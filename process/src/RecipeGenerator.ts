@@ -1,8 +1,11 @@
 "use strict";
 
-const RecipeNode = require('./RecipeNode');
+import { RecipeNode } from "./RecipeNode";
 
 class RecipeGenerator {
+  nodes: any;
+  object: any;
+  availableTools: any[];
   constructor(object) {
     this.object = object;
     this.nodes = [];
@@ -115,4 +118,4 @@ class RecipeGenerator {
   }
 }
 
-module.exports = RecipeGenerator;
+export { RecipeGenerator }
