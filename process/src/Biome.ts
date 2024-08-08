@@ -1,6 +1,10 @@
 "use strict";
 
 class Biome {
+  id: any;
+  groundHeat: number;
+  objects: any[];
+
   static fromFilename(filename) {
     const id = filename.replace("ground_", "").replace(".tga", "");
     if (!id || id === "U") return;
@@ -46,7 +50,7 @@ class Biome {
   }
 
   jsonData() {
-    const result = {
+    const result: any = {
       id: this.id,
       groundHeat: this.groundHeat,
       name: this.name(),
@@ -58,4 +62,4 @@ class Biome {
   }
 }
 
-module.exports = Biome;
+export { Biome }

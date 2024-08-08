@@ -1,9 +1,22 @@
 "use strict";
 
-const GameObject = require('./GameObject');
-const Transition = require('./Transition');
+import { GameObject } from "./GameObject";
+import { Transition } from "./Transition";
 
 class ChangeLogCommit {
+  version: any;
+  git: any;
+  objects: any;
+  legacyObjects: {};
+  sha: any;
+  date: any;
+  message: any;
+  addedObjects: any[];
+  removedObjects: any[];
+  addedTransitions: any[];
+  removedTransitions: any[];
+  objectChanges: any[];
+
   constructor(version, log) {
     this.version = version;
     this.git = version.git;
@@ -173,7 +186,7 @@ class ChangeLogCommit {
   }
 
   jsonData() {
-    const data = {sha: this.sha, message: this.message, date: this.date};
+    const data: any = {sha: this.sha, message: this.message, date: this.date};
 
     if (this.addedObjects.length)
       data.addedObjectIDs = this.addedObjects.map(o => o.id);
@@ -208,4 +221,4 @@ class ChangeLogCommit {
   }
 }
 
-module.exports = ChangeLogCommit;
+export { ChangeLogCommit }

@@ -3,9 +3,10 @@
 const sm = require('sitemap');
 const fs = require('fs');
 
-const ObjectFilters = require('./ObjectFilters');
+import { ObjectFilters } from "./ObjectFilters";
 
 class SitemapGenerator {
+  rootDir: any;
   constructor(rootDir) {
     this.rootDir = rootDir;
   }
@@ -45,4 +46,4 @@ class SitemapGenerator {
   }
 }
 
-module.exports = SitemapGenerator;
+export { SitemapGenerator }

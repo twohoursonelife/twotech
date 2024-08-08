@@ -211,4 +211,4 @@ const ObjectFilters = {
   }
 }
 
-module.exports = ObjectFilters;
+export { ObjectFilters }

@@ -3,6 +3,7 @@
 const { spawnSync } = require('child_process');
 
 class Git {
+  dir: any;
   constructor(dir) {
     this.dir = dir;
   }
@@ -70,4 +71,4 @@ class Git {
   }
 }
 
-module.exports = Git;
+export { Git }

@@ -1,9 +1,11 @@
 "use strict";
 
-const RecipeGenerator = require('./RecipeGenerator');
-const RecipeNode = require('./RecipeNode');
+import { RecipeGenerator } from "./RecipeGenerator";
+import { RecipeNode } from "./RecipeNode";
 
 class Recipe {
+  object: any;
+  nodes: any;
   constructor(object) {
     this.object = object;
   }
@@ -22,7 +24,7 @@ class Recipe {
   }
 
   jsonData() {
-    const data = {steps: RecipeNode.steps(this.nodes)};
+    const data: any = {steps: RecipeNode.steps(this.nodes)};
 
     // For now let's just merge tools and ingredients together when displaying
     // We may eventually split them up for the user
@@ -44,7 +46,7 @@ class Recipe {
   }
 
   ingredients() {
-    const ingredients = [];
+    const ingredients: any[] = [];
     const nodes = this.nodes.filter(n => n.isIngredient());
     for (let node of nodes) {
       const count = node.count();
@@ -56,4 +58,4 @@ class Recipe {
   }
 }
 
-module.exports = Recipe;
+export { Recipe }

@@ -1,9 +1,13 @@
 "use strict";
 
-const Git = require('./Git');
-const ChangeLogVersion = require('./ChangeLogVersion');
+import { Git } from "./Git";
+import { ChangeLogVersion } from "./ChangeLogVersion";
 
 class ChangeLog {
+  git: Git;
+  objects: any;
+  versions: any;
+
   constructor(gitDir, objects, releasedOnly) {
     this.git = new Git(gitDir);
     this.objects = objects;
@@ -11,13 +15,13 @@ class ChangeLog {
   }
 
   fetchVersions(releasedOnly) {
-    let previousVersion = null;
+    let previousVersion: any = null;
     const versions = this.fetchVersionNumbers().map(id => {
       const version = new ChangeLogVersion(
         this.git,
         this.objects,
         id,
-        previousVersion
+        null
       );
       previousVersion = version;
       return version;
@@ -63,7 +67,7 @@ class ChangeLog {
   }
 
   reportMissing() {
-    const objects = Object.values(this.objects).filter(o => !o.version);
+    const objects = Object.values(this.objects).filter((o: any) => !o.version);
     console.log(objects.length + " objects are missing version");
     // for (let object of objects) {
     //   console.log(object.id, object.name, "unable to determine version");
@@ -71,4 +75,4 @@ class ChangeLog {
   }
 }
 
-module.exports = ChangeLog;
+export { ChangeLog }

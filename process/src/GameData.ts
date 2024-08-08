@@ -4,19 +4,27 @@ const { spawnSync } = require('child_process');
 const fs = require('fs');
 const _ = require('lodash');
 
-const GameObject = require('./GameObject');
-const Category = require('./Category');
-const TransitionImporter = require('./TransitionImporter');
-const ChangeLog = require('./ChangeLog');
-const Biome = require('./Biome');
-const DepthCalculator = require('./DepthCalculator');
-const SpriteProcessor = require('./SpriteProcessor');
-const ObjectFilters = require('./ObjectFilters');
-const ObjectBadges = require('./ObjectBadges');
-const SitemapGenerator = require('./SitemapGenerator');
-const readFileNormalized = require('./readFileNormalized');
+import { GameObject } from "./GameObject";
+import { Category } from "./Category";
+import { TransitionImporter } from "./TransitionImporter";
+import { ChangeLog } from "./ChangeLog";
+import { Biome } from "./Biome";
+import { DepthCalculator } from "./DepthCalculator";
+import { SpriteProcessor } from "./SpriteProcessor";
+import { ObjectFilters } from "./ObjectFilters";
+import { ObjectBadges } from "./ObjectBadges";
+import { SitemapGenerator } from "./SitemapGenerator";
+import { readFileNormalized } from "./readFileNormalized";
 
 class GameData {
+  processDir: any;
+  dataDir: any;
+  staticDir: any;
+  objects: {};
+  categories: any[];
+  biomes: any[];
+  releasedOnly: boolean;
+  changeLog: ChangeLog;
   constructor(processDir, dataDir, staticDir) {
     this.processDir = processDir;
     this.dataDir = dataDir;
@@ -95,7 +103,7 @@ class GameData {
         Biome.applyGroundHeat(this.biomes, filename, content);
       }
     });
-    const objects = Object.values(this.objects).filter(o => o.isNatural());
+    const objects = Object.values(this.objects).filter((o: any) => o.isNatural());
     for (let biome of this.biomes) {
       biome.addObjects(objects);
     }
@@ -112,10 +120,10 @@ class GameData {
     calculator.calculate();
   }
 
-  generateTechTree() {
-    var generator = new TechTreeGenerator();
-    generator.generate(Object.values(this.objects));
-  }
+  // generateTechTree() {
+  //   var generator = new TechTreeGenerator();
+  //   generator.generate(Object.values(this.objects));
+  // }
 
   exportObjects() {
     this.saveJSON("objects.json", this.objectsData());
@@ -177,7 +185,7 @@ class GameData {
       versions: this.changeLog.validVersions().map(v => v.id),
       biomeIds: this.biomes.map(b => b.id),
       biomeNames: this.biomes.map(b => b.name()),
-      foodEatBonus: parseInt(process.env.ONETECH_FOOD_BONUS),
+      foodEatBonus: parseInt(process.env.ONETECH_FOOD_BONUS || '0'),
     };
   }
 
@@ -234,7 +242,7 @@ class GameData {
 
   eachFileContent(dirName, extension, callback) {
     this.eachFileInDir(dirName, extension, (path, filename) => {
-      callback(readFileNormalized(path, "utf8"), filename);
+      callback(readFileNormalized(path), filename);
     });
   }
 
@@ -252,4 +260,4 @@ class GameData {
   }
 }
 
-module.exports = GameData;
+export { GameData }
