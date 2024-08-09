@@ -1,5 +1,8 @@
 "use strict";
 
+import { GameObject } from "./GameObject";
+import { Transition } from "./Transition";
+
 // Depth is the deepest number of steps needed to craft an object
 // Natural and uncraftable objects have a depth of 0
 class Depth {
@@ -14,7 +17,7 @@ class Depth {
     this.craftable = craftable;
   }
 
-  addTransition(transition) {
+  addTransition(transition: Transition): void {
     this.addObject(transition.actor);
     this.addObject(transition.target);
     this.value++;
@@ -28,7 +31,7 @@ class Depth {
       this.difficulty += 4;
   }
 
-  addObject(object) {
+  addObject(object: GameObject): void {
     if (!object) return;
     this.calculated = this.calculated && object.depth.calculated;
     this.craftable = this.craftable && object.depth.craftable;
@@ -36,7 +39,7 @@ class Depth {
     this.difficulty += object.depth.difficulty;
   }
 
-  clone() {
+  clone(): Depth {
     return new Depth({
       value: this.value,
       difficulty: this.difficulty,
@@ -45,7 +48,7 @@ class Depth {
   }
 
   // Sorts based on priority: calculated, craftable, value, difficulty
-  compare(depth) {
+  compare(depth: Depth): number {
     if (this.calculated == depth.calculated) {
       if (this.craftable == depth.craftable) {
         if (this.value == depth.value) {
