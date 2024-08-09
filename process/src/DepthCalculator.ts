@@ -1,14 +1,16 @@
 "use strict";
 
 import { Depth } from "./Depth";
+import { GameObject } from "./GameObject";
+import { Transition } from "./Transition";
 
 class DepthCalculator {
-  objects: any;
-  constructor(objects) {
+  objects: GameObject[];
+  constructor(objects: GameObject[]) {
     this.objects = objects;
   }
 
-  calculate() {
+  calculate(): void {
     this.calculateDepth();
     this.sortObjectTransitions();
     this.calculateDifficulty();
@@ -16,7 +18,7 @@ class DepthCalculator {
   }
 
   // Calculates the depth starting with natural and uncraftable objects.
-  calculateDepth() {
+  calculateDepth(): void {
     for (let object of this.objects) {
       if (object.isNatural() || object.transitionsToward.length === 0) {
         this.setObjectDepth(object, new Depth({value: 0, craftable: object.isNatural(), difficulty: 0}));
@@ -26,7 +28,7 @@ class DepthCalculator {
 
   // Sets the object depth if it is lower than previously set
   // It then calculates the depth for each "away" transition
-  setObjectDepth(object, depth) {
+  setObjectDepth(object: GameObject, depth: Depth): void {
     if (depth.compare(object.depth) < 0) {
       // console.log("Depth set for", object.id, object.name, "to", depth.value);
       object.depth = depth;
@@ -43,7 +45,7 @@ class DepthCalculator {
 
   // Calculates the transition depth by finding max of actor and target depths
   // If the depth was calculated, it sets it to the resulting object
-  calculateTransition(transition) {
+  calculateTransition(transition: Transition): void {
     // Start in true state so adding transition can make to uncraftable
     const depth = new Depth({value: 0, craftable: true, difficulty: 0});
     depth.addTransition(transition);
@@ -57,21 +59,21 @@ class DepthCalculator {
       this.setObjectDepth(transition.newExtraTarget, depth);
   }
 
-  sortObjectTransitions() {
+  sortObjectTransitions(): void {
     for (let object of this.objects) {
       object.transitionsToward.sort((a,b) => a.depth.compare(b.depth));
       object.transitionsAway.sort((a,b) => a.depth.compare(b.depth));
     }
   }
 
-  calculateDifficulty() {
+  calculateDifficulty(): void {
     const depths = this.objects.map(o => o.depth).filter(c => c.difficulty > 0).sort((a,b) => a.difficulty - b.difficulty);
     for (let i in depths) {
       depths[i].difficulty = parseFloat(i) / depths.length;
     }
   }
 
-  reportUncraftable() {
+  reportUncraftable(): void {
     const objects = this.objects.filter(o => !o.depth.craftable && o.isVisible());
     console.log(objects.length + " objects are uncraftable");
     // for (let object of objects) {
