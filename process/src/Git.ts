@@ -1,14 +1,14 @@
 "use strict";
 
-const { spawnSync } = require('child_process');
+import { spawnSync } from 'child_process';
 
 class Git {
-  dir: any;
-  constructor(dir) {
+  dir: string;
+  constructor(dir: string) {
     this.dir = dir;
   }
 
-  run(...args) {
+  run(...args: string[]): string {
     const result = spawnSync("git", args, {cwd: this.dir, encoding: 'utf8'});
     if (result.status > 0) {
       console.log("Git command failed with args", args);
@@ -20,19 +20,19 @@ class Git {
     return result.stdout;
   }
 
-  runLines(...args) {
+  runLines(...args: string[]): string[] {
     return this.run(...args).split("\n").filter(l => l);
   }
 
-  tags() {
+  tags(): string[] {
     return this.runLines("tag", "-l");
   }
 
-  fileChanges(from, to) {
+  fileChanges(from: string, to: string): string[][] {
     return this.runLines("diff", "--name-status", `${from}..${to}`).map(line => line.split(/\s+/));
   }
 
-  fileContent(sha, path) {
+  fileContent(sha: string, path: string): string {
     // Dear future reader
     // Curse object 8316. This is a last ditch effort to fix it.
     // Broken commit causing errors. An object was removed before all references to it was.
@@ -58,7 +58,7 @@ class Git {
     return this.run("show", `${sha}:${path}`);
   }
 
-  log(from, to) {
+  log(from: string, to: string): any {
     const lines = this.runLines("log", "--format=%H %ad %s", "--date=iso-strict", `${from}..${to}`);
     return lines.map(line => {
       const parts = line.match(/^(.+?) (.+?) (.+?)$/).slice(1);
