@@ -4,13 +4,13 @@
 // Natural and uncraftable objects have a depth of 0
 class Depth {
   calculated: boolean;
-  value: any;
-  difficulty: any;
-  craftable: any;
-  constructor({ value, difficulty, craftable }) {
+  value: number;
+  difficulty: number;
+  craftable: boolean;
+  constructor({ value = null, difficulty = 0, craftable }) {
     this.calculated = !isNaN(value);
     this.value = value || 0;
-    this.difficulty = difficulty || 0;
+    this.difficulty = difficulty;
     this.craftable = craftable;
   }
 
