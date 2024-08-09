@@ -3,6 +3,17 @@
 const fs = require('fs');
 
 class Sprite {
+  index: any;
+  object: any;
+  id: any;
+  x: any;
+  y: any;
+  rotation: any;
+  tag: any;
+  multiplicativeBlending: boolean;
+  centerAnchorXOffset: number;
+  centerAnchorYOffset: number;
+  ageRange: any;
   constructor(lines, index, object) {
     this.index = index;
     this.object = object;
@@ -15,7 +26,7 @@ class Sprite {
   parseLine(line) {
     const assignments = line.split(/[,#]/);
     let attribute = null;
-    let values = [];
+    let values: any[] = [];
     for (let assignment of assignments) {
       const parts = assignment.split(/[_=]/);
       if (parts.length > 1) {
@@ -69,4 +80,4 @@ class Sprite {
   }
 }
 
-module.exports = Sprite;
+export { Sprite }

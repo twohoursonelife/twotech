@@ -1,10 +1,38 @@
 "use strict";
 
-const Depth = require('./Depth');
+import { Depth } from "./Depth";
 
 class Transition {
+  depth: any;
+  lastUseActor: boolean;
+  lastUseTarget: boolean;
+  actorID: any;
+  targetID: any;
+  newActorID: any;
+  newTargetID: any;
+  autoDecaySeconds: any;
+  actorMinUseFraction: any;
+  targetMinUseFraction: any;
+  reverseUseActor: boolean;
+  reverseUseTarget: boolean;
+  move: number;
+  desiredMoveDist: any;
+  noUseActor: boolean;
+  noUseTarget: boolean;
+  playerActor: boolean;
+  tool: boolean;
+  targetRemains: boolean;
+  decay: string | undefined;
+  actor: any;
+  target: any;
+  newActor: any;
+  newTarget: any;
+  newExtraTarget: any;
+  newExtraTargetID: any;
+  newActorWeight: any;
+  newTargetWeight: any;
   constructor(dataText, filename) {
-    this.depth = new Depth({});
+    this.depth = new Depth({craftable: false, difficulty: 0, value: 0});
     this.parseFilename(filename);
     this.parseData(dataText);
   }
@@ -139,7 +167,7 @@ class Transition {
   }
 
   jsonData() {
-    const result = {}
+    const result: any = {}
 
     if (this.actor) {
       result.actorID = this.actor.id;
@@ -217,4 +245,4 @@ class Transition {
   }
 }
 
-module.exports = Transition;
+export { Transition }

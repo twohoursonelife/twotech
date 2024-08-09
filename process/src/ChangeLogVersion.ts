@@ -1,8 +1,13 @@
 "use strict";
 
-const ChangeLogCommit = require('./ChangeLogCommit');
+import { ChangeLogCommit } from "./ChangeLogCommit";
 
 class ChangeLogVersion {
+  git: any;
+  objects: any;
+  id: any;
+  previous: any;
+  commits: any;
   constructor(git, objects, id, previous) {
     this.git = git;
     this.objects = objects;
@@ -42,7 +47,7 @@ class ChangeLogVersion {
   }
 
   jsonData() {
-    const data = {id: this.id};
+    const data: any = {id: this.id};
     const commits = this.fetchCommits();
     if (this.isReleased() && commits[0]) {
       data.date = commits[0].date;
@@ -70,4 +75,4 @@ class ChangeLogVersion {
   }
 }
 
-module.exports = ChangeLogVersion;
+export { ChangeLogVersion }

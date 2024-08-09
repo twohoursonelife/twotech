@@ -6,4 +6,4 @@ function readFileNormalized(path) {
   return fs.readFileSync(path, "utf8").replaceAll('\r\n', '\n');
 }
 
-module.exports = readFileNormalized;
+export { readFileNormalized }

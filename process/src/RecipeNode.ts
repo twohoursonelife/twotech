@@ -1,8 +1,20 @@
 "use strict";
 
 class RecipeNode {
+  transition: any;
+  object: any;
+  parents: any[];
+  children: any[];
+  decaySeconds: number;
+  tool: boolean;
+  collapsedParent: any;
+  cachedDepth: any;
+  countCache: any;
+  cachedSubNodes: any;
+  mainBranch: boolean;
+  cachedLargestChild: any;
   static steps(nodes, expand = false) {
-    const steps = [];
+    const steps: any[] = [];
     nodes = nodes.sort((a,b) => b.subNodeDepth() - a.subNodeDepth()).
                   sort((a,b) => (b.collapsedParent ? 0 : 1) - (a.collapsedParent ? 0 : 1))
     for (let node of nodes) {
@@ -254,7 +266,7 @@ class RecipeNode {
   }
 
   calculateSubNodes() {
-    let subNodes = [];
+    let subNodes: any[] = [];
     for (let child of this.uniqueChildren()) {
       if (!child.isLast()) {
         subNodes.push(child);
@@ -311,7 +323,7 @@ class RecipeNode {
     return this.cachedLargestChild;
   }
 
-  collapse(parent = null) {
+  collapse(parent: any = null) {
     // Don't collapse the main branch
     if (this.mainBranch) {
       return;
@@ -329,7 +341,7 @@ class RecipeNode {
   }
 
   jsonData(expand = false) {
-    const data = {id: this.object.id};
+    const data: any = {id: this.object.id};
     if (this.count() > 1) {
       data.count = this.count();
       data.uses = "x" + data.count;
@@ -387,4 +399,4 @@ class RecipeNode {
   }
 }
 
-module.exports = RecipeNode;
+export { RecipeNode }

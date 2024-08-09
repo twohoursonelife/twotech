@@ -1,13 +1,17 @@
 "use strict";
 
-const Canvas = require('canvas');
+import * as Canvas from 'canvas';
 const fs = require('fs');
 
 class SpriteProcessor {
+  spritesDir: any;
+  pngDir: any;
+  canvas: any;
+  context: any;
   constructor(spritesDir, pngDir) {
     this.spritesDir = spritesDir;
     this.pngDir = pngDir;
-    this.canvas = new Canvas.createCanvas(512, 1024);
+    this.canvas = Canvas.createCanvas(512, 1024);
     this.context = this.canvas.getContext('2d');
   }
 
@@ -74,10 +78,10 @@ class SpriteProcessor {
     const width = bounds.maxX - bounds.minX;
     const height = bounds.maxY - bounds.minY;
 
-    const newCanvas = new Canvas.createCanvas(width, height);
+    const newCanvas = Canvas.createCanvas(width, height);
     const newContext = newCanvas.getContext('2d');
 
-    newContext.setTransform(1, 0, 0, 1, 0, 0);
+    newContext.setTransform(new Canvas.DOMMatrix([1, 0, 0, 1, 0, 0]));
 
     newContext.drawImage(
       this.canvas,
@@ -109,7 +113,7 @@ class SpriteProcessor {
   }
 
   drawSpriteWithOperation(sprite, operation) {
-    const newCanvas = new Canvas.createCanvas(this.canvas.width, this.canvas.height);
+    const newCanvas = Canvas.createCanvas(this.canvas.width, this.canvas.height);
     const newContext = newCanvas.getContext('2d');
 
     this.drawSpriteDirectly(sprite, newContext);
@@ -149,15 +153,15 @@ class SpriteProcessor {
   }
 
   overlayColor(sprite, targetContext) {
-    const newCanvas = new Canvas.createCanvas(this.canvas.width, this.canvas.height);
+    const newCanvas = Canvas.createCanvas(this.canvas.width, this.canvas.height);
     const newContext = newCanvas.getContext('2d');
 
-    this.drawSpriteImage(sprite, newContext, false)
+    this.drawSpriteImage(sprite, newContext)
 
     const color = sprite.color.map(c => Math.round(c*255)).join(", ");
 
     newContext.globalCompositeOperation = "source-in";
-    newContext.setTransform(1, 0, 0, 1, 0, 0);
+    newContext.setTransform(new Canvas.DOMMatrix([1, 0, 0, 1, 0, 0]));
     newContext.fillStyle = "rgb(" + color + ")";
     newContext.fillRect(0, 0, newCanvas.width, newCanvas.height);
 
@@ -291,4 +295,4 @@ class SpriteProcessor {
   }
 }
 
-module.exports = SpriteProcessor;
+export { SpriteProcessor }

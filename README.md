@@ -56,16 +56,16 @@ npm install
 cd ..
 
 # run script including downloading latest data and processing sprites
-node process download
+npm run process -- download
 
 # if you want to re-process the sprites without downloading data
-node process sprites
+npm run process -- sprites
 
 # if you want to re-process the sounds without downloading data
-node process sounds
+npm run process -- sounds
 
 # or process without generating sprites
-node process
+npm run process
 ```
 
 ### Processing Script (Docker version)
@@ -83,16 +83,16 @@ This will build the Docker image used for the build environment, and then set up
 
 You can then run different build commands within a container of this image:
 ```
-./docker-run.sh node process-docker
+./docker-run.sh npm run process
 ```
 ```
-./docker-run.sh node process-docker download
+./docker-run.sh npm run process -- download
 ```
 ```
-./docker-run.sh node process-docker sprites
+./docker-run.sh npm run process -- sprites
 ```
 ```
-./docker-run.sh node process-docker sounds
+./docker-run.sh npm run process -- sounds
 ```
 
 ### Modded Support

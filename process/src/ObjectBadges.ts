@@ -1,12 +1,14 @@
 "use strict";
 
+import { GameObject } from "./GameObject";
+
 const Clothing = {
   key: "clothing",
   filter(objects) {
     return objects.filter(o => o.isClothing());
   },
-  value(object) {
-    const percent = (object.insulation()*10000).toFixed()/100
+  value(object: GameObject) {
+    const percent = Math.round(object.insulation()*10000)/100;
     return `${percent}%`;
   }
 }
@@ -18,8 +20,8 @@ const Food = {
   },
   value(object) {
     if (object.data.numUses > 1)
-      return `${object.data.foodValue[0] + object.data.foodValue[1] + parseInt(process.env.ONETECH_FOOD_BONUS)} x ${object.data.numUses}`;
-    return object.data.foodValue[0] + object.data.foodValue[1] + parseInt(process.env.ONETECH_FOOD_BONUS);
+      return `${object.data.foodValue[0] + object.data.foodValue[1] + parseInt(process.env.ONETECH_FOOD_BONUS || '0')} x ${object.data.numUses}`;
+    return object.data.foodValue[0] + object.data.foodValue[1] + parseInt(process.env.ONETECH_FOOD_BONUS || '0');
   }
 }
 
@@ -89,7 +91,7 @@ const ObjectBadges = {
     const badgesData = {};
     for (let badge of this.badges) {
       const objects = badge.filter(allObjects);
-      const data = {ids: objects.map(o => o.id)};
+      const data: any = {ids: objects.map(o => o.id)};
       if (badge.value)
         data.values = objects.map(o => badge.value(o));
       badgesData[badge.key] = data;
@@ -98,4 +100,4 @@ const ObjectBadges = {
   }
 }
 
-module.exports = ObjectBadges;
+export { ObjectBadges }

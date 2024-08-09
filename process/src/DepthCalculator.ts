@@ -1,8 +1,9 @@
 "use strict";
 
-const Depth = require('./Depth');
+import { Depth } from "./Depth";
 
 class DepthCalculator {
+  objects: any;
   constructor(objects) {
     this.objects = objects;
   }
@@ -18,7 +19,7 @@ class DepthCalculator {
   calculateDepth() {
     for (let object of this.objects) {
       if (object.isNatural() || object.transitionsToward.length === 0) {
-        this.setObjectDepth(object, new Depth({value: 0, craftable: object.isNatural()}));
+        this.setObjectDepth(object, new Depth({value: 0, craftable: object.isNatural(), difficulty: 0}));
       }
     }
   }
@@ -44,7 +45,7 @@ class DepthCalculator {
   // If the depth was calculated, it sets it to the resulting object
   calculateTransition(transition) {
     // Start in true state so adding transition can make to uncraftable
-    const depth = new Depth({value: 0, craftable: true});
+    const depth = new Depth({value: 0, craftable: true, difficulty: 0});
     depth.addTransition(transition);
     transition.depth = depth;
 
@@ -79,4 +80,4 @@ class DepthCalculator {
   }
 }
 
-module.exports = DepthCalculator;
+export { DepthCalculator }

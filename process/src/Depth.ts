@@ -3,6 +3,10 @@
 // Depth is the deepest number of steps needed to craft an object
 // Natural and uncraftable objects have a depth of 0
 class Depth {
+  calculated: boolean;
+  value: any;
+  difficulty: any;
+  craftable: any;
   constructor({ value, difficulty, craftable }) {
     this.calculated = !isNaN(value);
     this.value = value || 0;
@@ -63,4 +67,4 @@ class Depth {
   }
 }
 
-module.exports = Depth;
+export { Depth  }

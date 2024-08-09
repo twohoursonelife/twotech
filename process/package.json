@@ -4,7 +4,8 @@
   "description": "Processes files from OneHourOneLife into big JSON blobs",
   "main": "process.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "process": "npm i && node_modules/.bin/ts-node process"
   },
   "author": "",
   "license": "ISC",
@@ -13,5 +14,10 @@
     "lodash": "^4.17.21",
     "node-fetch": "^3.3.2",
     "sitemap": "^4.1.1"
+  },
+  "devDependencies": {
+    "@types/canvasjs": "^1.9.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
   }
 }

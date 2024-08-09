@@ -1,6 +1,13 @@
 "use strict";
 
 class Category {
+  objectIDs: any[];
+  objectWeights: any[];
+  parentID: any;
+  pattern: boolean;
+  probSet: boolean;
+  parent: any;
+  objects: any[];
   constructor(dataText) {
     this.objectIDs = [];
     this.objectWeights = [];
@@ -60,4 +67,4 @@ class Category {
   }
 }
 
-module.exports = Category;
+export { Category }
