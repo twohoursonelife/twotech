@@ -7,7 +7,9 @@
   "private": true,
   "scripts": {
     "dev": "webpack serve",
-    "build": "webpack --progress"
+    "build": "webpack --progress",
+    "process": "cd process && npm run process",
+    "process-all": "cd process && npm run process -- download"
   },
   "dependencies": {
     "lodash": "^4.17.21",
