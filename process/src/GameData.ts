@@ -20,7 +20,7 @@ class GameData {
   processDir: any;
   dataDir: any;
   staticDir: any;
-  objects: any;
+  objects: Record<string, GameObject>;
   categories: any[];
   biomes: any[];
   releasedOnly: boolean;
