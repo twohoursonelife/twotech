@@ -24,7 +24,7 @@ class GameObject {
     this.transitionsAway = [];
     this.categories = [];
     this.biomes = [];
-    this.depth = new Depth({craftable: false, value: 0, difficulty: 0});
+    this.depth = new Depth({craftable: false, difficulty: 0});
     this.parseData(dataText);
     if (!this.data.id)
       return;

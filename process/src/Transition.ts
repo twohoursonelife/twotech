@@ -32,7 +32,7 @@ class Transition {
   newActorWeight: any;
   newTargetWeight: any;
   constructor(dataText, filename) {
-    this.depth = new Depth({craftable: false, difficulty: 0, value: 0});
+    this.depth = new Depth({craftable: false, difficulty: 0});
     this.parseFilename(filename);
     this.parseData(dataText);
   }
