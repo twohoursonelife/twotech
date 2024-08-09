@@ -7,7 +7,7 @@ class ChangeLogCommit {
   version: any;
   git: any;
   objects: any;
-  legacyObjects: {};
+  legacyObjects: any;
   sha: any;
   date: any;
   message: any;
