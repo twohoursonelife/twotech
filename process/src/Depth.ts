@@ -70,4 +70,4 @@ class Depth {
   }
 }
 
-export { Depth  }
+export { Depth }

@@ -1,7 +1,7 @@
 "use strict";
 
-const { spawnSync } = require('child_process');
-const fs = require('fs');
+import { spawnSync } from 'child_process';
+import * as fs from 'fs';
 const _ = require('lodash');
 
 import { GameObject } from "./GameObject";
@@ -15,17 +15,18 @@ import { ObjectFilters } from "./ObjectFilters";
 import { ObjectBadges } from "./ObjectBadges";
 import { SitemapGenerator } from "./SitemapGenerator";
 import { readFileNormalized } from "./readFileNormalized";
+import { ChangeLogVersion } from './ChangeLogVersion';
 
 class GameData {
-  processDir: any;
-  dataDir: any;
-  staticDir: any;
+  processDir: string;
+  dataDir: string;
+  staticDir: string;
   objects: Record<string, GameObject>;
-  categories: any[];
-  biomes: any[];
+  categories: Category[];
+  biomes: Biome[];
   releasedOnly: boolean;
   changeLog: ChangeLog;
-  constructor(processDir, dataDir, staticDir) {
+  constructor(processDir: string, dataDir: string, staticDir: string) {
     this.processDir = processDir;
     this.dataDir = dataDir;
     this.staticDir = staticDir;
@@ -34,7 +35,7 @@ class GameData {
     this.biomes = [];
   }
 
-  download(gitURL) {
+  download(gitURL: string): void {
     if (fs.existsSync(this.dataDir)) {
       this.checkoutMaster();
       spawnSync("git", ["pull"], {cwd: this.dataDir});
@@ -43,22 +44,22 @@ class GameData {
     }
   }
 
-  verifyDownloaded() {
+  verifyDownloaded(): void {
     if (!fs.existsSync(this.dataDir)) {
       throw "OneLifeData7 not found, first run `node process dev download`"
     }
   }
 
-  checkoutVersion(version) {
+  checkoutVersion(version: ChangeLogVersion): void {
     this.releasedOnly = true;
     spawnSync("git", ["checkout", version.tag()], {cwd: this.dataDir});
   }
 
-  checkoutMaster() {
+  checkoutMaster(): void {
     spawnSync("git", ["checkout", "master"], {cwd: this.dataDir});
   }
 
-  importObjects() {
+  importObjects(): void {
     this.eachFileContent("objects", ".txt", (content, _filename) => {
       const object = new GameObject(content);
       if (object.id) {
@@ -68,7 +69,7 @@ class GameData {
     console.log("Object Count: " + Object.values(this.objects).length);
   }
 
-  importCategories() {
+  importCategories(): void {
     this.eachFileContent("categories", ".txt", (content, _filename) => {
       const category = new Category(content);
       category.addToObjects(this.objects);
@@ -77,7 +78,7 @@ class GameData {
     console.log("Category Count: " + this.categories.length);
   }
 
-  importTransitions() {
+  importTransitions(): void {
     const importer = new TransitionImporter();
     this.eachFileContent("transitions", ".txt", (content, filename) => {
       importer.importFromFile(content, filename);
@@ -90,7 +91,7 @@ class GameData {
     console.log("Transition Count: " + importer.transitions.length);
   }
 
-  importBiomes() {
+  importBiomes(): void {
     this.eachFileInDir("ground", ".tga", (_path, filename) => {
       const biome = Biome.fromFilename(filename);
       if (biome) {
@@ -110,13 +111,13 @@ class GameData {
     console.log("Biome Count: " + this.biomes.length);
   }
 
-  populateVersions() {
+  populateVersions(): void {
     this.changeLog = new ChangeLog(this.dataDir, this.objects, this.releasedOnly);
     this.changeLog.populateObjects();
   }
 
-  calculateObjectDepth() {
-    var calculator = new DepthCalculator(Object.values(this.objects));
+  calculateObjectDepth(): void {
+    let calculator = new DepthCalculator(Object.values(this.objects));
     calculator.calculate();
   }
 
@@ -125,14 +126,14 @@ class GameData {
   //   generator.generate(Object.values(this.objects));
   // }
 
-  exportObjects() {
-    this.saveJSON("objects.json", this.objectsData());
+  exportObjects(): void {
+    this.saveJSON("objects.json", this.objectsJsonData());
     for (let id in this.objects) {
       this.saveJSON(`objects/${id}.json`, this.objects[id].jsonData());
     }
   }
 
-  exportVersions() {
+  exportVersions(): void {
     const versions = this.changeLog.versions.slice().reverse();
     for (let version of versions) {
       const path = `versions/${version.id}.json`;
@@ -142,13 +143,13 @@ class GameData {
     }
   }
 
-  exportBiomes() {
+  exportBiomes(): void {
     for (let biome of this.biomes) {
       this.saveJSON(`biomes/${biome.id}.json`, biome.jsonData());
     }
   }
 
-  prepareStaticDir() {
+  prepareStaticDir(): void {
     this.makeDir(this.staticDir);
     this.makeDir(this.staticDir + "/sprites");
     this.makeDir(this.staticDir + "/ground");
@@ -162,18 +163,18 @@ class GameData {
     this.makeDir(this.staticDir + "/pretty-json/biomes");
   }
 
-  makeDir(path) {
+  makeDir(path: string): void {
     if (!fs.existsSync(path)) fs.mkdirSync(path);
   }
 
-  saveJSON(path, data) {
+  saveJSON(path: string, data: Record<string, any>): void {
     const minPath = this.staticDir + "/" + path;
     const prettyPath = this.staticDir + "/pretty-json/" + path;
     fs.writeFileSync(minPath, JSON.stringify(data));
     fs.writeFileSync(prettyPath, JSON.stringify(data, null, 2));
   }
 
-  objectsData() {
+  objectsData(): Record<string, any> {
     var objects = _.sortBy(this.objects, o => o.sortWeight()).filter(o => o.isVisible());
     // Traverse objects array only once, pushing to each array the part it needs.
     let objectsData = objects.reduce(
@@ -203,9 +204,9 @@ class GameData {
     };
   }
 
-  convertSpriteImages() {
+  convertSpriteImages(): void {
     const dir = this.dataDir + "/sprites";
-    for (var filename of fs.readdirSync(dir)) {
+    for (let filename of fs.readdirSync(dir)) {
       if (filename.endsWith(".tga")) {
         const id = filename.split('.')[0];
         const inPath = dir + "/" + filename;
@@ -215,9 +216,9 @@ class GameData {
     }
   }
 
-  convertGroundImages() {
+  convertGroundImages(): void {
     const dir = this.dataDir + "/ground";
-    for (var filename of fs.readdirSync(dir)) {
+    for (let filename of fs.readdirSync(dir)) {
       if (filename.endsWith(".tga")) {
         const name = filename.split('.')[0];
         const inPath = dir + "/" + filename;
@@ -227,9 +228,9 @@ class GameData {
     }
   }
 
-  convertSounds() {
+  convertSounds(): void {
     const dir = this.dataDir + "/sounds";
-    for (var filename of fs.readdirSync(dir)) {
+    for (let filename of fs.readdirSync(dir)) {
       if (filename.endsWith(".aiff")) {
         const id = filename.split('.')[0];
         const inPath = dir + "/" + filename;
@@ -240,12 +241,12 @@ class GameData {
     }
   }
 
-  processSprites() {
+  processSprites(): void {
     const processor = new SpriteProcessor(this.dataDir + "/sprites", this.staticDir + "/sprites")
     processor.process(this.objects)
   }
 
-  eachFileInDir(dirName, extension, callback) {
+  eachFileInDir(dirName: string, extension: string, callback: (fileWithPath: string, file: string) => void): void {
     const dir = this.dataDir + "/" + dirName;
     for (let filename of fs.readdirSync(dir)) {
       if (filename.endsWith(extension)) {
@@ -254,18 +255,18 @@ class GameData {
     }
   }
 
-  eachFileContent(dirName, extension, callback) {
+  eachFileContent(dirName: string, extension: string, callback: (fileContent: string, filename: string) => void): void {
     this.eachFileInDir(dirName, extension, (path, filename) => {
       callback(readFileNormalized(path), filename);
     });
   }
 
-  generateSitemap() {
-    var generator = new SitemapGenerator(this.processDir + "/../");
+  generateSitemap(): void {
+    let generator = new SitemapGenerator(this.processDir + "/../");
     generator.generate(Object.values(this.objects), this.biomes);
   }
 
-  unprocessedVersion(staticDir, force) {
+  unprocessedVersion(staticDir: string, force: boolean): ChangeLogVersion {
     const version = this.changeLog.lastReleasedVersion();
     const path = `versions/${version.id}.json`;
     if (force || !fs.existsSync(staticDir + "/" + path)) {
