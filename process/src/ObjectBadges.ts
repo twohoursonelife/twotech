@@ -2,7 +2,7 @@
 
 import { GameObject } from "./GameObject";
 
-const Clothing = {
+const Clothing: ObjectBadge = {
   key: "clothing",
   filter(objects) {
     return objects.filter(o => o.isClothing());
@@ -13,7 +13,7 @@ const Clothing = {
   }
 }
 
-const Food = {
+const Food: ObjectBadge = {
   key: "food",
   filter(objects) {
     return objects.filter(o => o.data.foodValue[0] > 0);
@@ -25,7 +25,7 @@ const Food = {
   }
 }
 
-const Tool = {
+const Tool: ObjectBadge = {
   key: "tool",
   filter(objects) {
     return objects.filter(o => o.isTool());
@@ -39,7 +39,7 @@ const Tool = {
   }
 }
 
-const Container = {
+const Container: ObjectBadge = {
   key: "container",
   filter(objects) {
     return objects.filter(o => o.isCraftableContainer());
@@ -49,7 +49,7 @@ const Container = {
   }
 }
 
-const HeatSource = {
+const HeatSource: ObjectBadge = {
   key: "heat",
   filter(objects) {
     return objects.filter(o => o.data.heatValue > 0);
@@ -59,7 +59,7 @@ const HeatSource = {
   }
 }
 
-const WaterSource = {
+const WaterSource: ObjectBadge = {
   key: "water",
   filter(objects) {
     return objects.filter(o => o.isWaterSource());
@@ -69,24 +69,35 @@ const WaterSource = {
   }
 }
 
-const Natural = {
+const Natural: ObjectBadge = {
   key: "natural",
   filter(objects) {
     return objects.filter(o => o.isNatural());
   }
 }
 
-const ObjectBadges = {
-  badges: [
-    Clothing,
-    Food,
-    Tool,
-    Container,
-    WaterSource,
-    HeatSource,
-    Natural,
-  ],
-  jsonData(allObjects) {
+interface ObjectBadge {
+  key: string;
+  filter: (objects: GameObject[]) => GameObject[];
+  value?: (object: GameObject) => any;
+}
+
+class ObjectBadges {
+  badges: ObjectBadge[];
+
+  constructor() {
+    this.badges = [
+      Clothing,
+      Food,
+      Tool,
+      Container,
+      WaterSource,
+      HeatSource,
+      Natural,
+    ];
+  }
+
+  jsonData(allObjects: GameObject[]): Record<string, any> {
     allObjects = allObjects.filter(o => o.canFilter());
     const badgesData = {};
     for (let badge of this.badges) {
@@ -100,4 +111,4 @@ const ObjectBadges = {
   }
 }
 
-export { ObjectBadges }
+export {ObjectBadges}

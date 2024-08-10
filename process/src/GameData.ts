@@ -25,6 +25,8 @@ class GameData {
   categories: Category[];
   biomes: Biome[];
   releasedOnly: boolean;
+  badges: ObjectBadges;
+  filters: ObjectFilters;
   changeLog: ChangeLog;
   constructor(processDir: string, dataDir: string, staticDir: string) {
     this.processDir = processDir;
@@ -33,6 +35,8 @@ class GameData {
     this.objects = {};
     this.categories = [];
     this.biomes = [];
+    this.badges = new ObjectBadges();
+    this.filters = new ObjectFilters();
   }
 
   download(gitURL: string): void {
@@ -194,8 +198,8 @@ class GameData {
       difficulties: objectsData.difficulties,
       numSlots: objectsData.numSlots,
       craftable: objectsData.craftable,
-      filters: ObjectFilters.jsonData(objects),
-      badges: ObjectBadges.jsonData(objects),
+      filters: this.filters.jsonData(objects),
+      badges: this.badges.jsonData(objects),
       date: new Date(),
       versions: this.changeLog.validVersions().map(v => v.id),
       biomeIds: this.biomes.map(b => b.id),
@@ -263,7 +267,7 @@ class GameData {
 
   generateSitemap(): void {
     let generator = new SitemapGenerator(this.processDir + "/../");
-    generator.generate(Object.values(this.objects), this.biomes);
+    generator.generate(Object.values(this.objects), this.filters.filters, this.biomes);
   }
 
   unprocessedVersion(staticDir: string, force: boolean): ChangeLogVersion {

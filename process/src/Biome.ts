@@ -1,17 +1,19 @@
 "use strict";
 
-class Biome {
-  id: any;
-  groundHeat: number;
-  objects: any[];
+import { GameObject } from "./GameObject";
 
-  static fromFilename(filename) {
+class Biome {
+  id: string;
+  groundHeat: number;
+  objects: GameObject[];
+
+  static fromFilename(filename: string): Biome {
     const id = filename.replace("ground_", "").replace(".tga", "");
     if (!id || id === "U") return;
     return new Biome(id);
   }
 
-  static applyGroundHeat(biomes, filename, content) {
+  static applyGroundHeat(biomes: Biome[], filename: string, content: string): void {
     const id = filename.replace("groundHeat_", "").replace(".txt", "");
     if (!id || id === "U") return;
     const biome = biomes.find(b => b.id === id);
@@ -19,18 +21,18 @@ class Biome {
     biome.groundHeat = parseFloat(content);
   }
 
-  constructor(id) {
+  constructor(id: string) {
     this.id = id;
-    this.groundHeat = 0;
+    this.groundHeat = 0.0;
     this.objects = [];
   }
 
-  name() {
+  name(): string {
     const names = ["Grasslands", "Swamps", "Yellow Prairies", "Badlands", "Tundra", "Desert", "Jungle", "Deep Water", "Flower Fields", "Shallow Water"];
     return names[this.id];
   }
 
-  addObjects(objects) {
+  addObjects(objects: GameObject[]) {
     for (let object of objects) {
       if (object.data.biomes && object.data.biomes.includes(parseInt(this.id))) {
         this.objects.push(object);
@@ -39,17 +41,17 @@ class Biome {
     }
   }
 
-  totalMapChance() {
+  totalMapChance(): number {
     return this.objects.map(o => o.data.mapChance).reduce((a,b) => a + b);
   }
 
-  spawnChance(object) {
+  spawnChance(object: GameObject): number {
     const total = this.totalMapChance();
     if (!total) return 0;
     return object.data.mapChance / total;
   }
 
-  jsonData() {
+  jsonData(): Record<string, any> {
     const result: any = {
       id: this.id,
       groundHeat: this.groundHeat,
