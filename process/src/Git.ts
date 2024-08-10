@@ -58,7 +58,7 @@ class Git {
     return this.run("show", `${sha}:${path}`);
   }
 
-  log(from: string, to: string): any {
+  log(from: string, to: string): Record<string, any> {
     const lines = this.runLines("log", "--format=%H %ad %s", "--date=iso-strict", `${from}..${to}`);
     return lines.map(line => {
       const parts = line.match(/^(.+?) (.+?) (.+?)$/).slice(1);
