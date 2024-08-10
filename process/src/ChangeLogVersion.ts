@@ -54,7 +54,7 @@ class ChangeLogVersion {
     if (this.isReleased() && commits[0]) {
       data.date = commits[0].date;
     }
-    data.commits = commits.filter(c => c.isRelavent()).map(c => c.jsonData());
+    data.commits = commits.filter(c => c.isRelevent()).map(c => c.jsonData());
     return data;
   }
 

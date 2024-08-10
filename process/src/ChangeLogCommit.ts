@@ -1,23 +1,36 @@
 "use strict";
 
+import { ChangeLogVersion } from "./ChangeLogVersion";
 import { GameObject } from "./GameObject";
+import { ChangeLogEntry, Git } from "./Git";
 import { Transition } from "./Transition";
 
-class ChangeLogCommit {
-  version: any;
-  git: any;
-  objects: any;
-  legacyObjects: any;
-  sha: any;
-  date: any;
-  message: any;
-  addedObjects: any[];
-  removedObjects: any[];
-  addedTransitions: any[];
-  removedTransitions: any[];
-  objectChanges: any[];
+interface ObjectChange {
+  id: string,
+  attributes: Record<string, any>,
+}
 
-  constructor(version, log) {
+interface LegacyObjectData {
+  id: string,
+  name: string,
+  category: boolean,
+}
+
+class ChangeLogCommit {
+  version: ChangeLogVersion;
+  git: Git;
+  objects: Record<string, GameObject>;
+  legacyObjects: Record<string, GameObject>;
+  sha: string;
+  date: Date;
+  message: string;
+  addedObjects: GameObject[];
+  removedObjects: GameObject[];
+  addedTransitions: Transition[];
+  removedTransitions: Transition[];
+  objectChanges: ObjectChange[];
+
+  constructor(version: ChangeLogVersion, log: ChangeLogEntry) {
     this.version = version;
     this.git = version.git;
     this.objects = version.objects;
@@ -33,7 +46,7 @@ class ChangeLogCommit {
     this.parseChanges();
   }
 
-  isRelavent() {
+  isRelevent(): boolean {
     if (this.message.includes("dataVersionNumber"))
       return false;
     if (this.message.startsWith("Merge branch"))
@@ -43,7 +56,7 @@ class ChangeLogCommit {
     return true
   }
 
-  parseChanges() {
+  parseChanges(): void {
     const changes = this.git.fileChanges(this.sha + "^", this.sha);
     for (let change of changes) {
       if (change[1].startsWith("objects"))
@@ -53,7 +66,7 @@ class ChangeLogCommit {
     }
   }
 
-  parseObjectChange(path, mode) {
+  parseObjectChange(path: string, mode: string): void {
     const id = path.split("/")[1].split(".")[0];
     if (mode == "A") {
       const object = this.lookupObject(path, mode);
@@ -68,7 +81,7 @@ class ChangeLogCommit {
     }
   }
 
-  parseTransitionChange(path, mode) {
+  parseTransitionChange(path: string, mode: string): void {
     if (mode == "A") {
       const transition = this.createTransition(path, mode);
       this.addedTransitions.push(transition);
@@ -85,7 +98,7 @@ class ChangeLogCommit {
     }
   }
 
-  isSignificantChange(oldTransition, newTransition) {
+  isSignificantChange(oldTransition: Transition, newTransition: Transition): boolean {
     if (oldTransition.actorID != newTransition.actorID)
       return true;
     if (oldTransition.targetID != newTransition.targetID)
@@ -99,7 +112,7 @@ class ChangeLogCommit {
     return false;
   }
 
-  lookupObject(path, mode) {
+  lookupObject(path: string, mode: string): GameObject {
     const id = path.split("/")[1].split(".")[0];
 
     if (this.objects[id]) {
@@ -120,7 +133,7 @@ class ChangeLogCommit {
     return object;
   }
 
-  createTransition(path, mode) {
+  createTransition(path: string, mode: string): Transition {
     const content = this.fileContent(path, mode);
     const filename = path.split("/")[1];
     const transition = new Transition(content, filename);
@@ -131,14 +144,14 @@ class ChangeLogCommit {
     return transition;
   }
 
-  setTransitionObject(transition, key, mode) {
+  setTransitionObject(transition: Transition, key: string, mode: string): void {
     const id = transition[key + "ID"];
     if (id > 1) {
       transition[key] = this.lookupObject(`objects/${id}.txt`, mode)
     }
   }
 
-  addObjectChange(path) {
+  addObjectChange(path: string): void {
     const before = new GameObject(this.git.fileContent(`${this.sha}^`, path));
     const after = new GameObject(this.git.fileContent(this.sha, path));
     const change = this.objectChange(before, after);
@@ -146,7 +159,7 @@ class ChangeLogCommit {
       this.objectChanges.push(this.objectChange(before, after));
   }
 
-  ignoredAttributes() {
+  ignoredAttributes(): string[] {
     return [
       "slotPos",
       "pixHeight",
@@ -163,7 +176,7 @@ class ChangeLogCommit {
     ];
   }
 
-  objectChange(before, after) {
+  objectChange(before: GameObject, after: GameObject): ObjectChange {
     const ignore = this.ignoredAttributes();
     const attributes = {};
     for (let attribute in after.data) {
@@ -180,12 +193,12 @@ class ChangeLogCommit {
     return {id: after.id, attributes: attributes};
   }
 
-  fileContent(path, mode) {
+  fileContent(path: string, mode: string): string {
     const sha = (mode == "D" ? `${this.sha}^` : this.sha);
     return this.git.fileContent(sha, path);
   }
 
-  jsonData() {
+  jsonData(): Record<string, any> {
     const data: any = {sha: this.sha, message: this.message, date: this.date};
 
     if (this.addedObjects.length)
@@ -209,15 +222,15 @@ class ChangeLogCommit {
     return data;
   }
 
-  filterTransitions(transitions) {
+  filterTransitions(transitions: Transition[]): Transition[] {
     let ids = this.addedObjects.map(o => o.id);
     ids = ids.concat(Object.keys(this.legacyObjects));
     ids = ids.concat(this.removedObjects.map(o => o.id));
     return transitions.filter(t => !ids.includes(t.actorID) && !ids.includes(t.targetID));
   }
 
-  legacyObjectData(object) {
-    return {id: object.id, name: object.name, category: !!object.isCategory()};
+  legacyObjectData(object: GameObject): LegacyObjectData {
+    return {id: object.id, name: object.name, category: object.isCategory()};
   }
 }
 

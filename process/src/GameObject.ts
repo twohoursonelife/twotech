@@ -6,7 +6,7 @@ import { Recipe } from "./Recipe";
 
 class GameObject {
   legacy: boolean;
-  id: any;
+  id: string;
   data: any;
   sprites: any[];
   transitionsToward: any[];

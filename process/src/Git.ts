@@ -2,6 +2,12 @@
 
 import { spawnSync } from 'child_process';
 
+interface ChangeLogEntry {
+  sha: string,
+  date: Date,
+  message: string,
+}
+
 class Git {
   dir: string;
   constructor(dir: string) {
@@ -58,7 +64,7 @@ class Git {
     return this.run("show", `${sha}:${path}`);
   }
 
-  log(from: string, to: string): Record<string, any> {
+  log(from: string, to: string): ChangeLogEntry[] {
     const lines = this.runLines("log", "--format=%H %ad %s", "--date=iso-strict", `${from}..${to}`);
     return lines.map(line => {
       const parts = line.match(/^(.+?) (.+?) (.+?)$/).slice(1);
@@ -71,4 +77,4 @@ class Git {
   }
 }
 
-export { Git }
+export { Git, ChangeLogEntry }
