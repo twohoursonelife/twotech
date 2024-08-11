@@ -1,13 +1,15 @@
 "use strict";
 
+import { GameObject } from "./GameObject";
+
 class Category {
-  objectIDs: any[];
-  objectWeights: any[];
-  parentID: any;
+  objectIDs: string[];
+  objectWeights: number[];
+  parentID: string;
   pattern: boolean;
   probSet: boolean;
-  parent: any;
-  objects: any[];
+  parent: GameObject;
+  objects: GameObject[];
   constructor(dataText) {
     this.objectIDs = [];
     this.objectWeights = [];
@@ -22,7 +24,7 @@ class Category {
     }
   }
 
-  processHeader(line) {
+  processHeader(line: string): boolean {
     const parts = line.split('=');
     switch (parts[0]) {
       case "parentID":   this.parentID = parts[1]; break;
@@ -34,7 +36,7 @@ class Category {
     return true; // Continue processing headers
   }
 
-  processObject(line) {
+  processObject(line: string): void {
     const parts = line.split(' ');
     if (parts[0]) {
       this.objectIDs.push(parts[0]);
@@ -44,11 +46,11 @@ class Category {
     }
   }
 
-  objectWeight(id) {
+  objectWeight(id: string): number {
     return this.objectWeights[this.objectIDs.indexOf(id)];
   }
 
-  addToObjects(objects) {
+  addToObjects(objects: Record<string, GameObject>): void {
     this.parent = objects[this.parentID];
     if (!this.parent) throw "Unable to find object with id " + this.parentID;
     this.parent.category = this;
