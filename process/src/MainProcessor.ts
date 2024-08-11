@@ -1,33 +1,35 @@
 "use strict";
 
+import { ChangeLogVersion } from "./ChangeLogVersion";
 import { GameData } from "./GameData";
 
 class MainProcessor {
-  processDir: any;
-  doDownload: any;
-  doSprites: any;
-  doSounds: any;
-  constructor(processDir) {
+  processDir: string;
+  doDownload: boolean;
+  doSprites: boolean;
+  doSounds: boolean;
+  constructor(processDir: string) {
     this.processDir = processDir;
   }
 
-  staticDir(edge) {
+  staticDir(edge: boolean): string {
     if (edge && !process.env.ONETECH_MOD_NAME) {
       return this.processDir + "/../public/static-edge";
     }
     return this.processDir + "/../public/static";
   }
 
-  dataDir() {
+  dataDir(): string {
     return process.env.ONETECH_PROCESS_GIT_PATH || (this.processDir + "/OneLifeData7");
   }
 
-  gitUrl() {
+  gitUrl(): string {
     return process.env.ONETECH_PROCESS_GIT_URL || "https://github.com/twohoursonelife/OneLifeData7.git";
   }
 
-  process(version) {
-    const gameData = new GameData(this.processDir, this.dataDir(), this.staticDir(!version));
+  process(version: ChangeLogVersion): ChangeLogVersion {
+    // double-equals used to cover undefined case too.
+    const gameData = new GameData(this.processDir, this.dataDir(), this.staticDir(version == null));
 
     if (this.doDownload) {
       console.log("Downloading data...");
