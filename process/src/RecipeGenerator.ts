@@ -1,18 +1,21 @@
 "use strict";
 
+import { GameObject } from "./GameObject";
 import { RecipeNode } from "./RecipeNode";
+import { Transition } from "./Transition";
 
 class RecipeGenerator {
-  nodes: any;
-  object: any;
-  availableTools: any[];
-  constructor(object) {
+  nodes: RecipeNode[];
+  object: GameObject;
+  availableTools: GameObject[];
+
+  constructor(object: GameObject) {
     this.object = object;
     this.nodes = [];
     this.availableTools = [];
   }
 
-  generate() {
+  generate(): void {
     try {
       const root = this.generateNode(this.object);
       root.trackMainBranch();
@@ -23,7 +26,7 @@ class RecipeGenerator {
     }
   }
 
-  generateNode(object) {
+  generateNode(object: GameObject): RecipeNode {
     const node = new RecipeNode(object);
     if (this.availableTools.includes(object)) {
       node.makeTool(this);
@@ -36,7 +39,7 @@ class RecipeGenerator {
     return node;
   }
 
-  lookupTransition(node) {
+  lookupTransition(node: RecipeNode): Transition {
     let transition = node.object.transitionsToward[0];
     if (!transition) return;
 
@@ -57,7 +60,7 @@ class RecipeGenerator {
     return transition;
   }
 
-  collapseDecayTransition(node, transition, depth) {
+  collapseDecayTransition(node: RecipeNode, transition: Transition, depth: number): Transition {
     if (depth > 10) {
       console.log(`Detected infinite loop collapsing decay transitions for ${this.object.name}`);
       // debugger;
@@ -74,7 +77,7 @@ class RecipeGenerator {
     return transition;
   }
 
-  generateTransitionNodes(node) {
+  generateTransitionNodes(node: RecipeNode): void {
     if (!node.transition) return;
 
     this.addAvailableTool(node.transition.newActor, node, 0);
@@ -84,7 +87,7 @@ class RecipeGenerator {
     this.generateChildNode(node.transition.target, node);
   }
 
-  generateChildNode(object, parent) {
+  generateChildNode(object: GameObject, parent: RecipeNode): void {
     if (!object) return;
     let node = this.nodes.find(n => n.object == object);
     if (!node)
@@ -92,11 +95,11 @@ class RecipeGenerator {
     node.addParent(parent);
   }
 
-  deleteNode(node) {
+  deleteNode(node: RecipeNode): void {
     this.nodes = this.nodes.filter(n => n != node);
   }
 
-  addAvailableTool(object, parent, recursionCount) {
+  addAvailableTool(object: GameObject, parent: RecipeNode, recursionCount: number) {
     if (!object || object == parent.object || this.availableTools.includes(object)) return;
 
     if (object.depth.compare(parent.object.depth) < 0) {

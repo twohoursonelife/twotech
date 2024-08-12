@@ -1,16 +1,17 @@
 "use strict";
 
+import { GameObject } from "./GameObject";
 import { RecipeGenerator } from "./RecipeGenerator";
 import { RecipeNode } from "./RecipeNode";
 
 class Recipe {
-  object: any;
-  nodes: any;
-  constructor(object) {
+  object: GameObject;
+  nodes: RecipeNode[];
+  constructor(object: GameObject) {
     this.object = object;
   }
 
-  generate() {
+  generate(): void {
     // if (this.object.id == 2620) {
       // global.debug = true;
     // }
@@ -19,11 +20,11 @@ class Recipe {
     this.nodes = generator.nodes;
   }
 
-  hasData() {
+  hasData(): boolean {
     return this.nodes.length > 1;
   }
 
-  jsonData() {
+  jsonData(): Record<string, any> {
     const data: any = {steps: RecipeNode.steps(this.nodes)};
 
     // For now let's just merge tools and ingredients together when displaying
@@ -41,12 +42,12 @@ class Recipe {
     return data;
   }
 
-  tools() {
+  tools(): GameObject[] {
     return this.nodes.filter(n => n.tool && !n.parentsAreTools()).map(n => n.object);
   }
 
-  ingredients() {
-    const ingredients: any[] = [];
+  ingredients(): GameObject[] {
+    const ingredients: GameObject[] = [];
     const nodes = this.nodes.filter(n => n.isIngredient());
     for (let node of nodes) {
       const count = node.count();
