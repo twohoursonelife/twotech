@@ -1,23 +1,30 @@
 "use strict";
 
+import { Category } from "./Category";
+import { GameObject } from "./GameObject";
 import { Transition } from "./Transition";
 
+enum CategorySplitType {
+  Actor,
+  Target,
+}
+
 class TransitionImporter {
-  transitions: any;
+  transitions: Transition[];
   constructor() {
     this.transitions = [];
   }
 
-  importFromFile(content, filename) {
+  importFromFile(content: string, filename: string): void {
     const transition = new Transition(content, filename);
     this.transitions.push(transition);
   }
 
-  splitCategories(categories) {
+  splitCategories(categories: Category[]): void {
     const nonPatternCategories = categories.filter(c => !c.pattern);
     for (let category of nonPatternCategories) {
-      this.splitCategory(category, "actorID", "newActorID", "newActorWeight");
-      this.splitCategory(category, "targetID", "newTargetID", "newTargetWeight");
+      this.splitCategory(category, CategorySplitType.Actor);
+      this.splitCategory(category, CategorySplitType.Target);
     }
     const patternCategories = categories.filter(c => c.pattern);
     for (let transition of this.transitions) {
@@ -26,20 +33,44 @@ class TransitionImporter {
     this.cleanUpPatternCategories(patternCategories);
   }
 
-  splitCategory(category, attr, newAttr, weightAttr) {
-    const newTransitions: any[] = [];
+  splitCategory(category: Category, type: CategorySplitType): void {
+    const newTransitions: Transition[] = [];
     for (let transition of this.transitions) {
-      if (transition[attr] == category.parentID || transition[newAttr] == category.parentID) {
+      let currentId, newId, newWeight;
+      if (type === CategorySplitType.Actor) {
+        currentId = transition.actorID;
+        newId = transition.newActorID;
+        newWeight = transition.newActorWeight;
+      } else if (type === CategorySplitType.Target) {
+        currentId = transition.targetID;
+        newId = transition.newTargetID;
+        newWeight = transition.newTargetWeight;
+      }
+
+      if (currentId == category.parentID || newId == category.parentID) {
         for (let id of category.objectIDs) {
           const newTransition = transition.clone();
-          if (transition[attr] == category.parentID)
-            newTransition[attr] = id;
-          if (transition[newAttr] == category.parentID)
-            newTransition[newAttr] = id;
-          if (transition[newAttr] == category.parentID)
-            newTransition[newAttr] = id;
+          if (currentId == category.parentID)
+          {
+            if (type === CategorySplitType.Actor) {
+              newTransition.actorID = id;
+            } else if (type === CategorySplitType.Target) {
+              newTransition.targetID = id;
+            }
+          }
+          if (newId == category.parentID) {
+            if (type === CategorySplitType.Actor) {
+              newTransition.newActorID = id;
+            } else if (type === CategorySplitType.Target) {
+              newTransition.newTargetID = id;
+            }
+          }
           if (category.probSet) {
-            newTransition[weightAttr] = category.objectWeight(id);
+            if (type === CategorySplitType.Actor) {
+              newTransition.newActorWeight = category.objectWeight(id);
+            } else if (type === CategorySplitType.Target) {
+              newTransition.newTargetWeight = category.objectWeight(id);
+            }
           }
           if (!this.findDuplicate(newTransition)) {
             newTransitions.push(newTransition);
@@ -58,7 +89,7 @@ class TransitionImporter {
   //    categories have the same number of objectIDs
   // 3. For each objectID, a new transition is created which maps
   //    each other pattern category objectID to the new object
-  splitPatternCategories(transition, patternCategories) {
+  splitPatternCategories(transition: Transition, patternCategories: Category[]): void {
     // if (transition.actorID == 2900 && transition.targetID == 733)
     //   debugger;
     const attrs = ["actorID", "targetID", "newActorID", "newTargetID"];
@@ -84,7 +115,7 @@ class TransitionImporter {
   }
 
   // Remove transitions where pattern category parent is an actual category object
-  cleanUpPatternCategories(patternCategories) {
+  cleanUpPatternCategories(patternCategories: Category[]): void {
     const categories = patternCategories.filter(c => c.parent && c.parent.isCategory());
     for (let category of categories) {
       this.transitions = this.transitions.filter(transition => {
@@ -96,7 +127,7 @@ class TransitionImporter {
     }
   }
 
-  findDuplicate(newTransition) {
+  findDuplicate(newTransition: Transition): Transition {
     return this.transitions.find(transition => {
       if (newTransition.newActorWeight || newTransition.newTargetWeight) {
         return transition.actorID == newTransition.actorID &&
@@ -112,7 +143,7 @@ class TransitionImporter {
   }
 
   // Generic transitions are played along with another successful transition of the same actor
-  mergeGenericTransitions() {
+  mergeGenericTransitions(): void {
     const newTransitions: any[] = [];
     for (let transition of this.transitions) {
       if (transition.isGeneric()) {
@@ -124,7 +155,7 @@ class TransitionImporter {
     this.transitions = newTransitions;
   }
 
-  mergeGenericTransition(transition, newTransitions) {
+  mergeGenericTransition(transition: Transition, newTransitions: Transition[]): void {
     const otherTransitions = this.transitions.filter(t => t.matchesGenericTransition(transition));
 
     if (otherTransitions.length == 0) {
@@ -159,8 +190,8 @@ class TransitionImporter {
     }
   }
 
-  mergeAttackTransitions() {
-    const newTransitions: any[] = [];
+  mergeAttackTransitions(): void {
+    const newTransitions: Transition[] = [];
     for (let transition of this.transitions) {
       if (transition.targetID === "0") {
         if (!transition.lastUseActor && !transition.lastUseTarget) {
@@ -174,7 +205,7 @@ class TransitionImporter {
     this.transitions = newTransitions;
   }
 
-  mergeAttackTransition(transition) {
+  mergeAttackTransition(transition: Transition): void {
     const lastUseActorTransition = this.transitions.find(t => t != transition && t.actorID == transition.actorID && t.lastUseActor);
     const lastUseTargetTransition = this.transitions.find(t => t != transition && t.actorID == transition.actorID && t.lastUseTarget);
 
@@ -192,15 +223,15 @@ class TransitionImporter {
     transition.newExtraTargetID = (lastUseTargetTransition || transition).newTargetID;
     transition.newActorID = (lastUseActorTransition || lastUseTargetTransition).newActorID;
     transition.newTargetID = (lastUseActorTransition || lastUseTargetTransition).newTargetID;
-    transition.tool = transition.actorID >= 0 && transition.actorID == transition.newActorID;
-    transition.targetRemains = transition.targetID >= 0 && transition.targetID == transition.newTargetID;
+    transition.tool = parseInt(transition.actorID) >= 0 && transition.actorID === transition.newActorID;
+    transition.targetRemains = parseInt(transition.targetID) >= 0 && transition.targetID === transition.newTargetID;
   }
 
-  newDecayTransition(targetID, newTargetID, decaySeconds) {
+  newDecayTransition(targetID: string, newTargetID: string, decaySeconds: number): Transition {
     return new Transition(`0 ${newTargetID} ${decaySeconds}`, `-1_${targetID}.txt`);
   }
 
-  addToObjects(objects) {
+  addToObjects(objects: Record<string, GameObject>): void {
     for (let transition of this.transitions) {
       transition.addToObjects(objects);
     }
@@ -211,11 +242,11 @@ class TransitionImporter {
   // They have an "away" transition for the receiver, but no
   // "towards" transition. This looks for a transmitter which
   // has "*global1" in the name and adds this as an extra object
-  addGlobalTriggers(objects) {
-    const triggers: any[] = Object.values(objects).filter((o: any) => o.isGlobalTrigger());
+  addGlobalTriggers(objects: Record<string, GameObject>): void {
+    const triggers: GameObject[] = Object.values(objects).filter((o) => o.isGlobalTrigger());
     for (let trigger of triggers) {
       const transmitterName = trigger.transmitterName();
-      const transmitters: any[] = Object.values(objects).filter((o: any) => o.name.includes(transmitterName));
+      const transmitters: GameObject[] = Object.values(objects).filter((o) => o.name.includes(transmitterName));
       for (let transmitter of transmitters) {
         for (let transition of transmitter.transitionsToward) {
           transition.newExtraTargetID = trigger.id;

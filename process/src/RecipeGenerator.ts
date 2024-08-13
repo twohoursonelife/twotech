@@ -68,7 +68,7 @@ class RecipeGenerator {
     }
 
     if (transition.totalDecaySeconds() > 0 && transition.target.depth.value) {
-      node.decaySeconds += parseInt(transition.totalDecaySeconds());
+      node.decaySeconds += transition.totalDecaySeconds();
       const nextTransition = transition.target.transitionsToward[0];
       if (nextTransition.totalDecaySeconds() > 0) {
         return this.collapseDecayTransition(node, nextTransition, depth+1);
