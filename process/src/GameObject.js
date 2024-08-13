@@ -213,6 +213,10 @@ class GameObject {
     return Number.parseFloat(this.depth.difficulty).toPrecision(3);
   }
 
+  numSlots() {
+    return this.data.numSlots;
+  }
+
   isTool() {
     for (var transition of this.transitionsAway) {
       if (transition.actor == this && transition.target && transition.tool) return true;
