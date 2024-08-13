@@ -1,20 +1,32 @@
 "use strict";
 
+import { GameObject } from "./GameObject";
+
 const fs = require('fs');
 
 class Sprite {
-  index: any;
-  object: any;
-  id: any;
-  x: any;
-  y: any;
-  rotation: any;
-  tag: any;
+  index: number;
+  object: GameObject;
+  id: string;
+  x: number;
+  y: number;
+  rotation: number;
+  tag: string;
   multiplicativeBlending: boolean;
   centerAnchorXOffset: number;
   centerAnchorYOffset: number;
-  ageRange: any;
-  constructor(lines, index, object) {
+  ageRange: number[];
+  color: number[];
+  width: number;
+  height: number;
+  hFlip: number;
+  invisHolding: number;
+  invisWorn: number;
+  behindSlots:  number;
+  parent: number;
+  invisCont: number;
+
+  constructor(lines: string[], index: number, object: GameObject) {
     this.index = index;
     this.object = object;
     for (let line of lines) {
@@ -23,7 +35,7 @@ class Sprite {
   }
 
   // Dupication with GameObject.js
-  parseLine(line) {
+  parseLine(line: string): void {
     const assignments = line.split(/[,#]/);
     let attribute = null;
     let values: any[] = [];
@@ -34,47 +46,66 @@ class Sprite {
         attribute = parts.shift();
         values = [];
       }
-      values.push(this.parseValue(parts[0]));
+      values.push(parts[0]);
     }
     this.assignData(attribute, values);
   }
 
-  parseValue(value) {
-    if (isNaN(value))
-      return value;
-    if (value.includes("."))
-      return parseFloat(value);
-    return parseInt(value);
-  }
-
-  assignData(attribute, values) {
+  assignData(attribute: string, values: string[]) {
     if (!attribute) return;
+    // Strings first
     if (attribute === "spriteID") {
       this.id = values[0].toString();
+    }
+    // Floats next
+    else if (attribute === "rot") {
+      this.rotation = parseFloat(values[0]);
     } else if (attribute === "pos") {
-      this.x = values[0];
-      this.y = values[1];
-    } else if (attribute === "rot") {
-      this.rotation = values[0];
-    } else if (values.length == 1) {
+      this.x = parseFloat(values[0]);
+      this.y = parseFloat(values[1]);
+    } else if (attribute === "ageRange") {
+      this.ageRange = [values[0], values[1]].map((v) => parseFloat(v));
+    } else if (attribute === "color") {
+      this.color = [values[0], values[1], values[2]].map((v) => parseFloat(v));
+    }
+    // Ints
+    else if (attribute === "index") {
+      this.index = parseInt(values[0]);
+    } else if (attribute === "hFlip") {
+      this.hFlip = parseInt(values[0]);
+    } else if (attribute === "invisHolding") {
+      this.invisHolding = parseInt(values[0]);
+    } else if (attribute === "invisWorn") {
+      this.invisWorn = parseInt(values[0]);
+    } else if (attribute === "behindSlots") {
+      this.behindSlots = parseInt(values[0]);
+    } else if (attribute === "parent") {
+      this.parent = parseInt(values[0]);
+    } else if (attribute === "invisCont") {
+      this.invisCont = parseInt(values[0]);
+    }
+
+    else if (values.length == 1) {
+      console.log(`WARNING: Unhandled data {"${attribute}": ${JSON.stringify(values)}`);
       this[attribute] = values[0];
     } else {
+      console.log(`WARNING: Unhandled data {"${attribute}": ${JSON.stringify(values)}`);
       this[attribute] = values;
     }
   }
 
-  parseExtraData(data) {
+  parseExtraData(data: string[]) {
     this.tag = data[0];
     this.multiplicativeBlending = data[1] === '1';
     this.centerAnchorXOffset = parseFloat(data[2]);
     this.centerAnchorYOffset = parseFloat(data[3]);
   }
 
-  beyondAge(age) {
+  beyondAge(age: number): boolean {
     return (this.ageRange[0] > -1 || this.ageRange[1] > -1) && (this.ageRange[0] > age || this.ageRange[1] < age);
   }
 
-  additiveBlend() {
+  additiveBlend(): boolean {
     const additiveIndexes = this.object.data.spritesAdditiveBlend;
     return additiveIndexes && additiveIndexes.indexOf(this.index) > -1;
   }

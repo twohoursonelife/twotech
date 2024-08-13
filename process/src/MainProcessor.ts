@@ -43,7 +43,7 @@ class MainProcessor {
 
     if (version) {
       console.log(`Checking out v${version.id}...`);
-      console.timeEnd(`Checking out v${version.id} took`);
+      console.time(`Checking out v${version.id} took`);
       gameData.checkoutVersion(version);
       console.timeEnd(`Checking out v${version.id} took`);
     } else {
