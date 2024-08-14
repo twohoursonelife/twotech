@@ -46,7 +46,7 @@ class ChangeLogCommit {
     this.parseChanges();
   }
 
-  isRelevent(): boolean {
+  isRelevant(): boolean {
     if (this.message.includes("dataVersionNumber"))
       return false;
     if (this.message.startsWith("Merge branch"))
