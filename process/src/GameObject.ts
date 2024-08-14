@@ -479,7 +479,7 @@ class GameObject {
   }
 
   craftable() {
-    return this.depth.craftable > 0 || this.isNatural();
+    return this.depth.craftable || this.isNatural();
   }
 
   isCraftableContainer() {

@@ -131,7 +131,7 @@ class GameData {
   // }
 
   exportObjects(): void {
-    this.saveJSON("objects.json", this.objectsJsonData());
+    this.saveJSON("objects.json", this.objectsData());
     for (let id in this.objects) {
       this.saveJSON(`objects/${id}.json`, this.objects[id].jsonData());
     }
