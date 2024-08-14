@@ -177,7 +177,7 @@ class GameData {
         acc.craftable.push(o.craftable());
         return acc;
       },
-      { ids: [], names: [], difficulties: [], craftable: [] }
+      { ids: [], names: [], difficulties: [], numSlots: [], craftable: [] }
     );
     return {
       ids: objectsData.ids,
