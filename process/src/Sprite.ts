@@ -25,6 +25,9 @@ class Sprite {
   behindSlots:  number;
   parent: number;
   invisCont: number;
+  spritesDrawnBehind: number[];
+  spritesAdditiveBlend: number[];
+  ignoredCont: number[];
 
   constructor(lines: string[], index: number, object: GameObject) {
     this.index = index;
@@ -83,6 +86,12 @@ class Sprite {
       this.parent = parseInt(values[0]);
     } else if (attribute === "invisCont") {
       this.invisCont = parseInt(values[0]);
+    } else if (attribute === "spritesDrawnBehind") {
+      this.spritesDrawnBehind = values.map(v => parseInt(v));
+    } else if (attribute === "spritesAdditiveBlend") {
+      this.spritesAdditiveBlend = values.map(v => parseInt(v));
+    } else if (attribute === "ignoredCont") {
+      this.ignoredCont = values.map(v => parseInt(v));
     }
 
     else if (values.length == 1) {

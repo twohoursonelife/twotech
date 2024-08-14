@@ -125,7 +125,7 @@ class Transition {
   }
 
   targetsPlayer(): boolean {
-    return this.targetID === '0' || this.targetID === '-1' && this.actor.data.foodValue > 0;
+    return this.targetID === '0' || this.targetID === '-1' && (this.actor.data.foodValue[0] + this.actor.data.foodValue[1]) > 0;
   }
 
   totalDecaySeconds(): number {

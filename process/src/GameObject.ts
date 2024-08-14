@@ -3,23 +3,96 @@
 import { Sprite } from "./Sprite";
 import { Depth } from "./Depth";
 import { Recipe } from "./Recipe";
+import { Transition } from "./Transition";
+import { Category } from "./Category";
+import { Biome } from "./Biome";
+
+interface SlotPosData {
+  slotPos?: number[];
+  vert?: number;
+  parent?: number;
+}
+
+interface GameObjectData {
+  backFootIndex?: number[];
+  biomes?: number[]; // goes with MapChance
+  blocksWalking?: number;
+  bodyIndex?: number[];
+  clothing?: string;
+  clothingOffset?: number[];
+  containOffset?: number[];
+  containSize?: number;
+  containable?: number;
+  creationSoundForce?: number;
+  creationSoundInitialOnly?: number;
+  deadlyDistance?: number;
+  deathMarker?: number;
+  drawBehindPlayer?: number;
+  floor?: number;
+  floorHugging?: number;
+  foodValue?: number[];
+  frontFootIndex?: number[];
+  frontWall?: number;
+  headIndex?: number[];
+  heatValue?: number;
+  heldInHand?: number;
+  heldOffset?: number[];
+  homeMarker?: number;
+  id?: string;
+  leftBlockingRadius?: number;
+  mapChance?: number;
+  male?: number;
+  minPickupAge?: number;
+  name?: string;
+  noFlip?: number;
+  noSpawn?: number;
+  numSlots?: number;
+  numSprites?: number;
+  numUses?: number;
+  partialFloor?: number;
+  permanent?: number;
+  person?: number;
+  pixHeight?: number;
+  rValue?: number;
+  ridingAnimationIndex?: number;
+  rightBlockingRadius?: number;
+  sideAccess?: number;
+  slotPosData?: SlotPosData[];
+  slotSize?: number;
+  slotStyle?: number;
+  slotsLocked?: number;
+  slotsNoSwap?: number;
+  sounds?: string[];
+  speedMult?: number;
+  sprites?: Sprite[];
+  spritesAdditiveBlend?: number[];
+  timeStretch?: number;
+  useAppearIndex?: number[];
+  useChance?: number;
+  useDistance?: number;
+  useVanishIndex?: number[];
+  vertSlotRot?: number;
+  wallLayer?: number;
+}
 
 class GameObject {
+  containable: number;
   legacy: boolean;
   id: string;
-  data: any;
-  sprites: any[];
-  transitionsToward: any[];
-  transitionsAway: any[];
-  categories: any[];
-  biomes: any[];
-  depth: any;
-  name: any;
-  version: any;
-  category: any;
-  constructor(dataText) {
+  data: GameObjectData;
+  transitionsToward: Transition[];
+  transitionsAway: Transition[];
+  categories: Category[];
+  biomes: Biome[];
+  depth: Depth;
+  name: string;
+  version: string;
+  category: Category;
+  rotation: number;
+  index: number;
+
+  constructor(dataText: string) {
     this.data = {};
-    this.sprites = [];
     this.transitionsToward = [];
     this.transitionsAway = [];
     this.categories = [];
@@ -32,26 +105,86 @@ class GameObject {
     this.name = this.data.name;
   }
 
-  parseData(dataText) {
+  isSpriteData(data: string): boolean {
+    if (data.includes("spriteID")
+     || data.includes("pos")
+     || data.includes("rot")
+     || data.includes("hFlip")
+     || data.includes("color")
+     || data.includes("ageRange")
+     || data.includes("parent")
+     || data.includes("invisHolding")
+     || data.includes("invisCont")
+     || data.includes("spritesDrawnBehind")
+     || data.includes("spritesAdditiveBlend")
+     || data.includes("ignoredCont")
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  parseSlotPos(data: string): SlotPosData {
+    const result: SlotPosData = {};
+
+    // Split the string into key-value pairs
+    const pairs = data.split(',');
+    pairs[1] = pairs[0] + "," + pairs[1];
+    pairs.shift();
+  
+    for (const pair of pairs) {
+      const [key, value] = pair.split('=');
+
+      // Assign the parsed value to the appropriate key in the result object
+      switch (key) {
+        case 'slotPos':
+          result.slotPos = value.split(',').map(v => parseFloat(v));
+          break;
+        case 'vert':
+          result.vert = parseInt(value);
+          break;
+        case 'parent':
+          result.parent = parseInt(value);
+          break;
+      }
+    }
+
+    return result;
+  }
+
+  parseData(dataText: string): void {
     const lines = dataText.split('\n');
-    for (var i = 0; i < lines.length; i++) {
-      if (i == 1) {
+    for (let i = 0; i < lines.length; i++) {
+      if (i === 1) {
         this.parseName(lines[i]);
       } else if (lines[i].includes('spriteID')) {
-        this.parseSprite(lines.slice(i, i+8));
-        i += 7;
+        if (!this.data.sprites) {
+          this.data.sprites = [];
+        }
+        // Look forward, gathering all relevant sprite data and incrementing LCV as needed
+        // Stop when we have lines that don't match sprite data lines, or if we hit a new spriteID.
+        let spriteData = [lines[i++]];
+        while (this.isSpriteData(lines[i]) && !lines[i].includes('spriteID')) {
+          spriteData.push(lines[i++]);
+        }
+        // Back up one line, because of the final increment from the while loop.
+        i -= 1;
+        this.parseSprite(spriteData);
+      } else if (lines[i].includes('slotPos')) {
+         this.parseSlotPos(lines[i])
       } else {
         this.parseLine(lines[i]);
       }
     }
   }
 
-  parseName(name) {
+  parseName(name: string): void {
     if (name)
       this.data.name = name.replace(/#/g, ' - ');
   }
 
-  parseLine(line) {
+  parseLine(line: string): void {
     const assignments = line.split(/[,#]/);
     let attribute = null;
     let values: any[] = [];
@@ -62,38 +195,147 @@ class GameObject {
         attribute = parts.shift();
         values = [];
       }
-      values.push(this.parseValue(parts[0]));
+      values.push(parts[0]);
     }
     this.assignData(attribute, values);
   }
 
-  parseValue(value) {
-    if (isNaN(value))
-      return value;
-    if (value.includes("."))
-      return parseFloat(value);
-    return parseInt(value);
-  }
+  // parseValue(value) {
+  //   if (isNaN(value))
+  //     return value;
+  //   if (value.includes("."))
+  //     return parseFloat(value);
+  //   return parseInt(value);
+  // }
 
-  assignData(attribute, values) {
+  assignData(attribute: string, values: string[]): void {
     if (!attribute) return;
-    if (attribute == "numUses") {
-      this.data.numUses = values[0];
-      this.data.useChance = parseFloat(values[1] || 1.0);
-    } else if (attribute == "foodValue") {
-      if (values.length == 1) values.push(0);
-      this.data.foodValue = values; 
-    } else if (attribute == "biomes" || attribute == "useAppearIndex" || attribute == "spritesAdditiveBlend") {
-      this.data[attribute] = values;
+    // Parse attributes. Try to keep this alphabetized, for sanity's sake
+    if (attribute === "backFootIndex") {
+      this.data.backFootIndex = values.map(v => parseInt(v));
+    } else if (attribute === "biomes") {
+      this.data.biomes = values.map(v => parseInt(v));
+    } else if (attribute === "blocksWalking") {
+      this.data.blocksWalking = parseInt(values[0]);
+    } else if (attribute === "bodyIndex") {
+      this.data.bodyIndex = values.map(v => parseInt(v));
+    } else if (attribute === "clothing") {
+      this.data.clothing = values[0];
+    } else if (attribute === "clothingOffset") {
+      this.data.clothingOffset = [values[0], values[1]].map(v => parseInt(v));
+    } else if (attribute === "containOffset") {
+      this.data.containOffset = [values[0], values[1]].map(v => parseInt(v));
+    } else if (attribute === "containSize") {
+      this.data.containSize = parseFloat(values[0]);
+    } else if (attribute === "containable") {
+      this.data.containable = parseInt(values[0]);
+    } else if (attribute === "creationSoundForce") {
+      this.data.creationSoundForce = parseInt(values[0]);
+    } else if (attribute === "creationSoundInitialOnly") {
+      this.data.creationSoundInitialOnly = parseInt(values[0]);
+    } else if (attribute === "deadlyDistance") {
+      this.data.deadlyDistance = parseInt(values[0]);
+    } else if (attribute === "deathMarker") {
+      this.data.deathMarker = parseInt(values[0]);
+    } else if (attribute === "drawBehindPlayer") {
+      this.data.drawBehindPlayer = parseInt(values[0]);
+    } else if (attribute === "floor") {
+      this.data.floor = parseInt(values[0]);
+    } else if (attribute === "floorHugging") {
+      this.data.floorHugging = parseInt(values[0]);
+    } else if (attribute === "foodValue") {
+      if (values.length == 1) values.push('0');
+      this.data.foodValue = [values[0], values[1]].map(v => parseInt(v));
+    } else if (attribute === "frontFootIndex") {
+      this.data.frontFootIndex = values.map(v => parseInt(v));
+    } else if (attribute === "frontWall") {
+      this.data.frontWall = parseInt(values[0]);
+    } else if (attribute === "headIndex") {
+      this.data.headIndex = values.map(v => parseInt(v));
+    } else if (attribute === "heatValue") {
+      this.data.heatValue = parseInt(values[0]);
+    } else if (attribute === "heldInHand") {
+      this.data.heldInHand = parseInt(values[0]);
+    } else if (attribute === "heldOffset") {
+      this.data.heldOffset = [values[0], values[1]].map(v => parseFloat(v));
+    } else if (attribute === "homeMarker") {
+      this.data.homeMarker = parseInt(values[0]);
+    } else if (attribute === "id") {
+      this.data.id = values[0];
+    } else if (attribute === "leftBlockingRadius") {
+      this.data.leftBlockingRadius = parseInt(values[0]);
+    } else if (attribute === "mapChance") {
+      this.data.mapChance = parseFloat(values[0]);
+    } else if (attribute === "male") {
+      this.data.male = parseInt(values[0]);
+    } else if (attribute === "minPickupAge") {
+      this.data.minPickupAge = parseInt(values[0]);
+    } else if (attribute === "name") {
+      this.data.name = values[0];
+    } else if (attribute === "noFlip") {
+      this.data.noFlip = parseInt(values[0]);
+    } else if (attribute === "noSpawn") {
+      this.data.noSpawn = parseInt(values[0]);
+    } else if (attribute === "numSlots") {
+      this.data.numSlots = parseInt(values[0]);
+    } else if (attribute === "numSprites") {
+      this.data.numSprites = parseInt(values[0]);
+    } else if (attribute === "numUses") {
+      this.data.numUses = parseInt(values[0]);
+      this.data.useChance = parseFloat(values[1] || '1.0');
+    } else if (attribute === "partialFloor") {
+      this.data.partialFloor = parseInt(values[0]);
+    } else if (attribute === "permanent") {
+      this.data.permanent = parseInt(values[0]);
+    } else if (attribute === "person") {
+      this.data.person = parseInt(values[0]);
+    } else if (attribute === "pixHeight") {
+      this.data.pixHeight = parseInt(values[0]);
+    } else if (attribute === "rValue") {
+      this.data.rValue = parseFloat(values[0]);
+    } else if (attribute === "ridingAnimationIndex") {
+      this.data.ridingAnimationIndex = parseInt(values[0]);
+    } else if (attribute === "rightBlockingRadius") {
+      this.data.rightBlockingRadius = parseInt(values[0]);
+    } else if (attribute === "sideAccess") {
+      this.data.sideAccess = parseInt(values[0]);
+    } else if (attribute === "slotSize") {
+      this.data.slotSize = parseFloat(values[0]);
+    } else if (attribute === "slotStyle") {
+      this.data.slotStyle = parseInt(values[0]);
+    } else if (attribute === "slotsLocked") {
+      this.data.slotsLocked = parseInt(values[0]);
+    } else if (attribute === "slotsNoSwap") {
+      this.data.slotsNoSwap = parseInt(values[0]);
+    } else if (attribute === "sounds") {
+      this.data.sounds = values;
+    } else if (attribute === "speedMult") {
+      this.data.speedMult = parseFloat(values[0]);
+    } else if (attribute === "spritesAdditiveBlend") {
+      this.data.spritesAdditiveBlend = values.map(v => parseInt(v));
+    } else if (attribute === "timeStretch") {
+      this.data.timeStretch = parseInt(values[0]);
+    } else if (attribute === "useAppearIndex") {
+      this.data.useAppearIndex = values.map(v => parseInt(v));
+    } else if (attribute === "useDistance") {
+      this.data.useDistance = parseInt(values[0]);
+    } else if (attribute === "useVanishIndex") {
+      this.data.useVanishIndex = values.map(v => parseInt(v));
+    } else if (attribute === "vertSlotRot") {
+      this.data.vertSlotRot = parseFloat(values[0]);
+    } else if (attribute === "wallLayer") {
+      this.data.wallLayer = parseInt(values[0]);
     } else if (values.length == 1) {
-      this.data[attribute] = values[0];
+      console.log(`WARNING: Unhandled data {"${attribute}": ${JSON.stringify(values)}`);
+      this[attribute] = values[0];
     } else {
-      this.data[attribute] = values;
+      console.log(`WARNING: Unhandled data {"${attribute}": ${JSON.stringify(values)}`);
+      this[attribute] = values;
     }
   }
 
-  parseSprite(lines) {
-    this.sprites.push(new Sprite(lines, this.sprites.length, this));
+  parseSprite(lines: string[]): void {
+    this.data.sprites.push(new Sprite(lines, this.data.sprites.length, this));
   }
 
   jsonData() {
@@ -161,11 +403,11 @@ class GameObject {
     }
 
     if (this.canPickup()) {
-      result.minPickupAge = parseInt(this.data.minPickupAge) || 3;
+      result.minPickupAge = this.data.minPickupAge || 3;
     }
 
     if (this.data.speedMult != 1) {
-      result.speedMult = parseFloat(this.data.speedMult);
+      result.speedMult = this.data.speedMult;
     }
 
     if (this.data.blocksWalking == 1) {
@@ -212,7 +454,7 @@ class GameObject {
   }
 
   hasSprite() {
-    return this.sprites.length > 0;
+    return this.data.sprites.length > 0;
   }
 
   sortWeight() {
@@ -222,7 +464,7 @@ class GameObject {
   // See ObjectInspector.vue for difficulty levels
   difficulty() {
     if (!this.depth.craftable || !this.depth.difficulty) return;
-    return Number.parseFloat(this.depth.difficulty).toPrecision(3);
+    return this.depth.difficulty.toPrecision(3);
   }
 
   numSlots() {
@@ -253,7 +495,7 @@ class GameObject {
   }
 
   isClothing() {
-    return this.data.clothing != "n" && (this.data.rValue > 0 || this.data.foodValue == '0' && this.data.containable == '1');
+    return this.data.clothing != "n" && (this.data.rValue > 0 || this.data.foodValue[0] == 0 && this.data.containable == 1);
   }
 
   isWaterSource() {
@@ -292,7 +534,7 @@ class GameObject {
 
   sounds() {
     if (!this.data.sounds) return [];
-    const sounds = this.data.sounds.map(sound => sound.split(":")[0]);
+    const sounds = this.data.sounds.map(sound => parseInt(sound.split(":")[0]));
     return sounds.filter((sound,index) => sound > 0 && sounds.indexOf(sound) === index);
   }
 

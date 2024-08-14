@@ -47,10 +47,10 @@ class SpriteProcessor {
 
   visibleSprites(object: GameObject): Sprite[] {
     // Draw sprites as if they were 20 years old
-    let sprites = object.sprites.filter(sprite => !sprite.beyondAge(20));
+    let sprites = object.data.sprites.filter(sprite => !sprite.beyondAge(20));
 
     // Remove multiple use sprites
-    if (object.data.useVanishIndex == -1 && object.data.numUses > 1) {
+    if (object.data.useVanishIndex.includes(-1) && object.data.numUses > 1) {
       sprites = sprites.filter((_s,i) => !object.data.useAppearIndex.includes(i));
     }
 
@@ -63,21 +63,21 @@ class SpriteProcessor {
   }
 
   lastSprites(object: GameObject): Sprite[] {
-    if (object.data.useVanishIndex != -1 && Array.isArray(object.data.useVanishIndex)) {
+    if (!object.data.useVanishIndex.includes(-1) && Array.isArray(object.data.useVanishIndex)) {
       const hideIndexes = object.data.useVanishIndex.slice(0);
       hideIndexes.shift(); // still draw the first sprite
       return this.visibleSprites(object).filter((s,i) => !hideIndexes.includes(i));
     }
-    if (object.data.useAppearIndex != -1 && Array.isArray(object.data.useAppearIndex)) {
+    if (!object.data.useAppearIndex.includes(-1) && Array.isArray(object.data.useAppearIndex)) {
       const indexes = object.data.useAppearIndex.filter((_, i) => i+1 < object.data.numUses);
-      const useSprites = object.sprites.filter((s,i) => indexes.includes(i));
+      const useSprites = object.data.sprites.filter((s,i) => indexes.includes(i));
       const sprites = this.visibleSprites(object);
       // Insert the use sprites after the last index
       // add 2 to work around goose pond rendering
       sprites.splice(indexes.pop() - useSprites.length + 2, 0, ...useSprites);
       return sprites;
     }
-    return object.sprites;
+    return object.data.sprites;
   }
 
   renderSprites(sprites: Sprite[], name: string): void {
