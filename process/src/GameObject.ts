@@ -446,7 +446,7 @@ class GameObject {
       return null;
     if (depth == 0)
       return []; // Empty array means tree goes deeper
-    var nodes: any[] = [];
+    var nodes: TechTreeNode[] = [];
     if (transition.decay)
       nodes.push({decay: transition.decay});
     if (transition.actor)
@@ -459,7 +459,7 @@ class GameObject {
   techTreeNode(depth: number): TechTreeNode {
     return {
       id: this.id,
-      nodes: this.techTreeNodes(depth - 1)
+      nodes: this.techTreeNodes(depth - 1),
     };
   }
 
@@ -612,8 +612,9 @@ interface ExportedGameObjectData {
 }
 
 interface TechTreeNode {
-  id: string;
-  nodes: TechTreeNode[];
+  id?: string;
+  nodes?: TechTreeNode[];
+  decay?: string;
 }
 
 export { GameObject }

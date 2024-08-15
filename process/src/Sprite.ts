@@ -41,7 +41,7 @@ class Sprite {
   parseLine(line: string): void {
     const assignments = line.split(/[,#]/);
     let attribute = null;
-    let values: any[] = [];
+    let values: string[] = [];
     for (let assignment of assignments) {
       const parts = assignment.split(/[_=]/);
       if (parts.length > 1) {

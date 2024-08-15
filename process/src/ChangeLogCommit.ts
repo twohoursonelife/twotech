@@ -3,7 +3,7 @@
 import { ChangeLogVersion } from "./ChangeLogVersion";
 import { GameObject } from "./GameObject";
 import { ChangeLogEntry, Git } from "./Git";
-import { Transition } from "./Transition";
+import { ExportedTransitionData, Transition } from "./Transition";
 
 interface ObjectChange {
   id: string,
@@ -234,8 +234,6 @@ class ChangeLogCommit {
   }
 }
 
-type TODO = Record<string, any>;
-
 interface ExportedChangeLogCommitData {
   sha: string;
   message: string;
@@ -243,8 +241,8 @@ interface ExportedChangeLogCommitData {
   addedObjectIDs?: string[];
   removedObjectIDs?: string[];
   // TODO: Change this to ExportedTransitionData when it gets defined.
-  addedTransitions?: TODO;
-  removedTransitions?: TODO;
+  addedTransitions?: ExportedTransitionData[];
+  removedTransitions?: ExportedTransitionData[];
   objectChanges?: ObjectChange[];
   legacyObjects?: LegacyObjectData[];
 }

@@ -102,7 +102,7 @@ class ObjectBadges {
     const badgesData: ExportedObjectBadgesData = {};
     for (let badge of this.badges) {
       const objects = badge.filter(allObjects);
-      const data: any = {ids: objects.map(o => o.id)};
+      const data: ExportedObjectBadgeData = {ids: objects.map(o => o.id)};
       if (badge.value)
         data.values = objects.map(o => badge.value(o));
       badgesData[badge.key] = data;

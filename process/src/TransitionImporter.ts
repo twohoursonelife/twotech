@@ -144,7 +144,7 @@ class TransitionImporter {
 
   // Generic transitions are played along with another successful transition of the same actor
   mergeGenericTransitions(): void {
-    const newTransitions: any[] = [];
+    const newTransitions: Transition[] = [];
     for (let transition of this.transitions) {
       if (transition.isGeneric()) {
         this.mergeGenericTransition(transition, newTransitions);

@@ -60,7 +60,7 @@ class Recipe {
 }
 
 interface ExportedRecipeJson {
-  steps?: Record<string, ExportedRecipeNodeJson>[][];
+  steps?: ExportedRecipeNodeJson[][];
   ingredients?: string[];
   uncraftables?: string[];
 }

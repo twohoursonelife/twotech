@@ -11,8 +11,8 @@ import { ChangeLog } from "./ChangeLog";
 import { Biome } from "./Biome";
 import { DepthCalculator } from "./DepthCalculator";
 import { SpriteProcessor } from "./SpriteProcessor";
-import { ObjectFilters } from "./ObjectFilters";
-import { ObjectBadges } from "./ObjectBadges";
+import { ExportedObjectFilterData, ObjectFilters } from "./ObjectFilters";
+import { ExportedObjectBadgesData, ObjectBadges } from "./ObjectBadges";
 import { SitemapGenerator } from "./SitemapGenerator";
 import { readFileNormalized } from "./readFileNormalized";
 import { ChangeLogVersion } from './ChangeLogVersion';
@@ -132,7 +132,7 @@ class GameData {
 
   exportObjects(): void {
     this.populateFilters();
-    this.saveJSON("objects.json", this.objectsData());
+    this.saveJSON("objects.json", this.objectsJsonData());
     for (let id in this.objects) {
       this.saveJSON(`objects/${id}.json`, this.objects[id].jsonData());
     }
@@ -176,14 +176,15 @@ class GameData {
     if (!fs.existsSync(path)) fs.mkdirSync(path);
   }
 
-  saveJSON(path: string, data: Record<string, any>): void {
+  // Allow any so we can save any object/array/value we want
+  saveJSON(path: string, data: any): void {
     const minPath = this.staticDir + "/" + path;
     const prettyPath = this.staticDir + "/pretty-json/" + path;
     fs.writeFileSync(minPath, JSON.stringify(data));
     fs.writeFileSync(prettyPath, JSON.stringify(data, null, 2));
   }
 
-  objectsData(): Record<string, any> {
+  objectsJsonData(): ExportedObjectsData {
     var objects = _.sortBy(this.objects, o => o.sortWeight()).filter(o => o.isVisible());
     // Traverse objects array only once, pushing to each array the part it needs.
     let objectsData = objects.reduce(
@@ -282,6 +283,21 @@ class GameData {
       return version;
     }
   }
+}
+
+interface ExportedObjectsData {
+  ids: string[],
+  names: string[],
+  difficulties: string[],
+  numSlots: number[],
+  craftable: boolean[],
+  filters: ExportedObjectFilterData,
+  badges: ExportedObjectBadgesData,
+  date: Date,
+  versions: string[],
+  biomeIds: string[],
+  biomeNames: string[],
+  foodEatBonus: number,
 }
 
 export { GameData }

@@ -381,8 +381,8 @@ class RecipeNode {
     return data;
   }
 
-  static steps(nodes: RecipeNode[], expand = false): Record<string, ExportedRecipeNodeJson>[][] {
-    const steps: Record<string, any>[][] = [];
+  static steps(nodes: RecipeNode[], expand = false): ExportedRecipeNodeJson[][] {
+    const steps: ExportedRecipeNodeJson[][] = [];
     nodes = nodes.sort((a,b) => b.subNodeDepth() - a.subNodeDepth()).
                   sort((a,b) => (b.collapsedParent ? 0 : 1) - (a.collapsedParent ? 0 : 1))
     for (let node of nodes) {
@@ -395,7 +395,7 @@ class RecipeNode {
     return steps.filter(s => s).reverse();
   }
 
-  subSteps(): Record<string, ExportedRecipeNodeJson>[][] {
+  subSteps(): ExportedRecipeNodeJson[][] {
     return RecipeNode.steps([this, ...this.collapsedSubNodes()], true);
   }
 
@@ -410,7 +410,7 @@ interface ExportedRecipeNodeJson {
   uses?: string;
   mainBranch?: boolean;
   depth?: number;
-  subSteps?: Record<string, any>[][];
+  subSteps?: ExportedRecipeNodeJson[][];
   actorID?: string;
   actorUses?: string;
   targetID?: string;
