@@ -77,4 +77,4 @@ interface ExportedBiomeData {
   objects: ExportedBiomeObjectData[];
 }
 
-export { Biome, ExportedBiomeData }
+export { Biome, ExportedBiomeData, ExportedBiomeObjectData }

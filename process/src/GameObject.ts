@@ -2,10 +2,10 @@
 
 import { Sprite } from "./Sprite";
 import { Depth } from "./Depth";
-import { Recipe } from "./Recipe";
-import { Transition } from "./Transition";
+import { ExportedRecipeJson, Recipe } from "./Recipe";
+import { ExportedTransitionData, Transition } from "./Transition";
 import { Category } from "./Category";
-import { Biome } from "./Biome";
+import { Biome, ExportedBiomeObjectData } from "./Biome";
 
 interface SlotPosData {
   slotPos?: number[];
@@ -338,11 +338,144 @@ class GameObject {
     this.data.sprites.push(new Sprite(lines, this.data.sprites.length, this));
   }
 
-  jsonData() {
+  canPickup(): boolean {
+    return this.data.permanent == 0 && this.data.floor == 0;
+  }
+
+  canMove(): boolean {
+    return this.transitionsAway.some(t => t.move > 0);
+  }
+
+  hasSprite(): boolean {
+    return this.data.sprites.length > 0;
+  }
+
+  sortWeight(): number {
+    return -this.id;
+  }
+
+  // See ObjectInspector.vue for difficulty levels
+  difficulty(): string {
+    if (!this.depth.craftable || !this.depth.difficulty) return;
+    return this.depth.difficulty.toPrecision(3);
+  }
+
+  numSlots(): number {
+    return this.data.numSlots;
+  }
+
+  isTool(): boolean {
+    for (var transition of this.transitionsAway) {
+      if (transition.actor == this && transition.target && transition.tool) return true;
+    }
+    return false;
+  }
+
+  craftable(): boolean {
+    return this.depth.craftable || this.isNatural();
+  }
+
+  isCraftableContainer(): boolean {
+    return this.data.numSlots > 0 && this.data.slotSize >= 1 && !this.isGrave();
+  }
+
+  isGrave(): boolean {
+    return this.name.includes("Grave");
+  }
+
+  isNatural(): boolean {
+    return this.data.mapChance > 0;
+  }
+
+  isClothing(): boolean {
+    return this.data.clothing != "n" && (this.data.rValue > 0 || this.data.foodValue[0] == 0 && this.data.containable == 1);
+  }
+
+  isWaterSource(): boolean {
+    for (var transition of this.transitionsAway) {
+      if (transition.actorID == '209' // Empty water pouch
+        && transition.newActorID == '210' // Full water pouch
+        && transition.target == this
+        && (transition.tool || transition.targetRemains)) return true;
+    }
+    return false;
+  }
+
+  isVisible(): boolean {
+    return !this.isCategory();
+  }
+
+  isCategory(): boolean {
+    return this.category && !this.category.pattern || this.name && this.name.startsWith("@");
+  }
+
+  isDeadly(): boolean {
+    return this.data.deadlyDistance && !this.hasSickTransition();
+  }
+
+  isGlobalTrigger(): boolean {
+    return this.name.startsWith(">");
+  }
+
+  transmitterName() {
+    return this.name.replace(">", "*");
+  }
+
+  canFilter(): boolean {
+    return this.depth.craftable && !this.isGlobalTrigger();
+  }
+
+  sounds(): number[] {
+    if (!this.data.sounds) return [];
+    const sounds = this.data.sounds.map(sound => parseInt(sound.split(":")[0]));
+    return sounds.filter((sound,index) => sound > 0 && sounds.indexOf(sound) === index);
+  }
+
+  hasSickTransition(): boolean {
+    for (let transition of this.transitionsAway.concat(this.transitionsToward)) {
+      if (transition.targetID == "0" && transition.newTarget && transition.newTarget.name.includes(" sick")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  techTreeNodes(depth: number): TechTreeNode[] {
+    const transition = this.transitionsToward[0];
+    if (this.isNatural() || !transition)
+      return null;
+    if (depth == 0)
+      return []; // Empty array means tree goes deeper
+    var nodes: any[] = [];
+    if (transition.decay)
+      nodes.push({decay: transition.decay});
+    if (transition.actor)
+      nodes.push(transition.actor.techTreeNode(depth));
+    if (transition.target)
+      nodes.push(transition.target.techTreeNode(depth));
+    return nodes;
+  }
+
+  techTreeNode(depth: number): TechTreeNode {
+    return {
+      id: this.id,
+      nodes: this.techTreeNodes(depth - 1)
+    };
+  }
+
+  insulation(): number {
+    const parts = {'h': 0.25, 't': 0.35, 'b': 0.2, 's': 0.1, 'p': 0.1};
+    if (parts[this.data.clothing])
+      return parts[this.data.clothing]*this.data.rValue;
+    else
+      return 0;
+  }
+
+  jsonData(): ExportedGameObjectData {
     const transitionsToward = this.transitionsToward;
     const transitionsAway = this.transitionsAway.filter(t => !t.decay);
     const transitionsTimed = this.transitionsAway.filter(t => t.decay);
-    const result: any = {
+    const result: ExportedGameObjectData = {
       id: this.id,
       name: this.name,
       transitionsToward: transitionsToward.map(t => t.jsonData()),
@@ -390,7 +523,7 @@ class GameObject {
 
     if (this.data.mapChance > 0) {
       result.mapChance = this.data.mapChance;
-      result.biomes = this.biomesData();
+      result.biomes = this.biomesJsonData();
     }
 
     if (this.data.numSlots > 0) {
@@ -439,144 +572,48 @@ class GameObject {
     return result;
   }
 
-  biomesData() {
+  biomesJsonData(): ExportedBiomeObjectData[] {
     return this.biomes.map(biome => {
       return {id: biome.id, spawnChance: biome.spawnChance(this)};
     });
   }
+}
 
-  canPickup() {
-    return this.data.permanent == 0 && this.data.floor == 0;
-  }
+interface ExportedGameObjectData {
+  id?: string,
+  name?: string,
+  transitionsToward?: ExportedTransitionData[],
+  transitionsAway?: ExportedTransitionData[],
+  transitionsTimed?: ExportedTransitionData[],
+  version?: string;
+  foodValue?: number[];
+  heatValue?: number;
+  numUses?: number;
+  useChance?: number;
+  craftable?: boolean;
+  depth?: number;
+  clothing?: string;
+  insulation?: number;
+  deadlyDistance?: number;
+  useDistance?: number;
+  mapChance?: number;
+  biomes?: ExportedBiomeObjectData[];
+  numSlots?: number;
+  slotSize?: number;
+  size?: number;
+  minPickupAge?: number;
+  speedMult?: number;
+  blocksWalking?: boolean;
+  sounds?: number[];
+  moveType?: number;
+  moveDistance?: number;
+  techTree?: TechTreeNode[];
+  recipe?: ExportedRecipeJson;
+}
 
-  canMove() {
-    return this.transitionsAway.find(t => t.move > 0);
-  }
-
-  hasSprite() {
-    return this.data.sprites.length > 0;
-  }
-
-  sortWeight() {
-    return -this.id;
-  }
-
-  // See ObjectInspector.vue for difficulty levels
-  difficulty() {
-    if (!this.depth.craftable || !this.depth.difficulty) return;
-    return this.depth.difficulty.toPrecision(3);
-  }
-
-  numSlots() {
-    return this.data.numSlots;
-  }
-
-  isTool() {
-    for (var transition of this.transitionsAway) {
-      if (transition.actor == this && transition.target && transition.tool) return true;
-    }
-    return false;
-  }
-
-  craftable() {
-    return this.depth.craftable || this.isNatural();
-  }
-
-  isCraftableContainer() {
-    return this.data.numSlots > 0 && this.data.slotSize >= 1 && !this.isGrave();
-  }
-
-  isGrave() {
-    return this.name.includes("Grave");
-  }
-
-  isNatural() {
-    return this.data.mapChance > 0;
-  }
-
-  isClothing() {
-    return this.data.clothing != "n" && (this.data.rValue > 0 || this.data.foodValue[0] == 0 && this.data.containable == 1);
-  }
-
-  isWaterSource() {
-    for (var transition of this.transitionsAway) {
-      if (transition.actorID == '209' // Empty water pouch
-        && transition.newActorID == '210' // Full water pouch
-        && transition.target == this
-        && (transition.tool || transition.targetRemains)) return true;
-    }
-    return false;
-  }
-
-  isVisible() {
-    return !this.isCategory();
-  }
-
-  isCategory() {
-    return this.category && !this.category.pattern || this.name && this.name.startsWith("@");
-  }
-
-  isDeadly() {
-    return this.data.deadlyDistance && !this.hasSickTransition();
-  }
-
-  isGlobalTrigger() {
-    return this.name.startsWith(">");
-  }
-
-  transmitterName() {
-    return this.name.replace(">", "*");
-  }
-
-  canFilter() {
-    return this.depth.craftable && !this.isGlobalTrigger();
-  }
-
-  sounds() {
-    if (!this.data.sounds) return [];
-    const sounds = this.data.sounds.map(sound => parseInt(sound.split(":")[0]));
-    return sounds.filter((sound,index) => sound > 0 && sounds.indexOf(sound) === index);
-  }
-
-  hasSickTransition() {
-    for (let transition of this.transitionsAway.concat(this.transitionsToward)) {
-      if (transition.targetID == "0" && transition.newTarget && transition.newTarget.name.includes(" sick")) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  techTreeNodes(depth) {
-    const transition = this.transitionsToward[0];
-    if (this.isNatural() || !transition)
-      return null;
-    if (depth == 0)
-      return []; // Empty array means tree goes deeper
-    var nodes: any[] = [];
-    if (transition.decay)
-      nodes.push({decay: transition.decay});
-    if (transition.actor)
-      nodes.push(transition.actor.techTreeNode(depth));
-    if (transition.target)
-      nodes.push(transition.target.techTreeNode(depth));
-    return nodes;
-  }
-
-  techTreeNode(depth) {
-    return {
-      id: this.id,
-      nodes: this.techTreeNodes(depth - 1)
-    };
-  }
-
-  insulation(): number {
-    const parts = {'h': 0.25, 't': 0.35, 'b': 0.2, 's': 0.1, 'p': 0.1};
-    if (parts[this.data.clothing])
-      return parts[this.data.clothing]*this.data.rValue;
-    else
-      return 0;
-  }
+interface TechTreeNode {
+  id: string;
+  nodes: TechTreeNode[];
 }
 
 export { GameObject }

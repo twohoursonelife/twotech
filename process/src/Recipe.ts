@@ -65,4 +65,4 @@ interface ExportedRecipeJson {
   uncraftables?: string[];
 }
 
-export { Recipe }
+export { Recipe, ExportedRecipeJson }
