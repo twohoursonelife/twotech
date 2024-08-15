@@ -51,11 +51,12 @@ class Biome {
     return object.data.mapChance / total;
   }
 
-  jsonData(): Record<string, any> {
-    const result: any = {
+  jsonData(): ExportedBiomeJson {
+    const result: ExportedBiomeJson = {
       id: this.id,
       groundHeat: this.groundHeat,
       name: this.name(),
+      objects: [],
     };
     result.objects = this.objects.map(object => {
       return {id: object.id, spawnChance: this.spawnChance(object)};
@@ -64,4 +65,16 @@ class Biome {
   }
 }
 
-export { Biome }
+interface ExportedBiomeObjectJson {
+  id: string;
+  spawnChance: number;
+}
+
+interface ExportedBiomeJson {
+  id: string;
+  groundHeat: number;
+  name: string;
+  objects: ExportedBiomeObjectJson[];
+}
+
+export { Biome, ExportedBiomeJson }
