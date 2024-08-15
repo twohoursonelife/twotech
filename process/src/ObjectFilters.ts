@@ -181,7 +181,7 @@ const Natural: ObjectFilter = {
   }
 }
 
-function setup_filters_recursively(filter, gameObjects, path) {
+function setup_filters_recursively(filter: ObjectFilter, gameObjects: GameObject[], path: string): ObjectFilter {
   filter.path = path + `/${filter.key}`;
   if (filter.filter_single) {
     filter.ids = gameObjects.filter(o => filter.filter_single(o)).map(o => o.id);
@@ -198,6 +198,7 @@ interface ObjectFilter {
   path: string,
   subfilters: Record<string, ObjectFilter>,
   filter_single: (object: GameObject) => boolean,
+  ids?: string[],
 }
 
 class ObjectFilters {
@@ -213,16 +214,20 @@ class ObjectFilters {
     };
   }
 
-  jsonData(objects: GameObject[]): Record<string, ObjectFilter> {
+  setupFilters(objects: GameObject[]): void {
     objects = objects.filter(o => o.canFilter());
-    const modifiedFilters = {};
     Object.entries(this.filters).forEach(([f_key, f_val]) => {
       // For each top level filter, we need to go into each of f.subfilters (recursively), and populate their ids with their filters
       let modifiedFilter = setup_filters_recursively(f_val, objects, "/filter");
-      modifiedFilters[f_key] = modifiedFilter;
+      this.filters[f_key] = modifiedFilter;
     });
-    return modifiedFilters;
+  }
+
+  jsonData(): ExportedObjectFilterData {
+    return this.filters;
   }
 }
 
-export { ObjectFilters, ObjectFilter }
+type ExportedObjectFilterData = Record<string, ObjectFilter>;
+
+export { ObjectFilters, ObjectFilter, ExportedObjectFilterData }

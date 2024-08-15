@@ -17,19 +17,6 @@ class RecipeNode {
   cachedSubNodes: RecipeNode[];
   mainBranch: boolean;
   cachedLargestChild: RecipeNode;
-  static steps(nodes: RecipeNode[], expand = false): Record<string, any>[][] {
-    const steps: Record<string, any>[][] = [];
-    nodes = nodes.sort((a,b) => b.subNodeDepth() - a.subNodeDepth()).
-                  sort((a,b) => (b.collapsedParent ? 0 : 1) - (a.collapsedParent ? 0 : 1))
-    for (let node of nodes) {
-      if (node.showInStep(expand)) {
-        if (!steps[node.depth()])
-          steps[node.depth()] = []
-        steps[node.depth()].push(node.jsonData(expand));
-      }
-    }
-    return steps.filter(s => s).reverse();
-  }
 
   constructor(object: GameObject) {
     this.object = object;
@@ -344,8 +331,8 @@ class RecipeNode {
     return this.parents.find(p => p.collapsedParent != parent);
   }
 
-  jsonData(expand: boolean = false): Record<string, any> {
-    const data: Record<string, any> = {id: this.object.id};
+  jsonData(expand: boolean = false): ExportedRecipeNodeJson {
+    const data: ExportedRecipeNodeJson = {id: this.object.id};
     if (this.count() > 1) {
       data.count = this.count();
       data.uses = "x" + data.count;
@@ -394,7 +381,21 @@ class RecipeNode {
     return data;
   }
 
-  subSteps(): Record<string, any>[][] {
+  static steps(nodes: RecipeNode[], expand = false): Record<string, ExportedRecipeNodeJson>[][] {
+    const steps: Record<string, any>[][] = [];
+    nodes = nodes.sort((a,b) => b.subNodeDepth() - a.subNodeDepth()).
+                  sort((a,b) => (b.collapsedParent ? 0 : 1) - (a.collapsedParent ? 0 : 1))
+    for (let node of nodes) {
+      if (node.showInStep(expand)) {
+        if (!steps[node.depth()])
+          steps[node.depth()] = []
+        steps[node.depth()].push(node.jsonData(expand));
+      }
+    }
+    return steps.filter(s => s).reverse();
+  }
+
+  subSteps(): Record<string, ExportedRecipeNodeJson>[][] {
     return RecipeNode.steps([this, ...this.collapsedSubNodes()], true);
   }
 
@@ -403,4 +404,22 @@ class RecipeNode {
   }
 }
 
-export { RecipeNode }
+interface ExportedRecipeNodeJson {
+  id?: string;
+  count?: number;
+  uses?: string;
+  mainBranch?: boolean;
+  depth?: number;
+  subSteps?: Record<string, any>[][];
+  actorID?: string;
+  actorUses?: string;
+  targetID?: string;
+  targetUses?: string;
+  weight?: number;
+  decay?: string;
+  hand?: boolean;
+  targetPlayer?: boolean;
+  
+}
+
+export { RecipeNode, ExportedRecipeNodeJson }

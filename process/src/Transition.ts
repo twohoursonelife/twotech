@@ -167,8 +167,8 @@ class Transition {
     return total;
   }
 
-  jsonData(): Record<string, any> {
-    const result: Record<string, any> = {}
+  jsonData(): ExportedTransitionData {
+    const result: ExportedTransitionData = {}
 
     if (this.actor) {
       result.actorID = this.actor.id;
@@ -246,4 +246,24 @@ class Transition {
   }
 }
 
-export { Transition }
+interface ExportedTransitionData {
+  actorID?: string;
+  actorUses?: string;
+  newActorWeight?: number;
+  newActorUses?: string;
+  targetID?: string;
+  targetUses?: string;
+  newTargetWeight?: number;
+  newTargetUses?: string;
+  newActorID?: string;
+  newTargetID?: string;
+  newExtraTargetID?: string;
+  targetPlayer?: boolean;
+  targetRemains?: boolean;
+  hand?: boolean;
+  tool?: boolean;
+  decay?: string;
+  move?: number;
+}
+
+export { Transition, ExportedTransitionData }

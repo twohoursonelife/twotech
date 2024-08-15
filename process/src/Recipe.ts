@@ -2,7 +2,7 @@
 
 import { GameObject } from "./GameObject";
 import { RecipeGenerator } from "./RecipeGenerator";
-import { RecipeNode } from "./RecipeNode";
+import { ExportedRecipeNodeJson, RecipeNode } from "./RecipeNode";
 
 class Recipe {
   object: GameObject;
@@ -24,8 +24,8 @@ class Recipe {
     return this.nodes.length > 1;
   }
 
-  jsonData(): Record<string, any> {
-    const data: any = {steps: RecipeNode.steps(this.nodes)};
+  jsonData(): ExportedRecipeJson {
+    const data: ExportedRecipeJson = {steps: RecipeNode.steps(this.nodes)};
 
     // For now let's just merge tools and ingredients together when displaying
     // We may eventually split them up for the user
@@ -57,6 +57,12 @@ class Recipe {
     }
     return ingredients;
   }
+}
+
+interface ExportedRecipeJson {
+  steps?: Record<string, ExportedRecipeNodeJson>[][];
+  ingredients?: string[];
+  uncraftables?: string[];
 }
 
 export { Recipe }

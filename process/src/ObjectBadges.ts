@@ -21,7 +21,7 @@ const Food: ObjectBadge = {
   value(object) {
     if (object.data.numUses > 1)
       return `${object.data.foodValue[0] + object.data.foodValue[1] + parseInt(process.env.ONETECH_FOOD_BONUS || '0')} x ${object.data.numUses}`;
-    return object.data.foodValue[0] + object.data.foodValue[1] + parseInt(process.env.ONETECH_FOOD_BONUS || '0');
+    return (object.data.foodValue[0] + object.data.foodValue[1] + parseInt(process.env.ONETECH_FOOD_BONUS || '0')).toString();
   }
 }
 
@@ -34,7 +34,7 @@ const Tool: ObjectBadge = {
     if (object.data.numUses > 1) {
       if (object.data.useChance && object.data.useChance != 1)
         return `~${(object.data.numUses-1) * (1 / object.data.useChance) + 1}`;
-      return object.data.numUses;
+      return object.data.numUses.toString();
     }
   }
 }
@@ -45,7 +45,7 @@ const Container: ObjectBadge = {
     return objects.filter(o => o.isCraftableContainer());
   },
   value(object) {
-    return object.data.numSlots;
+    return object.data.numSlots.toString();
   }
 }
 
@@ -55,7 +55,7 @@ const HeatSource: ObjectBadge = {
     return objects.filter(o => o.data.heatValue > 0);
   },
   value(object) {
-    return object.data.heatValue;
+    return object.data.heatValue.toString();
   }
 }
 
@@ -65,7 +65,7 @@ const WaterSource: ObjectBadge = {
     return objects.filter(o => o.isWaterSource());
   },
   value(object) {
-    return object.data.numUses > 1 ? object.data.numUses : "";
+    return object.data.numUses > 1 ? object.data.numUses.toString() : "";
   }
 }
 
@@ -79,7 +79,7 @@ const Natural: ObjectBadge = {
 interface ObjectBadge {
   key: string;
   filter: (objects: GameObject[]) => GameObject[];
-  value?: (object: GameObject) => any;
+  value?: (object: GameObject) => string;
 }
 
 class ObjectBadges {
@@ -97,9 +97,9 @@ class ObjectBadges {
     ];
   }
 
-  jsonData(allObjects: GameObject[]): Record<string, any> {
+  jsonData(allObjects: GameObject[]): ExportedObjectBadgesData {
     allObjects = allObjects.filter(o => o.canFilter());
-    const badgesData = {};
+    const badgesData: ExportedObjectBadgesData = {};
     for (let badge of this.badges) {
       const objects = badge.filter(allObjects);
       const data: any = {ids: objects.map(o => o.id)};
@@ -111,4 +111,11 @@ class ObjectBadges {
   }
 }
 
-export {ObjectBadges}
+interface ExportedObjectBadgeData {
+  ids: string[];
+  values?: string[];
+}
+
+type ExportedObjectBadgesData = {[key: string]: ExportedObjectBadgeData};
+
+export {ObjectBadges, ExportedObjectBadgesData}

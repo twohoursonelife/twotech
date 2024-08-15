@@ -48,8 +48,8 @@ class ChangeLogVersion {
     }
   }
 
-  jsonData(): ExportedChangeLogVersionJson {
-    const data: ExportedChangeLogVersionJson = {id: this.id};
+  jsonData(): ExportedChangeLogVersionData {
+    const data: ExportedChangeLogVersionData = {id: this.id};
     const commits = this.fetchCommits();
     if (this.isReleased() && commits[0]) {
       data.date = commits[0].date;
@@ -77,10 +77,10 @@ class ChangeLogVersion {
   }
 }
 
-interface ExportedChangeLogVersionJson {
+interface ExportedChangeLogVersionData {
   id: string;
   date?: Date;
   commits?: ExportedChangeLogCommitData[];
 }
 
-export { ChangeLogVersion, ExportedChangeLogVersionJson }
+export { ChangeLogVersion, ExportedChangeLogVersionData }

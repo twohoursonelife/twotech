@@ -108,7 +108,7 @@ class GameData {
         Biome.applyGroundHeat(this.biomes, filename, content);
       }
     });
-    const objects = Object.values(this.objects).filter((o: any) => o.isNatural());
+    const objects = Object.values(this.objects).filter(o => o.isNatural());
     for (let biome of this.biomes) {
       biome.addObjects(objects);
     }
@@ -131,10 +131,15 @@ class GameData {
   // }
 
   exportObjects(): void {
+    this.populateFilters();
     this.saveJSON("objects.json", this.objectsData());
     for (let id in this.objects) {
       this.saveJSON(`objects/${id}.json`, this.objects[id].jsonData());
     }
+  }
+
+  populateFilters(): void {
+    this.filters.setupFilters(Object.values(this.objects));
   }
 
   exportVersions(): void {
@@ -182,7 +187,7 @@ class GameData {
     var objects = _.sortBy(this.objects, o => o.sortWeight()).filter(o => o.isVisible());
     // Traverse objects array only once, pushing to each array the part it needs.
     let objectsData = objects.reduce(
-      (acc, o) => {
+      (acc: { ids: string[]; names: string[]; difficulties: string[]; numSlots: number[]; craftable: boolean[]; }, o: GameObject) => {
         acc.ids.push(o.id);
         acc.names.push(o.name);
         acc.difficulties.push(o.difficulty());
@@ -198,7 +203,7 @@ class GameData {
       difficulties: objectsData.difficulties,
       numSlots: objectsData.numSlots,
       craftable: objectsData.craftable,
-      filters: this.filters.jsonData(objects),
+      filters: this.filters.jsonData(),
       badges: this.badges.jsonData(objects),
       date: new Date(),
       versions: this.changeLog.validVersions().map(v => v.id),
