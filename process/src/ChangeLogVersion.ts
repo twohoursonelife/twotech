@@ -1,6 +1,6 @@
 "use strict";
 
-import { ChangeLogCommit } from "./ChangeLogCommit";
+import { ChangeLogCommit, ExportedChangeLogCommitData } from "./ChangeLogCommit";
 import { GameObject } from "./GameObject";
 import { Git } from "./Git";
 
@@ -48,8 +48,8 @@ class ChangeLogVersion {
     }
   }
 
-  jsonData(): Record<string, any> {
-    const data: any = {id: this.id};
+  jsonData(): ExportedChangeLogVersionJson {
+    const data: ExportedChangeLogVersionJson = {id: this.id};
     const commits = this.fetchCommits();
     if (this.isReleased() && commits[0]) {
       data.date = commits[0].date;
@@ -77,4 +77,10 @@ class ChangeLogVersion {
   }
 }
 
-export { ChangeLogVersion }
+interface ExportedChangeLogVersionJson {
+  id: string;
+  date?: Date;
+  commits?: ExportedChangeLogCommitData[];
+}
+
+export { ChangeLogVersion, ExportedChangeLogVersionJson }

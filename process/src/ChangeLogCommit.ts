@@ -198,8 +198,8 @@ class ChangeLogCommit {
     return this.git.fileContent(sha, path);
   }
 
-  jsonData(): Record<string, any> {
-    const data: any = {sha: this.sha, message: this.message, date: this.date};
+  jsonData(): ExportedChangeLogCommitData {
+    const data: ExportedChangeLogCommitData = {sha: this.sha, message: this.message, date: this.date};
 
     if (this.addedObjects.length)
       data.addedObjectIDs = this.addedObjects.map(o => o.id);
@@ -234,4 +234,19 @@ class ChangeLogCommit {
   }
 }
 
-export { ChangeLogCommit }
+type TODO = Record<string, any>;
+
+interface ExportedChangeLogCommitData {
+  sha: string;
+  message: string;
+  date: Date;
+  addedObjectIDs?: string[];
+  removedObjectIDs?: string[];
+  // TODO: Change this to ExportedTransitionData when it gets defined.
+  addedTransitions?: TODO;
+  removedTransitions?: TODO;
+  objectChanges?: ObjectChange[];
+  legacyObjects?: LegacyObjectData[];
+}
+
+export { ChangeLogCommit, ExportedChangeLogCommitData }
