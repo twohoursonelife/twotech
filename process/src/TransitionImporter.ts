@@ -92,7 +92,11 @@ class TransitionImporter {
   splitPatternCategories(transition: Transition, patternCategories: Category[]): void {
     // if (transition.actorID == 2900 && transition.targetID == 733)
     //   debugger;
-    const attrs = ["actorID", "targetID", "newActorID", "newTargetID"];
+    type StringKeys<T> = {
+      [K in keyof T]: T[K] extends string ? K : never;
+    }[keyof T];
+
+    const attrs: StringKeys<Transition>[] = ["actorID", "targetID", "newActorID", "newTargetID"];
     let categories = attrs.map(attr => {
       return patternCategories.find(c => c.parentID == transition[attr]);
     });
@@ -102,7 +106,7 @@ class TransitionImporter {
     const count = categories.find(c => c).objectIDs.length;
     categories = categories.map(c => c && c.objectIDs.length == count && c);
     for (let i=0; i < count; i++) {
-      const newTransition = transition.clone();
+      const newTransition: Transition = transition.clone();
       for (let j=0; j < attrs.length; j++) {
         if (categories[j]) {
           newTransition[attrs[j]] = categories[j].objectIDs[i];

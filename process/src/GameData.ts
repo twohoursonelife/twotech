@@ -185,7 +185,7 @@ class GameData {
   }
 
   objectsJsonData(): ExportedObjectsData {
-    var objects = _.sortBy(this.objects, o => o.sortWeight()).filter(o => o.isVisible());
+    var objects = _.sortBy(this.objects, (o: GameObject) => o.sortWeight()).filter((o: GameObject) => o.isVisible());
     // Traverse objects array only once, pushing to each array the part it needs.
     let objectsData = objects.reduce(
       (acc: { ids: string[]; names: string[]; difficulties: string[]; numSlots: number[]; craftable: boolean[]; }, o: GameObject) => {

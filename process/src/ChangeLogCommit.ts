@@ -145,8 +145,15 @@ class ChangeLogCommit {
   }
 
   setTransitionObject(transition: Transition, key: string, mode: string): void {
-    const id = transition[key + "ID"];
-    if (id > 1) {
+    let id: string;
+    switch (key) {
+      case "actor": id = transition.actorID; break;
+      case "target": id = transition.targetID; break;
+      case "newActor": id = transition.newActorID; break;
+      case "newTarget": id = transition.newTargetID; break;
+      default: console.log("Unknown transition object key: " + key); return;
+    }
+    if (parseInt(id) > 1) {
       transition[key] = this.lookupObject(`objects/${id}.txt`, mode)
     }
   }
@@ -178,14 +185,17 @@ class ChangeLogCommit {
 
   objectChange(before: GameObject, after: GameObject): ObjectChange {
     const ignore = this.ignoredAttributes();
-    const attributes = {};
+    const attributes: Record<string, any> = {};
     for (let attribute in after.data) {
       if (ignore.includes(attribute))
         continue;
-      if (typeof before.data[attribute] == 'undefined')
+      if (!Object.getOwnPropertyNames(before).includes(attribute))
         continue;
-      if (String(before.data[attribute]) != String(after.data[attribute])) {
-        attributes[attribute] = {from: before.data[attribute], to: after.data[attribute]};
+      if (String(before.data[attribute as keyof typeof before.data]) !== String(after.data[attribute as keyof typeof after.data])) {
+        attributes[attribute] = {
+          from: before.data[attribute as keyof typeof before.data],
+          to: after.data[attribute as keyof typeof after.data]
+        };
       }
     }
     if (Object.keys(attributes).length == 0)

@@ -325,12 +325,8 @@ class GameObject {
       this.data.vertSlotRot = parseFloat(values[0]);
     } else if (attribute === "wallLayer") {
       this.data.wallLayer = parseInt(values[0]);
-    } else if (values.length == 1) {
-      console.log(`WARNING: Unhandled data {"${attribute}": ${JSON.stringify(values)}`);
-      this[attribute] = values[0];
     } else {
       console.log(`WARNING: Unhandled data {"${attribute}": ${JSON.stringify(values)}`);
-      this[attribute] = values;
     }
   }
 
@@ -465,8 +461,8 @@ class GameObject {
 
   insulation(): number {
     const parts = {'h': 0.25, 't': 0.35, 'b': 0.2, 's': 0.1, 'p': 0.1};
-    if (parts[this.data.clothing])
-      return parts[this.data.clothing]*this.data.rValue;
+    if (Object.getOwnPropertyNames(parts).includes(this.data.clothing) && parts[this.data.clothing as keyof typeof parts])
+      return parts[this.data.clothing as keyof typeof parts]*this.data.rValue;
     else
       return 0;
   }

@@ -10,7 +10,7 @@ class Depth {
   value: number;
   difficulty: number;
   craftable: boolean;
-  constructor({ value = null, difficulty = 0, craftable }) {
+  constructor({ value = null, difficulty = 0, craftable }: {value?: number, difficulty?: number, craftable: boolean}) {
     this.calculated = !isNaN(value);
     this.value = value || 0;
     this.difficulty = difficulty;

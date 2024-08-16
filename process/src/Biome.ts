@@ -29,7 +29,7 @@ class Biome {
 
   name(): string {
     const names = ["Grasslands", "Swamps", "Yellow Prairies", "Badlands", "Tundra", "Desert", "Jungle", "Deep Water", "Flower Fields", "Shallow Water"];
-    return names[this.id];
+    return names[parseInt(this.id)];
   }
 
   addObjects(objects: GameObject[]) {

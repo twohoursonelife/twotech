@@ -10,7 +10,7 @@ class Category {
   probSet: boolean;
   parent: GameObject;
   objects: GameObject[];
-  constructor(dataText) {
+  constructor(dataText: string) {
     this.objectIDs = [];
     this.objectWeights = [];
     const lines = dataText.split('\n');

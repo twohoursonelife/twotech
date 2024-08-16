@@ -92,14 +92,8 @@ class Sprite {
       this.spritesAdditiveBlend = values.map(v => parseInt(v));
     } else if (attribute === "ignoredCont") {
       this.ignoredCont = values.map(v => parseInt(v));
-    }
-
-    else if (values.length == 1) {
-      console.log(`WARNING: Unhandled data {"${attribute}": ${JSON.stringify(values)}`);
-      this[attribute] = values[0];
     } else {
       console.log(`WARNING: Unhandled data {"${attribute}": ${JSON.stringify(values)}`);
-      this[attribute] = values;
     }
   }
 
