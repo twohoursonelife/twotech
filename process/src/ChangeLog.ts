@@ -21,8 +21,8 @@ class ChangeLog {
       const version = new ChangeLogVersion(
         this.git,
         this.objects,
-        id,
-        null
+        id.toString(),
+        previousVersion
       );
       previousVersion = version;
       return version;

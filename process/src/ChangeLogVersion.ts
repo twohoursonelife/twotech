@@ -10,7 +10,7 @@ class ChangeLogVersion {
   id: string;
   previous: ChangeLogVersion;
   commits: ChangeLogCommit[];
-  constructor(git, objects, id, previous) {
+  constructor(git: Git, objects: Record<string, GameObject>, id: string, previous: ChangeLogVersion) {
     this.git = git;
     this.objects = objects;
     this.id = id;
