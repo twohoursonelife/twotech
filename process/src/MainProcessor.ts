@@ -1,13 +1,19 @@
 "use strict";
 
+import { spawnSync } from 'child_process';
+import * as fs from 'fs';
+
 import { ChangeLogVersion } from "./ChangeLogVersion";
-import { GameData } from "./GameData";
+import { GameData, GitVersionData } from "./GameData";
+import { Git } from "./Git";
 
 class MainProcessor {
   processDir: string;
   doDownload: boolean;
   doSprites: boolean;
   doSounds: boolean;
+  doEdge: boolean;
+  doLastRelease: boolean;
   constructor(processDir: string) {
     this.processDir = processDir;
   }
@@ -27,7 +33,7 @@ class MainProcessor {
     return process.env.ONETECH_PROCESS_GIT_URL || "https://github.com/twohoursonelife/OneLifeData7.git";
   }
 
-  process(version: ChangeLogVersion): ChangeLogVersion {
+  process(version: GitVersionData | null): GitVersionData {
     // double-equals used to cover undefined case too.
     const gameData = new GameData(this.processDir, this.dataDir(), this.staticDir(version == null));
     console.time("Processing took");
@@ -136,7 +142,21 @@ class MainProcessor {
       return null;
     }
 
-    return gameData.unprocessedVersion(this.staticDir(false), !this.doDownload);
+    let lastReleasedVersion = gameData.unprocessedVersion(this.staticDir(false), !this.doDownload);
+    return {id: lastReleasedVersion.id, tag: lastReleasedVersion.tag()};
+  }
+
+  lastReleasedVersion(): GitVersionData {
+    let git = new Git(this.dataDir());
+    if (fs.existsSync(this.dataDir())) {
+      spawnSync("git", ["checkout", "master"], {cwd: this.dataDir()});
+      spawnSync("git", ["pull"], {cwd: this.dataDir()});
+    } else {
+      spawnSync("git", ["clone", this.gitUrl(), this.dataDir()]);
+    }
+    let tag = git.run("describe", "--tags", "--match", "2HOL_v[0-9]*").trim();
+    let id = tag.slice(6);
+    return {id, tag};
   }
 }
 
