@@ -14,7 +14,7 @@ source_node() {
 
 cd /usr/local/twotech
 if ./updater/changes_upstream.sh; then
-    echo "$(timestamp) Upstream changes made to twotech, pulling and updating..."
+    echo "$(timestamp) Upstream changes made to tech site, pulling and updating..."
     git pull
     source_node $(pwd)
     npm install
@@ -25,7 +25,7 @@ if ./updater/changes_upstream.sh; then
     npm install
     cd ..
 else
-    echo "$(timestamp) No upstream changes to twotech, moving on..."
+    echo "$(timestamp) No upstream changes to tech site, moving on..."
 fi
 
 if ./updater/changes_upstream.sh "./process/OneLifeData7"; then
