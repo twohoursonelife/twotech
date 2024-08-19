@@ -54,10 +54,9 @@ class GameData {
     }
   }
 
-  checkoutVersion(version: GitVersionData): void {
+  checkoutVersion(version: ChangeLogVersion): void {
     this.releasedOnly = true;
-    console.log("Checking out version.tag() = " + version.tag);
-    spawnSync("git", ["checkout", version.tag], {cwd: this.dataDir});
+    spawnSync("git", ["checkout", version.tag()], {cwd: this.dataDir});
   }
 
   checkoutMaster(): void {
@@ -286,11 +285,6 @@ class GameData {
   }
 }
 
-interface GitVersionData {
-  id: string;
-  tag: string;
-}
-
 interface ExportedObjectsData {
   ids: string[],
   names: string[],
@@ -306,4 +300,4 @@ interface ExportedObjectsData {
   foodEatBonus: number,
 }
 
-export { GameData, GitVersionData }
+export { GameData }
