@@ -1,8 +1,10 @@
 "use strict";
 
+import { GameObject } from "./GameObject";
+
 // Clothing and its sub-filters
 
-const Clothing_Head = {
+const Clothing_Head: ObjectFilter = {
   key: "head",
   name: "Head",
   path: "",
@@ -12,7 +14,7 @@ const Clothing_Head = {
   }
 }
 
-const Clothing_Top = {
+const Clothing_Top: ObjectFilter = {
   key: "top",
   name: "Top",
   path: "",
@@ -22,7 +24,7 @@ const Clothing_Top = {
   }
 }
 
-const Clothing_Pack = {
+const Clothing_Pack: ObjectFilter = {
   key: "pack",
   name: "Pack",
   path: "",
@@ -32,7 +34,7 @@ const Clothing_Pack = {
   }
 }
 
-const Clothing_Bottom = {
+const Clothing_Bottom: ObjectFilter = {
   key: "bottom",
   name: "Bottom",
   path: "",
@@ -42,7 +44,7 @@ const Clothing_Bottom = {
   }
 }
 
-const Clothing_Shoe = {
+const Clothing_Shoe: ObjectFilter = {
   key: "shoe",
   name: "Shoe",
   path: "",
@@ -52,7 +54,7 @@ const Clothing_Shoe = {
   }
 }
 
-const Clothing = {
+const Clothing: ObjectFilter = {
   key: "clothing",
   name: "Clothing",
   path: "",
@@ -69,7 +71,7 @@ const Clothing = {
 }
 
 // Food
-const Food = {
+const Food: ObjectFilter = {
   key: "food",
   name: "Food",
   path: "",
@@ -80,7 +82,7 @@ const Food = {
 }
 
 // Tools
-const Tools = {
+const Tools: ObjectFilter = {
   key: "tools",
   name: "Tools",
   path: "",
@@ -91,7 +93,7 @@ const Tools = {
 }
 
 // Containers and its subfilters
-const SmallContainers = {
+const SmallContainers: ObjectFilter = {
   key: "small",
   name: "Small",
   path: "",
@@ -101,7 +103,7 @@ const SmallContainers = {
   }
 }
 
-const LargeContainers = {
+const LargeContainers: ObjectFilter = {
   key: "large",
   name: "Large",
   path: "",
@@ -111,7 +113,7 @@ const LargeContainers = {
   }
 }
 
-const ExtraLargeContainers = {
+const ExtraLargeContainers: ObjectFilter = {
   key: "extra_large",
   name: "Extra Large",
   path: "",
@@ -121,7 +123,7 @@ const ExtraLargeContainers = {
   }
 }
 
-const OtherContainers = {
+const OtherContainers: ObjectFilter = {
   key: "other",
   name: "Other Sizes",
   path: "",
@@ -131,7 +133,7 @@ const OtherContainers = {
   }
 }
 
-const Containers = {
+const Containers: ObjectFilter = {
   key: "containers",
   name: "Containers",
   path: "",
@@ -147,7 +149,7 @@ const Containers = {
 }
 
 // HeatSources
-const HeatSources = {
+const HeatSources: ObjectFilter = {
   key: "heat",
   name: "Heat Sources",
   path: "",
@@ -158,7 +160,7 @@ const HeatSources = {
 }
 
 // WaterSources
-const WaterSources = {
+const WaterSources: ObjectFilter = {
   key: "water",
   name: "Water Sources",
   path: "",
@@ -169,7 +171,7 @@ const WaterSources = {
 }
 
 // Natural
-const Natural = {
+const Natural: ObjectFilter = {
   key: "natural",
   name: "Natural",
   path: "",
@@ -179,7 +181,7 @@ const Natural = {
   }
 }
 
-function setup_filters_recursively(filter, gameObjects, path) {
+function setup_filters_recursively(filter: ObjectFilter, gameObjects: GameObject[], path: string): ObjectFilter {
   filter.path = path + `/${filter.key}`;
   if (filter.filter_single) {
     filter.ids = gameObjects.filter(o => filter.filter_single(o)).map(o => o.id);
@@ -190,25 +192,42 @@ function setup_filters_recursively(filter, gameObjects, path) {
   return filter;
 }
 
-const ObjectFilters = {
-  filters: {
-    "clothing": Clothing,
-    "food": Food,
-    "tools": Tools,
-    "containers": Containers,
-    "heat": HeatSources,
-    "natural": Natural,
-  },
-  jsonData(objects) {
+interface ObjectFilter {
+  key: string,
+  name: string,
+  path: string,
+  subfilters: Record<string, ObjectFilter>,
+  filter_single: (object: GameObject) => boolean,
+  ids?: string[],
+}
+
+class ObjectFilters {
+  filters: Record<string, ObjectFilter>;
+  constructor() {
+    this.filters = {
+      "clothing": Clothing,
+      "food": Food,
+      "tools": Tools,
+      "containers": Containers,
+      "heat": HeatSources,
+      "natural": Natural,
+    };
+  }
+
+  setupFilters(objects: GameObject[]): void {
     objects = objects.filter(o => o.canFilter());
-    const modifiedFilters = {};
     Object.entries(this.filters).forEach(([f_key, f_val]) => {
       // For each top level filter, we need to go into each of f.subfilters (recursively), and populate their ids with their filters
       let modifiedFilter = setup_filters_recursively(f_val, objects, "/filter");
-      modifiedFilters[f_key] = modifiedFilter;
+      this.filters[f_key] = modifiedFilter;
     });
-    return modifiedFilters;
+  }
+
+  jsonData(): ExportedObjectFilterData {
+    return this.filters;
   }
 }
 
-module.exports = ObjectFilters;
+type ExportedObjectFilterData = Record<string, ObjectFilter>;
+
+export { ObjectFilters, ObjectFilter, ExportedObjectFilterData }

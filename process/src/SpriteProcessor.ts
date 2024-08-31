@@ -1,23 +1,42 @@
 "use strict";
 
-const Canvas = require('canvas');
+import * as Canvas from 'canvas';
+import { GameObject } from './GameObject';
+import { Sprite } from './Sprite';
 const fs = require('fs');
 
+interface SpriteBounds {
+  minX: number,
+  maxX: number,
+  minY: number,
+  maxY: number,
+}
+
+interface SpritePoint {
+  x: number,
+  y: number,
+}
+
 class SpriteProcessor {
-  constructor(spritesDir, pngDir) {
+  spritesDir: string;
+  pngDir: string;
+  canvas: Canvas.Canvas;
+  context: Canvas.CanvasRenderingContext2D;
+
+  constructor(spritesDir: string, pngDir: string) {
     this.spritesDir = spritesDir;
     this.pngDir = pngDir;
-    this.canvas = new Canvas.createCanvas(512, 1024);
+    this.canvas = Canvas.createCanvas(512, 1024);
     this.context = this.canvas.getContext('2d');
   }
 
-  process(objects) {
-    for (var id in objects) {
+  process(objects: Record<string, GameObject>): void {
+    for (let id in objects) {
       this.processObject(objects[id]);
     }
   }
 
-  processObject(object) {
+  processObject(object: GameObject): void {
     this.renderSprites(this.visibleSprites(object), object.id);
 
     // Draw only the last sprite
@@ -26,12 +45,12 @@ class SpriteProcessor {
     }
   }
 
-  visibleSprites(object) {
+  visibleSprites(object: GameObject): Sprite[] {
     // Draw sprites as if they were 20 years old
-    let sprites = object.sprites.filter(sprite => !sprite.beyondAge(20));
+    let sprites = object.data.sprites.filter(sprite => !sprite.beyondAge(20));
 
     // Remove multiple use sprites
-    if (object.data.useVanishIndex == -1 && object.data.numUses > 1) {
+    if (object.data.useVanishIndex.includes(-1) && object.data.numUses > 1) {
       sprites = sprites.filter((_s,i) => !object.data.useAppearIndex.includes(i));
     }
 
@@ -43,26 +62,26 @@ class SpriteProcessor {
     return sprites;
   }
 
-  lastSprites(object) {
-    if (object.data.useVanishIndex != -1 && Array.isArray(object.data.useVanishIndex)) {
+  lastSprites(object: GameObject): Sprite[] {
+    if (!object.data.useVanishIndex.includes(-1) && Array.isArray(object.data.useVanishIndex)) {
       const hideIndexes = object.data.useVanishIndex.slice(0);
       hideIndexes.shift(); // still draw the first sprite
       return this.visibleSprites(object).filter((s,i) => !hideIndexes.includes(i));
     }
-    if (object.data.useAppearIndex != -1 && Array.isArray(object.data.useAppearIndex)) {
+    if (!object.data.useAppearIndex.includes(-1) && Array.isArray(object.data.useAppearIndex)) {
       const indexes = object.data.useAppearIndex.filter((_, i) => i+1 < object.data.numUses);
-      const useSprites = object.sprites.filter((s,i) => indexes.includes(i));
+      const useSprites = object.data.sprites.filter((s,i) => indexes.includes(i));
       const sprites = this.visibleSprites(object);
       // Insert the use sprites after the last index
       // add 2 to work around goose pond rendering
       sprites.splice(indexes.pop() - useSprites.length + 2, 0, ...useSprites);
       return sprites;
     }
-    return object.sprites;
+    return object.data.sprites;
   }
 
-  renderSprites(sprites, name) {
-    this.context.setTransform(1, 0, 0, 1, 0, 0);
+  renderSprites(sprites: Sprite[], name: string): void {
+    this.context.setTransform(new Canvas.DOMMatrix([1, 0, 0, 1, 0, 0]));
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     for (var sprite of sprites) {
@@ -74,10 +93,10 @@ class SpriteProcessor {
     const width = bounds.maxX - bounds.minX;
     const height = bounds.maxY - bounds.minY;
 
-    const newCanvas = new Canvas.createCanvas(width, height);
+    const newCanvas = Canvas.createCanvas(width, height);
     const newContext = newCanvas.getContext('2d');
 
-    newContext.setTransform(1, 0, 0, 1, 0, 0);
+    newContext.setTransform(new Canvas.DOMMatrix([1, 0, 0, 1, 0, 0]));
 
     newContext.drawImage(
       this.canvas,
@@ -94,13 +113,13 @@ class SpriteProcessor {
     fs.writeFileSync(`${this.pngDir}/obj_${name}.png`, newCanvas.toBuffer());
   }
 
-  parseSpriteFile(sprite) {
+  parseSpriteFile(sprite: Sprite): void {
     const path = `${this.spritesDir}/${sprite.id}.txt`
     const data = fs.readFileSync(path, "utf8").split(' ');
     sprite.parseExtraData(data);
   }
 
-  drawSprite(sprite) {
+  drawSprite(sprite: Sprite): void {
     if (sprite.additiveBlend()) {
       this.drawSpriteWithOperation(sprite, "screen");
     } else {
@@ -108,15 +127,15 @@ class SpriteProcessor {
     }
   }
 
-  drawSpriteWithOperation(sprite, operation) {
-    const newCanvas = new Canvas.createCanvas(this.canvas.width, this.canvas.height);
+  drawSpriteWithOperation(sprite: Sprite, operation: Canvas.GlobalCompositeOperation): void {
+    const newCanvas = Canvas.createCanvas(this.canvas.width, this.canvas.height);
     const newContext = newCanvas.getContext('2d');
 
     this.drawSpriteDirectly(sprite, newContext);
     this.overlayCanvas(newCanvas, this.context, operation);
   }
 
-  drawSpriteDirectly(sprite, context) {
+  drawSpriteDirectly(sprite: Sprite, context: Canvas.CanvasRenderingContext2D): void {
     this.drawSpriteImage(sprite, context);
 
     if (sprite.color.find(c => c < 1.0) !== undefined) {
@@ -124,17 +143,17 @@ class SpriteProcessor {
     }
   }
 
-  drawSpriteImage(sprite, context) {
-    var img = new Canvas.Image;
+  drawSpriteImage(sprite: Sprite, context: Canvas.CanvasRenderingContext2D): void {
+    const img = new Canvas.Image;
     img.src = fs.readFileSync(`${this.pngDir}/sprite_${sprite.id}.png`);
     sprite.width = img.width;
     sprite.height = img.height;
 
-    const angleRads = parseFloat(sprite.rotation) * Math.PI * 2;
-    const x = parseFloat(sprite.x);
-    const y = parseFloat(sprite.y);
+    const angleRads = sprite.rotation * Math.PI * 2;
+    const x = sprite.x;
+    const y = sprite.y;
 
-    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.setTransform(new Canvas.DOMMatrix([1, 0, 0, 1, 0, 0]));
     context.translate(x + context.canvas.width / 2, -y + context.canvas.height / 2);
     context.rotate(angleRads);
     if (sprite.hFlip == 1) context.scale(-1, 1);
@@ -148,27 +167,27 @@ class SpriteProcessor {
     );
   }
 
-  overlayColor(sprite, targetContext) {
-    const newCanvas = new Canvas.createCanvas(this.canvas.width, this.canvas.height);
+  overlayColor(sprite: Sprite, targetContext: Canvas.CanvasRenderingContext2D): void {
+    const newCanvas = Canvas.createCanvas(this.canvas.width, this.canvas.height);
     const newContext = newCanvas.getContext('2d');
 
-    this.drawSpriteImage(sprite, newContext, false)
+    this.drawSpriteImage(sprite, newContext)
 
     const color = sprite.color.map(c => Math.round(c*255)).join(", ");
 
     newContext.globalCompositeOperation = "source-in";
-    newContext.setTransform(1, 0, 0, 1, 0, 0);
+    newContext.setTransform(new Canvas.DOMMatrix([1, 0, 0, 1, 0, 0]));
     newContext.fillStyle = "rgb(" + color + ")";
     newContext.fillRect(0, 0, newCanvas.width, newCanvas.height);
 
     this.overlayCanvas(newCanvas, targetContext, "multiply")
   }
 
-  overlayCanvas(sourceCanvas, targetContext, operation) {
+  overlayCanvas(sourceCanvas: Canvas.Canvas, targetContext: Canvas.CanvasRenderingContext2D, operation: Canvas.GlobalCompositeOperation): void {
     const previousOperation = targetContext.globalCompositeOperation;
     targetContext.globalCompositeOperation = operation;
 
-    targetContext.setTransform(1, 0, 0, 1, 0, 0);
+    targetContext.setTransform(new Canvas.DOMMatrix([1, 0, 0, 1, 0, 0]));
     targetContext.drawImage(
       sourceCanvas,
       0,
@@ -180,14 +199,14 @@ class SpriteProcessor {
     targetContext.globalCompositeOperation = previousOperation;
   }
 
-  spritesBounds(sprites) {
-    var maxX = 0;
-    var maxY = 0;
-    var minX = 0;
-    var minY = 0;
+  spritesBounds(sprites: Sprite[]): SpriteBounds {
+    let maxX = 0;
+    let maxY = 0;
+    let minX = 0;
+    let minY = 0;
 
-    for (var sprite of sprites) {
-      for (var point of this.spritePoints(sprite)) {
+    for (const sprite of sprites) {
+      for (const point of this.spritePoints(sprite)) {
         if (point.x > maxX) maxX = point.x + 2;
         if (point.x < minX) minX = point.x - 2;
         if (point.y > maxY) maxY = point.y + 2;
@@ -212,7 +231,7 @@ class SpriteProcessor {
     return {minX, minY, maxX, maxY};
   }
 
-  leftTrim(image, threshold) {
+  leftTrim(image: Canvas.ImageData, threshold: number): number {
     for (let col=0; col < image.width; col++) {
       let opacity = 0;
       for (let row=0; row < image.height; row++) {
@@ -224,7 +243,7 @@ class SpriteProcessor {
     // throw "Unable to find opaque pixels in image";
   }
 
-  rightTrim(image, threshold) {
+  rightTrim(image: Canvas.ImageData, threshold: number): number {
     for (let col=image.width-1; col >= 0; col--) {
       let opacity = 0;
       for (let row=image.height-1; row >= 0; row--) {
@@ -236,7 +255,7 @@ class SpriteProcessor {
     // throw "Unable to find opaque pixels in image";
   }
 
-  topTrim(image, threshold) {
+  topTrim(image: Canvas.ImageData, threshold: number): number {
     for (let row=0; row < image.height; row++) {
       let opacity = 0;
       for (let col=0; col < image.width; col++) {
@@ -248,7 +267,7 @@ class SpriteProcessor {
     // throw "Unable to find opaque pixels in image";
   }
 
-  bottomTrim(image, threshold) {
+  bottomTrim(image: Canvas.ImageData, threshold: number): number {
     for (let row=image.height-1; row >= 0; row--) {
       let opacity = 0;
       for (let col=image.width-1; col >= 0; col--) {
@@ -260,26 +279,26 @@ class SpriteProcessor {
     // throw "Unable to find opaque pixels in image";
   }
 
-  spritePoints(sprite) {
+  spritePoints(sprite: Sprite): SpritePoint[] {
     if (!sprite.width || !sprite.height) {
       return [];
     }
 
-    const x = parseFloat(sprite.x);
-    const y = parseFloat(sprite.y);
+    const x = sprite.x;
+    const y = sprite.y;
 
-    var points = [
+    const points: SpritePoint[] = [
       {x: -sprite.width/2, y: -sprite.height/2},
       {x: sprite.width/2, y: -sprite.height/2},
       {x: sprite.width/2, y: sprite.height/2},
       {x: -sprite.width/2, y: sprite.height/2},
     ]
 
-    const angleRads = parseFloat(sprite.rotation) * Math.PI * 2;
+    const angleRads = sprite.rotation * Math.PI * 2;
     const cosA = Math.cos(angleRads);
     const sinA = Math.sin(angleRads);
 
-    for (var point of points) {
+    for (const point of points) {
       point.x -= sprite.centerAnchorXOffset;
       point.y += sprite.centerAnchorYOffset;
       point.x = point.x * cosA - point.y * sinA;
@@ -291,4 +310,4 @@ class SpriteProcessor {
   }
 }
 
-module.exports = SpriteProcessor;
+export { SpriteProcessor }

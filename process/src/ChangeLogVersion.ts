@@ -1,23 +1,30 @@
 "use strict";
 
-const ChangeLogCommit = require('./ChangeLogCommit');
+import { ChangeLogCommit, ExportedChangeLogCommitData } from "./ChangeLogCommit";
+import { GameObject } from "./GameObject";
+import { Git } from "./Git";
 
 class ChangeLogVersion {
-  constructor(git, objects, id, previous) {
+  git: Git;
+  objects: Record<string, GameObject>;
+  id: string;
+  previous: ChangeLogVersion;
+  commits: ChangeLogCommit[];
+  constructor(git: Git, objects: Record<string, GameObject>, id: string, previous: ChangeLogVersion) {
     this.git = git;
     this.objects = objects;
     this.id = id;
     this.previous = previous;
   }
 
-  tag() {
-    if (this.id == 0) return "OneLife_vStart";
+  tag(): string {
+    if (this.id == '0') return "OneLife_vStart";
     if (this.isUnreleased()) return "master";
-    if (this.id < 20269) return "OneLife_v" + this.id;
+    if (parseInt(this.id) < 20269) return "OneLife_v" + this.id;
     return "2HOL_v" + this.id;
   }
 
-  populateObjects() {
+  populateObjects(): void {
     const differences = this.diff();
     for (let difference of differences) {
       if (difference[0] == "A")
@@ -27,12 +34,12 @@ class ChangeLogVersion {
     }
   }
 
-  diff() {
+  diff(): string[][] {
     if (!this.previous) return [];
     return this.git.fileChanges(this.previous.tag(), this.tag());
   }
 
-  populateObjectAtPath(path) {
+  populateObjectAtPath(path: string): void {
     const parts = path.split("/");
     if (parts[0] == "objects") {
       const object = this.objects[parts[1].split(".")[0]];
@@ -41,17 +48,17 @@ class ChangeLogVersion {
     }
   }
 
-  jsonData() {
-    const data = {id: this.id};
+  jsonData(): ExportedChangeLogVersionData {
+    const data: ExportedChangeLogVersionData = {id: this.id};
     const commits = this.fetchCommits();
     if (this.isReleased() && commits[0]) {
       data.date = commits[0].date;
     }
-    data.commits = commits.filter(c => c.isRelavent()).map(c => c.jsonData());
+    data.commits = commits.filter(c => c.isRelevant()).map(c => c.jsonData());
     return data;
   }
 
-  fetchCommits() {
+  fetchCommits(): ChangeLogCommit[] {
     if (!this.previous) return [];
     if (!this.commits) {
       this.commits = this.git.log(this.previous.tag(), this.tag()).map(entry => {
@@ -61,13 +68,19 @@ class ChangeLogVersion {
     return this.commits;
   }
 
-  isUnreleased() {
+  isUnreleased(): boolean {
     return this.id === "unreleased";
   }
 
-  isReleased() {
+  isReleased(): boolean {
     return this.id !== "unreleased";
   }
 }
 
-module.exports = ChangeLogVersion;
+interface ExportedChangeLogVersionData {
+  id: string;
+  date?: Date;
+  commits?: ExportedChangeLogCommitData[];
+}
+
+export { ChangeLogVersion, ExportedChangeLogVersionData }

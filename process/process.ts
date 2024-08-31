@@ -1,8 +1,10 @@
+
+
 if (!process.env.ONETECH_FOOD_BONUS) {
-  process.env.ONETECH_FOOD_BONUS = 0;
+  process.env.ONETECH_FOOD_BONUS = '0';
 }
 
-const MainProcessor = require('./src/MainProcessor');
+import {MainProcessor} from './src/MainProcessor';
 
 const processor = new MainProcessor(__dirname);
 

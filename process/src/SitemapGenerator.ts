@@ -3,25 +3,28 @@
 const sm = require('sitemap');
 const fs = require('fs');
 
-const ObjectFilters = require('./ObjectFilters');
+import { Biome } from "./Biome";
+import { GameObject } from "./GameObject";
+import { ObjectFilter, ObjectFilters } from "./ObjectFilters";
 
 class SitemapGenerator {
-  constructor(rootDir) {
+  rootDir: string;
+  constructor(rootDir: string) {
     this.rootDir = rootDir;
   }
 
-  generate(objects, biomes) {
+  generate(objects: GameObject[], filters: Record<string, ObjectFilter>, biomes: Biome[]): void {
     const sitemap = sm.createSitemap({hostname: 'https://twotech.twohoursonelife.com'});
 
     sitemap.add({url: "/"});
 
-    function addFilter(filter) {
+    function addFilter(filter: ObjectFilter) {
       sitemap.add({url: filter.path});
       Object.values(filter.subfilters).forEach((subfilter) => {
         addFilter(subfilter);
       });
     }
-    for (let filter of Object.values(ObjectFilters.filters)) {
+    for (let filter of Object.values(filters)) {
       addFilter(filter);
     }
 
@@ -45,4 +48,4 @@ class SitemapGenerator {
   }
 }
 
-module.exports = SitemapGenerator;
+export { SitemapGenerator }
