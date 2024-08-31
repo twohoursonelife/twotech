@@ -176,6 +176,59 @@ class GameData {
     if (!fs.existsSync(path)) fs.mkdirSync(path);
   }
 
+  importSpecificObjects(ids: string[]): void {
+    this.eachFileContent("objects", ".txt", (content, _filename) => {
+      const object = new GameObject(content);
+      // console.log("object = ", object ? object?.id : "NULL");
+      if (object.id && ids.includes(object.id)) {
+        this.objects[object.id] = object;
+      }
+    });
+  }
+
+  convertSpecificSpriteImages(): void {
+    const spriteIds :string[] = [];
+
+    // Collect all sprite IDs from the objects
+    for (let id in this.objects) {
+      const object = this.objects[id];
+      if (object.data.sprites) {
+        for (let i = 0; i < object.data.sprites.length; i++) {
+          if (!spriteIds.includes(object.data.sprites[i].id)) {
+            spriteIds.push(object.data.sprites[i].id);
+          }
+        }
+      }
+    }
+
+    console.log("Converting " + spriteIds.length + " sprites for " + Object.keys(this.objects).length + " objects");
+
+    const dir = this.dataDir + "/sprites";
+    for (let i = 0; i < spriteIds.length; i++) {
+      const spriteId = spriteIds[i];
+      const tgaFile = `${dir}/${spriteId}.tga`;
+      const txtFile = `${dir}/${spriteId}.txt`;
+
+      if (!fs.existsSync(tgaFile)) {
+        console.error(`Error: Missing TGA file for sprite ID ${spriteId}`);
+        continue;
+      }
+
+      if (!fs.existsSync(txtFile)) {
+        console.error(`Error: Missing TXT file for sprite ID ${spriteId}`);
+        continue;
+      }
+
+      const outPath = this.staticDir + `/sprites/sprite_${spriteId}.png`;
+      spawnSync("convert", [tgaFile, outPath]);
+    }
+  }
+
+  processSpecificSprites(): void {
+    const processor = new SpriteProcessor(this.dataDir + "/sprites", this.staticDir + "/sprites");
+    processor.process(this.objects);
+  }
+
   // Allow any so we can save any object/array/value we want
   saveJSON(path: string, data: any): void {
     const minPath = this.staticDir + "/" + path;

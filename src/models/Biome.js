@@ -19,9 +19,8 @@ export default class Biome {
 
   static findAndLoad(id) {
     const biome = this.find(id);
-    if (!biome) return;
-    biome.loadData();
-    return biome;
+    if (!biome) return Promise.resolve(null);
+    return biome.loadData().then(() => biome);
   }
 
   constructor(id, name) {
@@ -39,18 +38,15 @@ export default class Biome {
   }
 
   loadData() {
-    if (this.data || this.loading) return;
+    if (this.data || this.loading) return Promise.resolve(this.data);
     this.loading = true;
-    this.fetchData(data => {
-      this.loading = false;
-      this.data = data;
-    });
-  }
-
-  fetchData(callback) {
-    fetch(`${global.staticPath}/biomes/${this.id}.json`).
-      then(data => data.json()).
-      then(callback);
+    return fetch(`${global.staticPath}/biomes/${this.id}.json`)
+      .then(data => data.json())
+      .then(data => {
+        this.loading = false;
+        this.data = data;
+        return this.data;
+      });
   }
 
   objects() {

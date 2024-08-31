@@ -5,7 +5,8 @@
   "main": "process.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "process": "npm i && node_modules/.bin/ts-node process"
+    "process": "node_modules/.bin/ts-node process",
+    "process-specific-sprites": "node_modules/.bin/ts-node process specific-sprites"
   },
   "author": "",
   "license": "ISC",

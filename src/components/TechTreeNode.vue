@@ -1,7 +1,18 @@
 <template>
   <div class="node">
-    <ObjectImage v-if="decay" :decay="decay" hover="true" class="object" />
-    <ObjectImage v-else :object="object" clickable="true" hover="true" class="object" />
+    <ObjectImage
+      v-if="decay"
+      :decay="decay"
+      hover="true"
+      class="object"
+    />
+    <ObjectImage
+      v-else
+      :object="object"
+      clickable="true"
+      hover="true"
+      class="object"
+    />
     <div class="nodes" v-if="nodes">
       <TechTreeNode
         v-for="(node, index) in nodes"
@@ -12,9 +23,10 @@
         :key="index"
         @expand="expandTree"
       />
-      <div class="expand"
+      <div
+        class="expand"
         v-if="nodes.length == 0"
-        v-bind:class="{selected: selectedObject == object}"
+        v-bind:class="{ selected: selectedObject == object }"
         @click="expandTree(object)"
       >
         &#9660;
@@ -24,25 +36,30 @@
 </template>
 
 <script>
+import { defineComponent } from 'vue';
 import GameObject from '../models/GameObject';
-
 import ObjectImage from './ObjectImage';
 
-export default {
+export default defineComponent({
   name: 'TechTreeNode',
-  props: ['object', 'nodes', 'decay', 'selectedObject'],
+  props: {
+    object: Object,
+    nodes: Array,
+    decay: String,
+    selectedObject: Object,
+  },
   components: {
-    ObjectImage
+    ObjectImage,
   },
   methods: {
-    findObject (id) {
+    findObject(id) {
       return GameObject.find(id);
     },
-    expandTree (object) {
+    expandTree(object) {
       this.$emit('expand', object);
-    }
-  }
-}
+    },
+  },
+});
 </script>
 
 <style scoped>
@@ -54,7 +71,8 @@ export default {
     position: relative;
     padding: 12px 6px 0 6px;
   }
-  .node .node::before, .node .node::after {
+  .node .node::before,
+  .node .node::after {
     content: '';
     position: absolute;
     top: 0;
@@ -69,10 +87,11 @@ export default {
     left: 50%;
     border-left: 1px solid #555;
   }
-  .node .node:first-child::before, .node .node:last-child::after {
+  .node .node:first-child::before,
+  .node .node:last-child::after {
     border: 0 none;
   }
-  .node .node:last-child::before{
+  .node .node:last-child::before {
     border-right: 1px solid #555;
     border-radius: 0 5px 0 0;
   }

@@ -1,49 +1,46 @@
 <template>
   <div class="ingredients">
-    <h4>{{titleWithDefault}}</h4>
-    <div class="filterInstructions">
-      right click to filter recipe
-    </div>
+    <h4>{{ titleWithDefault }}</h4>
+    <div class="filterInstructions">right click to filter recipe</div>
     <div class="ingredientObjects">
       <ObjectImage
         v-for="object in objects"
+        :key="object.id"
         class="ingredientObject"
-        hover="true"
-        clickable="true"
+        hover
+        clickable
         :object="object"
         :uses="ingredientUses(object)"
-        :key="object.id"
-        :rightClick="rightClickObject" />
+        :rightClick="rightClickObject"
+      />
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue';
 import GameObject from '../models/GameObject';
-
 import ObjectImage from './ObjectImage';
 
-export default {
-  props: ['ingredients', 'title', 'rightClickObject'],
-  components: {
-    ObjectImage
-  },
-  computed: {
-    objects() {
-      const uniqueIDs = this.ingredients.filter((id, i) => this.ingredients.indexOf(id) == i);
-      return uniqueIDs.map(id => GameObject.find(id))
-    },
-    titleWithDefault() {
-      return this.title || "Ingredients";
-    }
-  },
-  methods: {
-    ingredientUses(object) {
-      const count = this.ingredients.filter(id => id == object.id).length;
-      if (count > 1)
-        return `x${count}`;
-    }
-  }
+// Props
+const props = defineProps({
+  ingredients: Array,
+  title: String,
+  rightClickObject: Function,
+});
+
+// Computed properties
+const objects = computed(() => {
+  const uniqueIDs = props.ingredients.filter((id, i) => props.ingredients.indexOf(id) === i);
+  return uniqueIDs.map(id => GameObject.find(id));
+});
+
+const titleWithDefault = computed(() => props.title || "Ingredients");
+
+// Methods
+function ingredientUses(object) {
+  const count = props.ingredients.filter(id => id === object.id).length;
+  return count > 1 ? `x${count}` : '';
 }
 </script>
 

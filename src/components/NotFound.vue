@@ -2,30 +2,36 @@
   <div class="notFound">
     <h2>You got lost...</h2>
     <h3>but you managed to find a wild carrot!</h3>
-    <ObjectImage :object="object" scaleUpTo="256" />
+    <ObjectImage v-if="object" :object="object" :scaleUpTo="256" />
     <div class="caption">Object ID 404</div>
     <router-link to="/" class="home">Go Back Home</router-link>
   </div>
 </template>
 
 <script>
+import { defineComponent, ref, onMounted } from 'vue';
 import GameObject from '../models/GameObject';
-
 import ObjectImage from './ObjectImage';
 
-export default {
+export default defineComponent({
   components: {
     ObjectImage,
   },
-  data() {
+  setup() {
+    const object = ref(null);
+
+    onMounted(() => {
+      object.value = GameObject.find("404");
+    });
+
     return {
-      object: GameObject.find("404"),
+      object,
     };
   },
   metaInfo() {
-    return {title: "Not Found"};
+    return { title: "Not Found" };
   }
-}
+});
 </script>
 
 <style scoped>
@@ -75,5 +81,4 @@ export default {
     background-color: #555;
     border: solid 1px #ddd;
   }
-
 </style>

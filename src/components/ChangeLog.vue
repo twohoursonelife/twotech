@@ -11,58 +11,72 @@
 </template>
 
 <script>
+import { defineComponent, ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { useRoute } from 'vue-router';
 import GameObject from '../models/GameObject';
 import Version from '../models/Version';
 
 import ChangeLogVersion from './ChangeLogVersion';
 
-export default {
+export default defineComponent({
   components: {
-    ChangeLogVersion
+    ChangeLogVersion,
   },
-  data() {
-    return {
-      limit: 3,
-    };
-  },
-  created () {
-    window.onscroll = () => this.handleScroll();
-  },
-  computed: {
-    versionIds() {
-      if (this.singleVersion)
-        return [this.singleVersion];
-      return GameObject.versions.slice(0, this.limit);
-    },
-    singleVersion() {
-      return this.$route.params.id;
-    }
-  },
-  methods: {
-    handleScroll() {
-      if (this.singleVersion)
-        return;
+  setup() {
+    const route = useRoute();
+    const limit = ref(3);
+    const loadingMore = ref(false);
+
+    const singleVersion = computed(() => {
+      return route.params.id;
+    });
+
+    const versionIds = computed(() => {
+      if (singleVersion.value) {
+        return [singleVersion.value];
+      }
+      return GameObject.versions.slice(0, limit.value);
+    });
+
+    const handleScroll = () => {
+      if (singleVersion.value) return;
       if (window.scrollY + window.innerHeight > document.body.clientHeight - 100) {
-        if (Version.isLoading())
-          return;
-        if (!this.loadingMore) {
-          this.loadingMore = true;
-          this.limit += 1;
+        if (Version.isLoading()) return;
+        if (!loadingMore.value) {
+          loadingMore.value = true;
+          limit.value += 1;
         }
       } else {
-        this.loadingMore = false;
+        loadingMore.value = false;
       }
-    },
-    showMore() {
-      this.limit += 3;
-    }
+    };
+
+    const showMore = () => {
+      limit.value += 3;
+    };
+
+    onMounted(() => {
+      window.addEventListener('scroll', handleScroll);
+    });
+
+    onBeforeUnmount(() => {
+      window.removeEventListener('scroll', handleScroll);
+    });
+
+    return {
+      limit,
+      versionIds,
+      singleVersion,
+      showMore,
+    };
   },
   metaInfo() {
-    if (this.singleVersion)
-      return {title: `Version ${this.singleVersion}`};
-    return {title: "Change Log"};
-  }
-}
+    if (this.singleVersion) {
+      return { title: `Version ${this.singleVersion}` };
+    }
+    return { title: "Change Log" };
+  },
+});
 </script>
 
 <style scoped>

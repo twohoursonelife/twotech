@@ -4,11 +4,22 @@
     <h3>To put on a Sign</h3>
 
     <div class="signSizes">
-      <div class="signSize" :class="{selected: small}" @click="selectSmall">Small Sign</div>
-      <div class="signSize" :class="{selected: !small}" @click="selectBig">Big Sign</div>
+      <div class="signSize" :class="{ selected: small }" @click="selectSmall">Small Sign</div>
+      <div class="signSize" :class="{ selected: !small }" @click="selectBig">Big Sign</div>
     </div>
 
-    <textarea class="message" id="messageArea" @keyup="update" :rows="rows" :cols="cols+1" :maxLength="maxLength" autofocus autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
+    <textarea
+      class="message"
+      id="messageArea"
+      @keyup="update"
+      :rows="rows"
+      :cols="cols + 1"
+      :maxLength="maxLength"
+      autofocus
+      autocomplete="off"
+      autocorrect="off"
+      spellcheck="false"
+    ></textarea>
 
     <h3 v-if="loading">Loading...</h3>
     <div v-else-if="objects.length" class="steps">
@@ -16,163 +27,159 @@
 
       <div class="filterHeadline" v-if="filteredObject">
         <h4>Filter:</h4>
-        <ObjectImage
-          class="filteredObject"
-          hover="true"
-          clickable="true"
-          :object="filteredObject" />
+        <ObjectImage class="filteredObject" hover clickable :object="filteredObject" />
         <a href="#" @click.prevent="filterObject(null)">Clear Filter</a>
       </div>
-
-      <RecipeStep
-        v-for="(transitions, index) in steps"
-        :transitions="transitions"
-        :number="index+1"
-        :key="index"
-        :rightClickObject="filterObject"
-        :filteredObject="filteredObject"
-        :highlightObjects="objects" />
+      <div v-else-if="objects.length" class="steps">
+        <RecipeStep
+          v-for="(transitions, index) in steps"
+          :key="index"
+          :transitions="transitions"
+          :number="index + 1"
+          :rightClickObject="filterObject"
+          :filteredObject="filteredObject"
+          :highlightObjects="objects"
+        />
+      </div>
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch } from 'vue';
 import GameObject from '../models/GameObject';
-
 import RecipeIngredients from './RecipeIngredients';
 import RecipeStep from './RecipeStep';
 import ObjectImage from './ObjectImage';
 
-export default {
-  components: {
-    RecipeIngredients,
-    RecipeStep,
-    ObjectImage
-  },
-  data() {
-    return {
-      small: true,
-      objects: [],
-      timer: null,
-      filteredObject: null,
-    };
-  },
-  computed: {
-    rows() {
-      return this.small ? 2 : 3;
-    },
-    cols() {
-      return this.small ? 7 : 9;
-    },
-    maxLength() {
-      return this.rows*this.cols+(this.rows-1)*2;
-    },
-    loading() {
-      return this.timer || this.objects.filter(o => !o.data).length > 0;
-    },
-    ingredients() {
-      const tools = ["34", "135", "235", "730"];
-      let ingredients = [];
-      for (let object of this.objects) {
-        ingredients = ingredients.concat(object.data.recipe.ingredients);
-      }
-      return ingredients.filter((id,i) => !tools.includes(id) || ingredients.indexOf(id) == i);
-    },
-    steps() {
-      let transitions = [];
-      for (let object of this.objects) {
-        const steps = object.data.recipe.steps;
-        for (let stepIndex=0; stepIndex < steps.length; stepIndex++) {
-          for (let transition of steps[steps.length-stepIndex-1]) {
-            this.addTransition(transition, transitions, stepIndex);
-          }
-        }
-      }
-      let steps = [];
-      for (let transition of transitions) {
-        if (!steps[transition.stepIndex])
-          steps[transition.stepIndex] = [];
-        steps[transition.stepIndex].push(transition);
-      }
-      return steps.reverse();
-    }
-  },
-  methods: {
-    selectBig() {
-      this.small = false;
-      this.fixMessage();
-      this.updateObjects();
-    },
-    selectSmall() {
-      this.small = true;
-      this.fixMessage();
-      this.updateObjects();
-    },
-    update(event) {
-      this.fixMessage();
-      if (this.timer)
-        clearTimeout(this.timer);
-      this.timer = setTimeout(() => this.updateObjects(), 500);
-    },
-    fixMessage() {
-      const textarea = document.getElementById("messageArea");
-      if (!textarea.value) return;
-      const rowRegex = new RegExp(`.{1,${this.cols}}`, "g");
-      const length = textarea.value.length;
-      let selectionStart = textarea.selectionStart;
-      let selectionEnd = textarea.selectionEnd;
-      textarea.value = textarea.value.toUpperCase()
-        .replace(/ /g, "-")
-        .replace("–", "--") // Some systems convert -- to en dash
-        .replace("—", "--") // Some systems convert -- to em dash
-        .replace(/[^A-Z-]/g, "")
-        .match(rowRegex)
-        .join("\r\n")
-        .substring(0, this.maxLength);
-      if (textarea.value.length > length) {
-        selectionStart += 2;
-        selectionEnd += 2;
-      }
-      textarea.selectionStart = selectionStart;
-      textarea.selectionEnd = selectionEnd;
-    },
-    updateObjects() {
-      let textarea = document.getElementById("messageArea");
-      this.objects = textarea.value.split("").map(this.letterToObject).filter(o => o);
-      this.timer = null;
-    },
-    addTransition(transition, transitions, stepIndex) {
-      let match = transitions.find(t => t.id == transition.id);
-      if (match) {
-        match.count += transition.count || 1;
-        match.uses = "x" + match.count;
-        if (match.stepIndex < stepIndex) {
-          match.stepIndex = stepIndex;
-        }
-      } else {
-        let clone = Object.assign({count: 1, stepIndex: stepIndex}, transition);
-        transitions.push(clone);
-      }
-    },
-    letterToObject(letter) {
-      if (letter == "-")
-        return GameObject.findAndLoadByName("Hyphen");
-      return GameObject.findAndLoadByName(`Letter ${letter}`);
-    },
-    filterObject(object) {
-      this.filteredObject = object;
-      if (object) {
-        setTimeout(function() {
-          var scrollingElement = (document.scrollingElement || document.body);
-          scrollingElement.scrollTop = scrollingElement.scrollHeight;
-        }, 100);
+// State
+const small = ref(true);
+const objects = ref([]);
+const timer = ref(null);
+const filteredObject = ref(null);
+
+// Computed properties
+const rows = computed(() => (small.value ? 2 : 3));
+const cols = computed(() => (small.value ? 7 : 9));
+const maxLength = computed(() => rows.value * cols.value + (rows.value - 1) * 2);
+
+const loading = computed(() => timer.value || objects.value.filter(o => !o.data).length > 0);
+
+const ingredients = computed(() => {
+  const tools = ["34", "135", "235", "730"];
+  let ingredientsList = [];
+  for (let object of objects.value) {
+    ingredientsList = ingredientsList.concat(object.data.recipe.ingredients);
+  }
+  return ingredientsList.filter((id, i) => !tools.includes(id) || ingredientsList.indexOf(id) === i);
+});
+
+const steps = computed(() => {
+  let transitions = [];
+  for (let object of objects.value) {
+    const steps = object.data.recipe.steps;
+    for (let stepIndex = 0; stepIndex < steps.length; stepIndex++) {
+      for (let transition of steps[steps.length - stepIndex - 1]) {
+        addTransition(transition, transitions, stepIndex);
       }
     }
-  },
-  metaInfo() {
-    return {title: `Recipe for Letters`};
+  }
+  let stepsList = [];
+  for (let transition of transitions) {
+    if (!stepsList[transition.stepIndex]) stepsList[transition.stepIndex] = [];
+    stepsList[transition.stepIndex].push(transition);
+  }
+  return stepsList.reverse();
+});
+
+// Methods
+function selectBig() {
+  small.value = false;
+  fixMessage();
+  updateObjects();
+}
+
+function selectSmall() {
+  small.value = true;
+  fixMessage();
+  updateObjects();
+}
+
+function update(event) {
+  fixMessage();
+  if (timer.value) clearTimeout(timer.value);
+  timer.value = setTimeout(() => updateObjects(), 500);
+}
+
+function fixMessage() {
+  const textarea = document.getElementById("messageArea");
+  if (!textarea.value) return;
+  const rowRegex = new RegExp(`.{1,${cols.value}}`, "g");
+  const length = textarea.value.length;
+  let selectionStart = textarea.selectionStart;
+  let selectionEnd = textarea.selectionEnd;
+  textarea.value = textarea.value.toUpperCase()
+    .replace(/ /g, "-")
+    .replace("–", "--")
+    .replace("—", "--")
+    .replace(/[^A-Z-]/g, "")
+    .match(rowRegex)
+    .join("\r\n")
+    .substring(0, maxLength.value);
+  if (textarea.value.length > length) {
+    selectionStart += 2;
+    selectionEnd += 2;
+  }
+  textarea.selectionStart = selectionStart;
+  textarea.selectionEnd = selectionEnd;
+}
+
+async function updateObjects() {
+  const textarea = document.getElementById("messageArea");
+  objects.value = await Promise.all(
+    textarea.value.split("").map(letterToObject)
+  );
+  timer.value = null;
+}
+
+function addTransition(transition, transitions, stepIndex) {
+  let match = transitions.find(t => t.id === transition.id);
+  if (match) {
+    match.count += transition.count || 1;
+    match.uses = "x" + match.count;
+    if (match.stepIndex < stepIndex) {
+      match.stepIndex = stepIndex;
+    }
+  } else {
+    let clone = Object.assign({ count: 1, stepIndex: stepIndex }, transition);
+    transitions.push(clone);
   }
 }
+
+async function letterToObject(letter) {
+  if (letter === "-") return await GameObject.findAndLoadByName("Hyphen");
+  return await GameObject.findAndLoadByName(`Letter ${letter}`);
+}
+
+function filterObject(object) {
+  filteredObject.value = object;
+  if (object) {
+    setTimeout(() => {
+      const scrollingElement = document.scrollingElement || document.body;
+      scrollingElement.scrollTop = scrollingElement.scrollHeight;
+    }, 100);
+  }
+}
+
+watch(filteredObject, () => {
+  if (filteredObject.value) {
+    setTimeout(() => {
+      const scrollingElement = document.scrollingElement || document.body;
+      scrollingElement.scrollTop = scrollingElement.scrollHeight;
+    }, 100);
+  }
+});
+
 </script>
 
 <style lang="scss" scoped>

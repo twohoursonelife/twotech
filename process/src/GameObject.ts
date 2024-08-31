@@ -116,7 +116,6 @@ class GameObject {
      || data.includes("invisHolding")
      || data.includes("invisCont")
      || data.includes("spritesDrawnBehind")
-     || data.includes("spritesAdditiveBlend")
      || data.includes("ignoredCont")
     ) {
       return true;

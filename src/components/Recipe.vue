@@ -1,22 +1,23 @@
 <template>
   <div class="recipe">
-    <div class="recipeHeadline">
+    <div class="recipeHeadline" v-if="object">
       <ObjectImage
         class="recipeHeadlineObject"
         :hover="false"
         :clickable="true"
-        :object="object" />
+        :object="object"
+      />
       <div class="recipeHeadlineText">
-        <h2><router-link :to="object.url()">{{object.name}}</router-link></h2>
+        <h2><router-link :to="objectUrl">{{ objectName }}</router-link></h2>
         <h3>Crafting Recipe</h3>
       </div>
     </div>
 
-    <h3 v-if="!object.data">Loading...</h3>
+    <h3 v-if="loading || !objectData">Loading...</h3>
     <div v-else class="steps">
-      <RecipeIngredients v-if="object.data.recipe.ingredients" :ingredients="object.data.recipe.ingredients" :rightClickObject="filterObject" />
+      <RecipeIngredients v-if="objectData.recipe.ingredients" :ingredients="objectData.recipe.ingredients" :rightClickObject="filterObject" />
 
-      <RecipeIngredients v-if="object.data.recipe.uncraftables" title="UNCRAFTABLE Ingredients" :ingredients="object.data.recipe.uncraftables" :rightClickObject="filterObject" />
+      <RecipeIngredients v-if="objectData.recipe.uncraftables" title="UNCRAFTABLE Ingredients" :ingredients="objectData.recipe.uncraftables" :rightClickObject="filterObject" />
 
       <div class="filterHeadline" v-if="filteredObject">
         <h4>Filter:</h4>
@@ -24,64 +25,78 @@
           class="filteredObject"
           hover="true"
           clickable="true"
-          :object="filteredObject" />
-        <a href="#" @click.prevent="filterObject(null)">Clear Filter</a>
+          :object="filteredObject"
+        />
+        <a href="#" @click.prevent="clearFilter">Clear Filter</a>
       </div>
 
       <RecipeStep
-        v-for="(transitions, index) in object.data.recipe.steps"
+        v-for="(transitions, index) in objectData.recipe.steps"
         :transitions="transitions"
-        :number="index+1"
+        :number="index + 1"
         :key="index"
         :rightClickObject="filterObject"
-        :filteredObject="filteredObject" />
+        :filteredObject="filteredObject"
+      />
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import GameObject from '../models/GameObject';
-
 import RecipeIngredients from './RecipeIngredients';
 import RecipeStep from './RecipeStep';
 import ObjectImage from './ObjectImage';
 
-export default {
-  components: {
-    RecipeIngredients,
-    RecipeStep,
-    ObjectImage
-  },
-  data() {
-    return {
-      object: GameObject.findAndLoad(this.$route.params.id),
-      filteredObject: null,
-    };
-  },
-  created() {
-    if (!this.object)
-      this.$router.replace("/not-found");
-  },
-  watch: {
-    '$route' (to, from) {
-      this.object = GameObject.findAndLoad(this.$route.params.id);
-    }
-  },
-  methods: {
-    filterObject(object) {
-      this.filteredObject = object;
-      if (object) {
-        setTimeout(function() {
-          var scrollingElement = (document.scrollingElement || document.body);
-          scrollingElement.scrollTop = scrollingElement.scrollHeight;
-        }, 100);
-      }
-    }
-  },
-  metaInfo() {
-    return {title: `${this.object.name} Recipe`};
+const route = useRoute();
+const router = useRouter();
+
+const object = ref(null);
+const filteredObject = ref(null);
+const loading = ref(true);
+
+const objectUrl = computed(() => object.value?.url() || '/not-found');
+const objectName = computed(() => object.value?.name || 'Unknown');
+const objectData = computed(() => object.value?.data);
+
+async function loadObject(id) {
+  loading.value = true;
+  object.value = await GameObject.findAndLoad(id);
+  loading.value = false;
+
+  if (!object.value) {
+    router.replace('/not-found');
   }
 }
+
+onMounted(() => {
+  loadObject(route.params.id);
+});
+
+watch(() => route.params.id, (newId) => {
+  loadObject(newId);
+});
+
+function filterObject(obj) {
+  filteredObject.value = obj;
+  if (obj) {
+    setTimeout(() => {
+      const scrollingElement = document.scrollingElement || document.body;
+      scrollingElement.scrollTop = scrollingElement.scrollHeight;
+    }, 100);
+  }
+}
+
+function clearFilter() {
+  filteredObject.value = null;
+}
+
+function getMetaInfo() {
+  return { title: `${objectName.value} Recipe` };
+}
+
 </script>
 
 <style lang="scss" scoped>

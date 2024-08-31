@@ -1,8 +1,8 @@
 <template>
   <div class="changeLogCommit">
     <div class="message">
-      <div class="messageContent">{{commit.message}}</div>
-      <div class="messageDate">{{date}}</div>
+      <div class="messageContent">{{ commit.message }}</div>
+      <div class="messageDate">{{ date }}</div>
       <div v-if="hasChanges" class="collapse" @click="toggleCollapse">
         <span v-if="collapsed">&#x25C0;</span>
         <span v-else>&#x25BC;</span>
@@ -12,10 +12,10 @@
     <div v-if="!collapsed && commit.removedObjectIDs" class="objectsList">
       <h3>Removed Objects</h3>
       <div class="objects">
-        <div v-for="object in removedObjects" class="objectWrapper">
+        <div v-for="object in removedObjects" class="objectWrapper" :key="object.id">
           <div class="object">
-            <ObjectImage :object="object" scaleUpTo="80" />
-            <div class="name">{{object.name}}</div>
+            <ObjectImage :object="object" :scaleUpTo="80" />
+            <div class="name">{{ object.name }}</div>
           </div>
         </div>
       </div>
@@ -27,13 +27,13 @@
     <div v-if="!collapsed && commit.addedObjectIDs" class="objectsList">
       <h3>Added Objects</h3>
       <div class="objects">
-        <div v-for="object in addedObjects" v-if="object" class="objectWrapper">
+        <div v-for="object in addedObjects" class="objectWrapper" :key="object.id">
           <router-link class="object"
               :to="object.url()"
-              :class="{disabled: object.legacy}"
+              :class="{ disabled: object.legacy }"
               :event="object.legacy ? '' : 'click'">
-            <ObjectImage :object="object" scaleUpTo="80" />
-            <div class="name">{{object.name}}</div>
+            <ObjectImage :object="object" :scaleUpTo="80" />
+            <div class="name">{{ object.name }}</div>
           </router-link>
         </div>
       </div>
@@ -45,9 +45,7 @@
     <div v-if="!collapsed && commit.removedTransitions">
       <h3>Removed Transitions</h3>
       <div class="transitions">
-        <div v-for="(transition, index) in removedTransitions"
-            class="transition"
-            :key="index">
+        <div v-for="(transition, index) in removedTransitions" class="transition" :key="index">
           <TransitionView :transition="transition" />
         </div>
         <div v-if="commit.removedTransitions.length > 1" class="transitionSpacer"></div>
@@ -60,9 +58,7 @@
     <div v-if="!collapsed && commit.addedTransitions">
       <h3>Added Transitions</h3>
       <div class="transitions">
-        <div v-for="(transition, index) in addedTransitions"
-            class="transition"
-            :key="index">
+        <div v-for="(transition, index) in addedTransitions" class="transition" :key="index">
           <TransitionView :transition="transition" />
         </div>
         <div v-if="commit.addedTransitions.length > 1" class="transitionSpacer"></div>
@@ -75,9 +71,7 @@
     <div v-if="!collapsed && commit.objectChanges" class="objectChanges">
       <h3>Changed Objects</h3>
       <div class="objects">
-        <div v-for="change in objectChanges"
-            class="changedObject"
-            :key="change.id">
+        <div v-for="change in objectChanges" class="changedObject" :key="change.id">
           <ChangeLogObjectChange :change="change" />
         </div>
       </div>
@@ -89,87 +83,115 @@
 </template>
 
 <script>
+import { defineComponent, ref, computed } from 'vue';
 import GameObject from '../models/GameObject';
-
 import ObjectImage from './ObjectImage';
 import TransitionView from './TransitionView';
 import ChangeLogObjectChange from './ChangeLogObjectChange';
 
-export default {
-  props: [
-    'commit',
-  ],
+export default defineComponent({
+  props: {
+    commit: Object,
+  },
   components: {
     ObjectImage,
     TransitionView,
     ChangeLogObjectChange,
   },
-  data() {
-    return {
-      objectLimit: 8,
-      transitionLimit: 6,
-      objectChangeLimit: 6,
-      collapsed: false
-    };
-  },
-  created() {
-    if (this.commit.legacyObjects) {
-      for (let object of this.commit.legacyObjects)
-        GameObject.addLegacyObject(object);
-    }
-  },
-  computed: {
-    addedObjects() {
-      return this.commit.addedObjectIDs.slice(0, this.objectLimit).map(id => GameObject.find(id));
-    },
-    removedObjects() {
-      return this.commit.removedObjectIDs.slice(0, this.objectLimit).map(id => GameObject.find(id));
-    },
-    addedTransitions() {
-      return this.commit.addedTransitions.slice(0, this.transitionLimit);
-    },
-    removedTransitions() {
-      return this.commit.removedTransitions.slice(0, this.transitionLimit);
-    },
-    objectChanges() {
-      return this.commit.objectChanges.slice(0, this.objectChangeLimit);
-    },
-    hasChanges() {
-      return this.commit.addedObjectIDs
-        || this.commit.removedObjectIDs
-        || this.commit.addedTransitions
-        || this.commit.removedTransitions
-        || this.commit.objectChanges;
-    },
-    date() {
-      const date = new Date(this.commit.date);
+  setup(props) {
+    const objectLimit = ref(8);
+    const transitionLimit = ref(6);
+    const objectChangeLimit = ref(6);
+    const collapsed = ref(false);
+
+    const addedObjects = computed(() => {
+      // Filter out any null or undefined objects
+      return props.commit.addedObjectIDs
+        .map(id => GameObject.find(id))
+        .filter(object => object !== null && object !== undefined)
+        .slice(0, objectLimit.value);
+    });
+
+    const removedObjects = computed(() => {
+      return props.commit.removedObjectIDs.slice(0, objectLimit.value).map(id => GameObject.find(id));
+    });
+
+    const addedTransitions = computed(() => {
+      return props.commit.addedTransitions.slice(0, transitionLimit.value);
+    });
+
+    const removedTransitions = computed(() => {
+      return props.commit.removedTransitions.slice(0, transitionLimit.value);
+    });
+
+    const objectChanges = computed(() => {
+      return props.commit.objectChanges.slice(0, objectChangeLimit.value);
+    });
+
+    const hasChanges = computed(() => {
+      return props.commit.addedObjectIDs
+        || props.commit.removedObjectIDs
+        || props.commit.addedTransitions
+        || props.commit.removedTransitions
+        || props.commit.objectChanges;
+    });
+
+    const date = computed(() => {
+      const date = new Date(props.commit.date);
       const months = [
         "January", "February", "March",
         "April", "May", "June", "July",
         "August", "September", "October",
         "November", "December"
       ];
-      var month = date.getMonth();
-      var day = date.getDate();
-      var year = date.getFullYear();
+      const month = date.getMonth();
+      const day = date.getDate();
+      const year = date.getFullYear();
       return `${months[month]} ${day}, ${year}`;
-    },
+    });
+
+    const showMoreObjects = () => {
+      objectLimit.value += 24;
+    };
+
+    const showMoreTransitions = () => {
+      transitionLimit.value += 24;
+    };
+
+    const showMoreObjectChanges = () => {
+      objectChangeLimit.value += 24;
+    };
+
+    const toggleCollapse = () => {
+      collapsed.value = !collapsed.value;
+    };
+
+    return {
+      objectLimit,
+      transitionLimit,
+      objectChangeLimit,
+      collapsed,
+      addedObjects,
+      removedObjects,
+      addedTransitions,
+      removedTransitions,
+      objectChanges,
+      hasChanges,
+      date,
+      showMoreObjects,
+      showMoreTransitions,
+      showMoreObjectChanges,
+      toggleCollapse,
+    };
   },
-  methods: {
-    showMoreObjects() {
-      this.objectLimit += 24;
-    },
-    showMoreTransitions() {
-      this.transitionLimit += 24;
-    },
-    showMoreObjectChanges() {
-      this.objectChangeLimit += 24;
-    },
-    toggleCollapse() {
-      this.collapsed = !this.collapsed;
+  created() {
+    if (this.commit.legacyObjects) {
+      for (let object of this.commit.legacyObjects) {
+        GameObject.addLegacyObject(object);
+      }
     }
   }
-}
+});
 </script>
 
 <style scoped>

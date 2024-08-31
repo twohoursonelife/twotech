@@ -22,24 +22,26 @@
 
 <script>
 import ObjectImageWrapper from './ObjectImageWrapper'
+import { defineComponent } from 'vue';
+import GameObject from '../models/GameObject';
 
-export default {
-  props: [
-    'object',
-    'extraObject',
-    'clickable',
-    'rightClick',
-    'hand',
-    'hover',
-    'decay',
-    'ground',
-    'uses',
-    'player',
-    'wildcard',
-    'scaleUpTo',
-    'weight',
-    'move'
-  ],
+export default defineComponent({
+  props: {
+    object: GameObject,
+    extraObject: GameObject,
+    clickable: Boolean,
+    rightClick: Function,
+    hand: Boolean,
+    hover: Boolean,
+    decay: String,
+    ground: Boolean,
+    uses: String,
+    player: Boolean,
+    wildcard: Boolean,
+    scaleUpTo: Number,
+    weight: Number,
+    move: Boolean
+  },
   components: {
     ObjectImageWrapper,
   },
@@ -48,33 +50,32 @@ export default {
     const img = document.getElementById(this.imageID);
     if (!img) return;
     img.onload = () => {
-      let multiplier = this.scaleUpTo/Math.max(img.naturalWidth, img.naturalHeight);
+      let multiplier = this.scaleUpTo / Math.max(img.naturalWidth, img.naturalHeight);
       if (multiplier < 1.0) {
         img.style.cssText = "object-fit: scale-down; width: 100%; height: 100%";
         return;
       }
       if (multiplier > 1.8)
         multiplier = 1.8;
-      const width = Math.round(img.naturalWidth*multiplier);
-      const height = Math.round(img.naturalHeight*multiplier);
+      const width = Math.round(img.naturalWidth * multiplier);
+      const height = Math.round(img.naturalHeight * multiplier);
       img.style.cssText = `object-fit: initial; width: ${width}px; height: ${height}px`;
     };
   },
   computed: {
-    imageUrl () {
+    imageUrl() {
       if (!this.object) return "about:blank";
       const suffix = this.uses == "last" && !this.object.category ? "_last" : "";
       return `${global.staticPath}/sprites/obj_${this.object.id}${suffix}.png`;
     },
-    imageID () {
+    imageID() {
       return ["image", this.object.id, Math.random().toString(36).substr(2, 7)].join("-");
     },
-    legacy () {
+    legacy() {
       return this.object && this.object.legacy;
     },
-    title () {
-      if (!this.hover)
-        return '';
+    title() {
+      if (!this.hover) return '';
 
       if (this.object) {
         if (this.extraObject)
@@ -82,26 +83,23 @@ export default {
         return this.object.name;
       }
 
-      if (this.player)
-        return "Player"
+      if (this.player) return "Player";
+      if (this.wildcard) return "Wildcard Object";
+      if (this.hand) return "Empty hands";
+      if (this.ground) return "Empty ground";
 
-      if (this.wildcard)
-        return "Wildcard Object"
-
-      if (this.hand)
-        return "Empty hands"
-
-      if (this.ground)
-        return "Empty ground"
-
-      if (this.decay)
-        return this.decay.replace("s", " second").replace("m", " minute").replace("h", " hour") + (parseInt(this.decay) != 1 ? 's' : '');
+      if (this.decay) {
+        return this.decay.replace("s", " second")
+          .replace("m", " minute")
+          .replace("h", " hour") +
+          (parseInt(this.decay) !== 1 ? 's' : '');
+      }
     },
-    weightPercent () {
-      return Math.round(this.weight*1000)/10.0;
+    weightPercent() {
+      return Math.round(this.weight * 1000) / 10.0;
     },
   }
-}
+});
 </script>
 
 <style scoped>

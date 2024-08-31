@@ -18,14 +18,14 @@ module.exports = {
       {
         test: /\.css$/,
         use: [
-          'vue-style-loader',
+          'style-loader',
           'css-loader'
         ],
       },
       {
         test: /\.scss$/,
         use: [
-          'vue-style-loader',
+          'style-loader',
           'css-loader',
           'sass-loader'
         ],
@@ -33,7 +33,7 @@ module.exports = {
       {
         test: /\.sass$/,
         use: [
-          'vue-style-loader',
+          'style-loader',
           'css-loader',
           'sass-loader?indentedSyntax'
         ],
@@ -47,12 +47,12 @@ module.exports = {
             // the "scss" and "sass" values for the lang attribute to the right configs here.
             // other preprocessors should work out of the box, no loader config like this necessary.
             'scss': [
-              'vue-style-loader',
+              'style-loader',
               'css-loader',
               'sass-loader'
             ],
             'sass': [
-              'vue-style-loader',
+              'style-loader',
               'css-loader',
               'sass-loader?indentedSyntax'
             ]
@@ -77,11 +77,14 @@ module.exports = {
   },
   resolve: {
     alias: {
-      'vue$': 'vue/dist/vue.esm.js'
+      'vue$': 'vue/dist/vue.runtime.esm-bundler.js',
     },
     extensions: ['*', '.js', '.vue', '.json']
   },
   devServer: {
+    headers: {
+      'Content-Security-Policy': "worker-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.usefathom.com;",
+    },
     static: {
       directory: path.join(__dirname, 'public'),
     },

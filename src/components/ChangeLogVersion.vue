@@ -1,6 +1,6 @@
 <template>
   <div class="changeLogVersion">
-    <h2>{{name}}</h2>
+    <h2>{{ name }}</h2>
     <div v-if="!version.data" class="loading">
       Loading...
     </div>
@@ -8,55 +8,62 @@
       <div class="empty">Currently no unreleased content</div>
     </div>
     <div v-else>
-      <div v-if="date" class="date">{{date}}</div>
+      <div v-if="date" class="date">{{ date }}</div>
       <ChangeLogCommit v-for="commit in version.data.commits" :commit="commit" :key="commit.sha" />
     </div>
   </div>
 </template>
 
 <script>
+import { defineComponent, ref, computed, onMounted } from 'vue';
 import Version from '../models/Version';
-
 import ChangeLogCommit from './ChangeLogCommit';
 
-export default {
-  props: [
-    'id',
-  ],
-  data() {
-    return {
-      version: Version.fetch(this.id),
-    };
+export default defineComponent({
+  props: {
+    id: String,
   },
   components: {
-    ChangeLogCommit
+    ChangeLogCommit,
   },
-  computed: {
-    date() {
-      if (!this.version.data.date) return;
-      const date = new Date(this.version.data.date);
+  setup(props) {
+    const version = ref(null);
+
+    onMounted(() => {
+      version.value = Version.fetch(props.id);
+    });
+
+    const date = computed(() => {
+      if (!version.value?.data?.date) return;
+      const dateObj = new Date(version.value.data.date);
       const months = [
         "January", "February", "March",
         "April", "May", "June", "July",
         "August", "September", "October",
         "November", "December"
       ];
-      var month = date.getMonth();
-      var day = date.getDate();
-      var year = date.getFullYear();
+      const month = dateObj.getMonth();
+      const day = dateObj.getDate();
+      const year = dateObj.getFullYear();
       return `${months[month]} ${day}, ${year}`;
-    },
-    name() {
-      if (this.id === "unreleased") {
-        return "Unreleased";
-      }
-      return "Version " + this.id;
-    },
-    isEmptyUnreleased() {
-      return this.id === "unreleased" && this.version.data.commits.length === 0;
-    }
-  }
-}
+    });
+
+    const name = computed(() => {
+      return props.id === "unreleased" ? "Unreleased" : `Version ${props.id}`;
+    });
+
+    const isEmptyUnreleased = computed(() => {
+      return props.id === "unreleased" && version.value?.data?.commits?.length === 0;
+    });
+
+    return {
+      version,
+      date,
+      name,
+      isEmptyUnreleased,
+    };
+  },
+});
 </script>
 
 <style scoped>

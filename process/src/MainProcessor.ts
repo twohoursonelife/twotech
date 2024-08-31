@@ -27,7 +27,29 @@ class MainProcessor {
     return process.env.ONETECH_PROCESS_GIT_URL || "https://github.com/twohoursonelife/OneLifeData7.git";
   }
 
-  process(version: ChangeLogVersion): ChangeLogVersion {
+  processSpecificObjects(ids: string[]): void {
+    const gameData = new GameData(this.processDir, this.dataDir(), this.staticDir(false));
+    console.time("Processing specific objects took");
+
+    console.log("\nImporting specific objects...");
+    console.time("Importing specific objects took");
+    gameData.importSpecificObjects(ids);
+    console.timeEnd("Importing specific objects took");
+
+    console.log("\nConverting specific sprite images...");
+    console.time("Converting specific sprite images took");
+    gameData.convertSpecificSpriteImages();
+    console.timeEnd("Converting specific sprite images took");
+
+    console.log("\nProcessing specific sprites...");
+    console.time("Processing specific sprites took");
+    gameData.processSpecificSprites();
+    console.timeEnd("Processing specific sprites took");
+
+    console.timeEnd("Processing specific objects took");
+  }
+
+  process(version: ChangeLogVersion | null): ChangeLogVersion {
     // double-equals used to cover undefined case too.
     const gameData = new GameData(this.processDir, this.dataDir(), this.staticDir(version == null));
     console.time("Processing took");

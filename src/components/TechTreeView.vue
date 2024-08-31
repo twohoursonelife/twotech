@@ -18,33 +18,40 @@
 </template>
 
 <script>
+import { defineComponent, ref, watch } from 'vue';
 import TechTreeView from './TechTreeView';
 import TechTreeNode from './TechTreeNode';
 
-export default {
+export default defineComponent({
   name: 'TechTreeView',
-  props: ['object'],
   components: {
     TechTreeView,
-    TechTreeNode
+    TechTreeNode,
   },
-  data () {
+  props: {
+    object: Object,
+  },
+  setup(props) {
+    const selectedObject = ref(null);
+
+    watch(
+      () => props.object,
+      () => {
+        selectedObject.value = null;
+      }
+    );
+
+    const expand = (object) => {
+      selectedObject.value = object;
+      selectedObject.value.loadData();
+    };
+
     return {
-      selectedObject: null,
+      selectedObject,
+      expand,
     };
   },
-  watch: {
-    object () {
-      this.selectedObject = null;
-    }
-  },
-  methods: {
-    expand (object) {
-      this.selectedObject = object;
-      this.selectedObject.loadData();
-    }
-  }
-}
+});
 </script>
 
 <style scoped>
