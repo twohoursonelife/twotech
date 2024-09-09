@@ -1,21 +1,24 @@
 "use strict";
 
-class RecipeNode {
-  static steps(nodes, expand = false) {
-    const steps = [];
-    nodes = nodes.sort((a,b) => b.subNodeDepth() - a.subNodeDepth()).
-                  sort((a,b) => (b.collapsedParent ? 0 : 1) - (a.collapsedParent ? 0 : 1))
-    for (let node of nodes) {
-      if (node.showInStep(expand)) {
-        if (!steps[node.depth()])
-          steps[node.depth()] = []
-        steps[node.depth()].push(node.jsonData(expand));
-      }
-    }
-    return steps.filter(s => s).reverse();
-  }
+import { GameObject } from "./GameObject";
+import { RecipeGenerator } from "./RecipeGenerator";
+import { Transition } from "./Transition";
 
-  constructor(object) {
+class RecipeNode {
+  transition: Transition;
+  object: GameObject;
+  parents: RecipeNode[];
+  children: RecipeNode[];
+  decaySeconds: number;
+  tool: boolean;
+  collapsedParent: RecipeNode;
+  cachedDepth: number;
+  countCache: number;
+  cachedSubNodes: RecipeNode[];
+  mainBranch: boolean;
+  cachedLargestChild: RecipeNode;
+
+  constructor(object: GameObject) {
     this.object = object;
     this.parents = [];
     this.children = [];
@@ -24,19 +27,19 @@ class RecipeNode {
     this.collapsedParent = null;
   }
 
-  addParent(parent) {
+  addParent(parent: RecipeNode) {
     this.parents.push(parent);
     parent.children.push(this);
   }
 
-  depth() {
+  depth(): number {
     if (!this.cachedDepth) {
       this.cachedDepth = this.calculateDepth();
     }
     return this.cachedDepth;
   }
 
-  calculateDepth() {
+  calculateDepth(): number {
     if (this.parents.length === 0) {
       return 0;
     }
@@ -49,21 +52,21 @@ class RecipeNode {
     return depths.sort((a,b) => b - a)[0] + 1;
   }
 
-  collapsedDepth() {
+  collapsedDepth(): number {
     if (this.collapsedParent) {
       return this.collapsedParent.depth();
     }
     return this.depth();
   }
 
-  makeTool(generator) {
+  makeTool(generator: RecipeGenerator) {
     if (this.tool) return;
     this.tool = true;
     this.children.forEach(child => child.deleteToolNode(generator));
     this.children = [];
   }
 
-  deleteToolNode(generator) {
+  deleteToolNode(generator: RecipeGenerator) {
     this.parents = this.parents.filter(p => !p.tool);
     if (this.parents.length === 0) {
       this.tool = true; // So children will remove this node
@@ -72,30 +75,30 @@ class RecipeNode {
     }
   }
 
-  showInStep(expand) {
+  showInStep(expand: boolean): boolean {
     return !this.isLast() && (!this.isCollapsed() || expand);
   }
 
-  isIngredient() {
+  isIngredient(): boolean {
     return !this.tool && this.object.isNatural();
   }
 
-  isUncraftable() {
+  isUncraftable(): boolean {
     return !this.tool && !this.isIngredient() && !this.object.depth.value;
   }
 
-  isLast() {
+  isLast(): boolean {
     return this.tool || this.isIngredient() || this.isUncraftable();
   }
 
-  count() {
+  count(): number {
     if (!this.countCache) {
       this.countCache = this.calculateCount();
     }
     return this.countCache;
   }
 
-  maxUses() {
+  maxUses(): number {
     const numUses = this.object.data.numUses;
     if (numUses && numUses > 1) {
       for (let parent of this.parents) {
@@ -107,7 +110,7 @@ class RecipeNode {
     return 1;
   }
 
-  maxUsesFor(child) {
+  maxUsesFor(child: RecipeNode): boolean {
     if (!this.transition) return false;
     if (this.transition.actor === child.object) {
       return this.transition.actorMinUseFraction == 1;
@@ -115,13 +118,13 @@ class RecipeNode {
     return this.transition.targetMinUseFraction == 1;
   }
 
-  calculateCount() {
+  calculateCount(): number {
     if (this.tool) return 1;
     if (this.parents.length == 0) return 1;
     return Math.ceil(this.uniqueParents().map(n => n.countFor(this)).reduce((t, c) => t + c, 0));
   }
 
-  countFor(child) {
+  countFor(child: RecipeNode): number {
     // if (global.debug && child.object.id == 2448) {
     //   debugger;
     // }
@@ -131,7 +134,7 @@ class RecipeNode {
     return this.count() * this.requiredUsesFor(child) / this.availableUsesFor(child);
   }
 
-  requiredUsesFor(child) {
+  requiredUsesFor(child: RecipeNode): number {
     let uses = 0;
     if (this.transition.actor == child.object) {
       uses += this.actorCount();
@@ -142,20 +145,20 @@ class RecipeNode {
     return uses;
   }
 
-  isReverseUse() {
+  isReverseUse(): boolean {
     return this.object.data.numUses && this.object.data.numUses > 1 &&
            (this.transition.newActor == this.object && this.transition.reverseUseActor ||
             this.transition.newTarget == this.object && this.transition.reverseUseTarget);
   }
 
-  actorCount() {
+  actorCount(): number {
     if (this.isReverseUse() && this.isObjectUsedToIncrement(this.transition.actor)) {
       return this.maxUses();
     }
     return 1;
   }
 
-  targetCount() {
+  targetCount(): number {
     if (this.transition.target != this.transition.actor) {
       if (this.isReverseUse() && this.isObjectUsedToIncrement(this.transition.target)) {
         return this.maxUses();
@@ -164,7 +167,7 @@ class RecipeNode {
     return 1;
   }
 
-  isObjectUsedToIncrement(object) {
+  isObjectUsedToIncrement(object: GameObject): boolean {
     for (let transition of this.object.transitionsAway) {
       if (transition != this.transition &&
           !transition.lastUseTarget &&
@@ -183,7 +186,7 @@ class RecipeNode {
     }
   }
 
-  availableUsesFor(child) {
+  availableUsesFor(child: RecipeNode): number {
     let numUses = child.object.data.numUses || 1;
     if (numUses > 1 && !this.applyUseFor(child)) {
       numUses = 1;
@@ -191,7 +194,7 @@ class RecipeNode {
     return numUses + this.remainderUses(this.transition);
   }
 
-  applyUseFor(child) {
+  applyUseFor(child: RecipeNode): boolean {
     const transition = this.transition;
     if (transition.actor && transition.applyActorUse() && transition.target && transition.applyTargetUse()) {
       // This is a special case where both sides look like tools
@@ -202,7 +205,7 @@ class RecipeNode {
            transition.target == child.object && transition.applyTargetUse();
   }
 
-  remainderUses(transition, depth = 0) {
+  remainderUses(transition: Transition, depth = 0): number {
     if (depth > 10) {
       console.log(`Detected infinite loop calculating remainder for ${this.object.name}`);
       // debugger;
@@ -223,7 +226,7 @@ class RecipeNode {
 
   // This is to check for a similar transition which results in the same object
   // Such as picking a charcoal out of a small charcoal pile
-  remainderUseTransition(remainder) {
+  remainderUseTransition(remainder: GameObject): Transition {
     for (let transition of remainder.transitionsAway) {
       if (transition.newActor === this.object || transition.newTarget === this.object) {
         // Make sure we are using the same actor or target so we don't count chisel being put on split rock again
@@ -235,7 +238,7 @@ class RecipeNode {
     }
   }
 
-  remainder(transition) {
+  remainder(transition: Transition): GameObject {
     if (!transition) return null;
     if (transition.newActor === this.object) {
       return transition.newTarget;
@@ -243,18 +246,18 @@ class RecipeNode {
     return transition.newActor;
   }
 
-  subNodes() {
+  subNodes(): RecipeNode[] {
     if (!this.cachedSubNodes)
       this.cachedSubNodes = this.calculateSubNodes();
     return this.cachedSubNodes;
   }
 
-  collapsedSubNodes() {
+  collapsedSubNodes(): RecipeNode[] {
     return this.subNodes().filter(n => n.collapsedParent == this);
   }
 
-  calculateSubNodes() {
-    let subNodes = [];
+  calculateSubNodes(): RecipeNode[] {
+    let subNodes: RecipeNode[] = [];
     for (let child of this.uniqueChildren()) {
       if (!child.isLast()) {
         subNodes.push(child);
@@ -264,29 +267,29 @@ class RecipeNode {
     return subNodes.filter((s,i) => subNodes.indexOf(s) == i);
   }
 
-  isExpandable() {
+  isExpandable(): boolean {
     return this.collapsedParent == this && this.collapsedSubNodes().length > 0;
   }
 
-  isCollapsed() {
+  isCollapsed(): boolean {
     return this.collapsedParent && this.collapsedParent != this;
   }
 
-  subNodeDepth() {
+  subNodeDepth(): number {
     if (this.subNodes().length == 0)
       return 0;
     return this.subNodes().map(n => n.depth()).sort((a,b) => b - a)[0];
   }
 
-  uniqueChildren() {
+  uniqueChildren(): RecipeNode[] {
     return this.children.filter((c,i) => this.children.indexOf(c) == i);
   }
 
-  uniqueParents() {
+  uniqueParents(): RecipeNode[] {
     return this.parents.filter((p,i) => this.parents.indexOf(p) == i);
   }
 
-  trackMainBranch() {
+  trackMainBranch(): void {
     this.mainBranch = true;
     const child = this.uniqueChildren().sort((a,b) => b.subNodes().length - a.subNodes().length)[0];
     if (child) {
@@ -294,7 +297,7 @@ class RecipeNode {
     }
   }
 
-  collapseBranches() {
+  collapseBranches(): void {
     for (let child of this.children) {
       if (child.mainBranch) {
         child.collapseBranches();
@@ -304,14 +307,14 @@ class RecipeNode {
     }
   }
 
-  largestChild() {
+  largestChild(): RecipeNode {
     if (!this.cachedLargestChild) {
       this.cachedLargestChild = this.children.sort((a,b) => b.subNodes().length - a.subNodes().length)[0];
     }
     return this.cachedLargestChild;
   }
 
-  collapse(parent = null) {
+  collapse(parent: RecipeNode = null): void {
     // Don't collapse the main branch
     if (this.mainBranch) {
       return;
@@ -324,12 +327,12 @@ class RecipeNode {
     this.children.forEach(c => c.collapse(parent));
   }
 
-  differentCollapsedParent(parent) {
+  differentCollapsedParent(parent: RecipeNode): RecipeNode {
     return this.parents.find(p => p.collapsedParent != parent);
   }
 
-  jsonData(expand = false) {
-    const data = {id: this.object.id};
+  jsonData(expand: boolean = false): ExportedRecipeNodeJson {
+    const data: ExportedRecipeNodeJson = {id: this.object.id};
     if (this.count() > 1) {
       data.count = this.count();
       data.uses = "x" + data.count;
@@ -378,13 +381,45 @@ class RecipeNode {
     return data;
   }
 
-  subSteps() {
-    return RecipeNode.steps([this].concat(this.collapsedSubNodes()), true);
+  static steps(nodes: RecipeNode[], expand = false): ExportedRecipeNodeJson[][] {
+    const steps: ExportedRecipeNodeJson[][] = [];
+    nodes = nodes.sort((a,b) => b.subNodeDepth() - a.subNodeDepth()).
+                  sort((a,b) => (b.collapsedParent ? 0 : 1) - (a.collapsedParent ? 0 : 1))
+    for (let node of nodes) {
+      if (node.showInStep(expand)) {
+        if (!steps[node.depth()])
+          steps[node.depth()] = []
+        steps[node.depth()].push(node.jsonData(expand));
+      }
+    }
+    return steps.filter(s => s).reverse();
   }
 
-  parentsAreTools() {
+  subSteps(): ExportedRecipeNodeJson[][] {
+    return RecipeNode.steps([this, ...this.collapsedSubNodes()], true);
+  }
+
+  parentsAreTools(): boolean {
     return this.parents.filter(p => p.tool).length == this.parents.length;
   }
 }
 
-module.exports = RecipeNode;
+interface ExportedRecipeNodeJson {
+  id?: string;
+  count?: number;
+  uses?: string;
+  mainBranch?: boolean;
+  depth?: number;
+  subSteps?: ExportedRecipeNodeJson[][];
+  actorID?: string;
+  actorUses?: string;
+  targetID?: string;
+  targetUses?: string;
+  weight?: number;
+  decay?: string;
+  hand?: boolean;
+  targetPlayer?: boolean;
+  
+}
+
+export { RecipeNode, ExportedRecipeNodeJson }

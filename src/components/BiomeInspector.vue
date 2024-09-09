@@ -1,81 +1,110 @@
 <template>
-  <div class="biomeInspector">
-    <div class="biomes">
-      <div class="biomesTitle">Biomes</div>
-      <BiomeList :selectedBiome="biome" />
-    </div>
-    <div class="info">
-      <h2 class="title">{{biome.name}} Biome</h2>
-      <h3 class="subtitle" v-if="!biome.data">Loading...</h3>
-      <div class="biomeImgContainer">
-        <BiomeImage :biome="biome" />
+  <div class="biomeInspector" v-if="biome">
+    <div v-if="loading" class="loading">Loading biome...</div>
+    <div v-else>
+      <div class="biomes">
+        <div class="biomesTitle">Biomes</div>
+        <BiomeList :selectedBiome="biome" />
       </div>
-      <ul v-if="biome.data">
-        <li>
-          Temperature: {{temperatureText}}
-          <span class="details">(ground heat: {{biome.data.groundHeat}})</span>
-        </li>
-      </ul>
-      <div class="objects">
-        <div class="object" v-for="object in objects">
-          <ObjectView :object="object" :spawnChance="biome.spawnChance(object)" />
+      <div class="info">
+        <h2 class="title">{{ biome.name }} Biome</h2>
+        <div class="biomeImgContainer">
+          <BiomeImage :biome="biome" />
+        </div>
+        <ul>
+          <li>
+            Temperature: {{ temperatureText }}
+            <span v-if="biome.data" class="details">(ground heat: {{ biome.data.groundHeat }})</span>
+          </li>
+        </ul>
+        <div class="objects">
+          <div class="object" v-for="object in objects" :key="object.id">
+            <ObjectView :object="object" :spawnChance="biome.spawnChance(object)" />
+          </div>
         </div>
       </div>
     </div>
   </div>
+  <div v-else>Loading biome...</div>
 </template>
 
 <script>
-import GameObject from '../models/GameObject';
+import { defineComponent, ref, computed, watch, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import Biome from '../models/Biome';
 
 import ObjectView from './ObjectView';
 import BiomeImage from './BiomeImage';
 import BiomeList from './BiomeList';
 
-export default {
+export default defineComponent({
   components: {
     ObjectView,
     BiomeList,
     BiomeImage,
   },
-  data() {
-    return {
-      biome: Biome.findAndLoad(this.$route.params.id),
+  setup() {
+    const route = useRoute();
+    const router = useRouter();
+    const biome = ref(null);
+    const loading = ref(true);
+
+    const loadBiome = async () => {
+      loading.value = true;
+      biome.value = await Biome.findAndLoad(route.params.id);
+      loading.value = false;
+      if (!biome.value) {
+        router.replace("/not-found");
+      }
     };
-  },
-  created() {
-    if (!this.biome)
-      this.$router.replace("/not-found");
-  },
-  watch: {
-    '$route' (to, from) {
-      this.biome = Biome.findAndLoad(this.$route.params.id);
-    }
-  },
-  computed: {
-    objects() {
-      return this.biome.objects();
-    },
-    temperatureText() {
-      const heat = this.biome.data.groundHeat;
+
+    watch(
+      () => route.params.id,
+      () => {
+        loadBiome();
+      }
+    );
+
+    onMounted(() => {
+      loadBiome();
+    });
+
+    const objects = computed(() => {
+      return biome.value?.objects() || [];
+    });
+
+    const temperatureText = computed(() => {
+      const heat = biome.value?.data?.groundHeat;
       if (heat < 0.0) return "Very Cold";
       if (heat < 0.5) return "Cold";
       if (heat < 1.0) return "Cool";
       if (heat < 1.1) return "Mild";
       if (heat < 1.9) return "Warm";
       if (heat < 2.1) return "Hot";
-      return "Very Hot"
-    }
+      return "Very Hot";
+    });
+
+    return {
+      biome,
+      loading,
+      objects,
+      temperatureText,
+    };
   },
   metaInfo() {
-    return {title: this.biome.name + " Biome"};
-  }
-}
+    return { title: `${this.biome?.name || "Biome"} Biome` };
+  },
+});
 </script>
 
 <style lang="scss">
 .biomeInspector {
+  .loading {
+    text-align: center;
+    padding: 20px;
+    font-size: 18px;
+    color: #aaa;
+  }
   .biomes {
     background-color: #222;
     border-radius: 5px;

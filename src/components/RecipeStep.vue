@@ -2,23 +2,23 @@
   <div class="stepWrapper" v-if="showStep">
     <div class="step">
       <div class="stepNumber">
-        {{number}}
+        {{ number }}
       </div>
       <div class="stepTransitionsWrapper">
         <div class="stepTransitions">
           <RecipeTransition
             v-for="transition in unexpandableTransitions"
+            :key="transition.id"
             :transition="transition"
             :highlight="highlightTransition(transition)"
-            :key="transition.id"
             :rightClickObject="rightClickObject"
           />
           <RecipeTransition
             v-for="transition in expandableTransitions"
-            :transition="transition"
             :key="transition.id"
+            :transition="transition"
             :rightClickObject="rightClickObject"
-            :expanded="transition == expandedTransition"
+            :expanded="transition === expandedTransition"
             :highlight="highlightTransition(transition)"
             @expand="expand"
           />
@@ -28,94 +28,82 @@
     <div class="subSteps" v-if="expandedTransition">
       <RecipeStep
         v-for="(transitions, index) in expandedTransition.subSteps"
+        :key="index"
         :transitions="transitions"
         :number="numberToLetter(index)"
         :rightClickObject="rightClickObject"
         :filteredObject="filteredObject"
         :highlightObjects="highlightObjects"
-        :key="index"
       />
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, ref } from 'vue';
 import RecipeTransition from './RecipeTransition';
 import RecipeStep from './RecipeStep';
 
-export default {
-  name: 'RecipeStep',
-  props: ['transitions', 'number', 'rightClickObject', 'filteredObject', 'highlightObjects'],
-  components: {
-    RecipeTransition,
-    RecipeStep
-  },
-  data() {
-    return {
-      manuallyExpandedTransition: null,
-    };
-  },
-  computed: {
-    showStep() {
-      return this.filteredTransitions.length > 0;
-    },
-    filteredTransitions() {
-      if (this.filteredObject) {
-        return this.transitionsWithObject(this.transitions, this.filteredObject);
-      }
-      return this.transitions;
-    },
-    unexpandableTransitions() {
-      return this.filteredTransitions.filter(t => !t.subSteps);
-    },
-    expandableTransitions() {
-      return this.filteredTransitions.filter(t => t.subSteps);
-    },
-    expandedTransition() {
-      return this.manuallyExpandedTransition || this.filteredObject && this.expandableTransitions[0];
-    }
-  },
-  methods: {
-    numberToLetter(num) {
-      return String.fromCharCode(97 + num);
-    },
+// Props
+const props = defineProps({
+  transitions: Array,
+  number: [String, Number],
+  rightClickObject: Function,
+  filteredObject: Object,
+  highlightObjects: Array,
+});
 
-    expand(transition) {
-      if (this.expandedTransition == transition) {
-        this.manuallyExpandedTransition = null;
-      } else {
-        this.manuallyExpandedTransition = transition;
-      }
-    },
+// State
+const manuallyExpandedTransition = ref(null);
 
-    transitionsWithObject(transitions, object) {
-      return transitions.filter(t => this.transitionIncludesObject(t, object));
-    },
+// Computed properties
+const showStep = computed(() => filteredTransitions.value.length > 0);
 
-    transitionIncludesObject(transition, object) {
-      if (transition.subSteps) {
-        for (var transitions of transition.subSteps) {
-          if (this.transitionsWithObject(transitions, object).length > 0) {
-            return true;
-          }
-        }
-        return false;
-      }
-      return transition.actorID == object.id ||
-             transition.targetID == object.id ||
-             transition.id == object.id;
-    },
-
-    highlightTransition(transition) {
-      if (!this.highlightObjects) return;
-      for (var object of this.highlightObjects) {
-        if (object.id == transition.id) {
-          return true;
-        }
-      }
-      return false;
-    }
+const filteredTransitions = computed(() => {
+  if (props.filteredObject) {
+    return transitionsWithObject(props.transitions, props.filteredObject);
   }
+  return props.transitions;
+});
+
+const unexpandableTransitions = computed(() => filteredTransitions.value.filter(t => !t.subSteps));
+
+const expandableTransitions = computed(() => filteredTransitions.value.filter(t => t.subSteps));
+
+const expandedTransition = computed(() => manuallyExpandedTransition.value || (props.filteredObject && expandableTransitions.value[0]));
+
+// Methods
+function numberToLetter(num) {
+  return String.fromCharCode(97 + num);
+}
+
+function expand(transition) {
+  if (expandedTransition.value === transition) {
+    manuallyExpandedTransition.value = null;
+  } else {
+    manuallyExpandedTransition.value = transition;
+  }
+}
+
+function transitionsWithObject(transitions, object) {
+  return transitions.filter(t => transitionIncludesObject(t, object));
+}
+
+function transitionIncludesObject(transition, object) {
+  if (transition.subSteps) {
+    for (const subTransition of transition.subSteps) {
+      if (transitionsWithObject(subTransition, object).length > 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+  return transition.actorID === object.id || transition.targetID === object.id || transition.id === object.id;
+}
+
+function highlightTransition(transition) {
+  if (!props.highlightObjects) return false;
+  return props.highlightObjects.some(object => object.id === transition.id);
 }
 </script>
 

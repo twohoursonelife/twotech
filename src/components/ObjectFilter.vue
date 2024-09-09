@@ -1,22 +1,34 @@
 <template>
   <router-link class="nostyle" :to="url">
-    <div class="objectFilter" :class="{selected}">
-      <h3>{{filter.name}}</h3>
+    <div class="objectFilter" :class="{ selected }">
+      <h3>{{ filter.name }}</h3>
       <div v-if="selected" class="deselect">x</div>
     </div>
   </router-link>
 </template>
 
 <script>
-export default {
-  props: ['filter', 'selected'],
-  computed: {
-    url() {
-      if (this.selected) return "/";
-      return `${this.filter.path}`;
+import { defineComponent, computed } from 'vue';
+
+export default defineComponent({
+  props: {
+    filter: {
+      type: Object,
+      required: true
+    },
+    selected: {
+      type: Boolean,
+      required: true
     }
+  },
+  setup(props) {
+    const url = computed(() => {
+      return props.selected ? '/' : `${props.filter.path}`;
+    });
+
+    return { url };
   }
-}
+});
 </script>
 
 <style scoped>

@@ -5,7 +5,8 @@
         v-for="(transition, index) in visibleTransitions"
         :key="index"
         :transition="transition"
-        :selectedObject="selectedObject" />
+        :selectedObject="selectedObject"
+      />
     </div>
     <div v-if="canShowMore" class="showMoreWrapper">
       <span class="showMore" @click="expand">
@@ -16,27 +17,39 @@
 </template>
 
 <script>
+import { defineComponent, computed } from 'vue';
 import TransitionView from './TransitionView';
 
-export default {
-  props: ['title', 'limit', 'transitions', 'selectedObject'],
+export default defineComponent({
+  props: {
+    title: String,
+    limit: Number,
+    transitions: Array,
+    selectedObject: Object,
+  },
   components: {
-    TransitionView
+    TransitionView,
   },
-  computed: {
-    visibleTransitions() {
-      return this.transitions.slice(0, this.limit);
-    },
-    canShowMore() {
-      return this.limit && this.limit < this.transitions.length;
-    }
+  setup(props) {
+    const visibleTransitions = computed(() => {
+      return props.transitions.slice(0, props.limit);
+    });
+
+    const canShowMore = computed(() => {
+      return props.limit && props.limit < props.transitions.length;
+    });
+
+    const expand = () => {
+      props.limit = parseInt(props.limit) + 50;
+    };
+
+    return {
+      visibleTransitions,
+      canShowMore,
+      expand,
+    };
   },
-  methods: {
-    expand() {
-      this.limit = parseInt(this.limit) + 50;
-    }
-  }
-}
+});
 </script>
 
 <style scoped>

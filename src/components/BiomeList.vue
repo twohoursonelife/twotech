@@ -1,32 +1,51 @@
 <template>
   <div class="biomeList">
-    <router-link v-for="biome in biomes" :to="biome.url()" :title="biome.name" v-tippy class="biome" :key="biome.id" :class="{selected: biome == selectedBiome}">
+    <router-link
+      v-for="biome in biomes"
+      :to="biome.url()"
+      :title="biome.name"
+      v-tippy="{theme: 'twotech', animation: 'scale'}"
+      class="biome"
+      :key="biome.id"
+      :class="{ selected: biome === selectedBiome }"
+      ref="biomeLink"
+    >
       <BiomeImage :biome="biome" />
     </router-link>
   </div>
 </template>
 
 <script>
+import { defineComponent, computed } from 'vue';
 import Biome from '../models/Biome';
-
 import BiomeImage from './BiomeImage';
 
-export default {
+import '../css/tippy.css'
+import 'tippy.js/animations/perspective.css'
+import 'tippy.js/animations/scale.css'
+import 'tippy.js/animations/shift-away.css'
+import 'tippy.js/animations/shift-toward.css'
+
+export default defineComponent({
   components: {
     BiomeImage,
   },
-  props: [
-    'selectedBiome',
-  ],
-  computed: {
-    biomes() {
+  props: {
+    selectedBiome: Object,
+  },
+  setup() {
+    const biomes = computed(() => {
       return Biome.biomes();
-    }
-  }
-}
+    });
+
+    return {
+      biomes,
+    };
+  },
+});
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .biomeList {
   display: flex;
   justify-content: center;

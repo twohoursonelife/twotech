@@ -12,7 +12,7 @@
                   :hand="transition.hand" hover="true"
                   :object="actor"
                   :uses="transition.actorUses"
-                  :clickable="transition.actorID && actor != selectedObject" />
+                  :clickable="transition.actorID && actor?.id !== selectedObject?.id" />
 
       <div v-else class="placeholder"></div>
 
@@ -26,7 +26,7 @@
                   :object="target"
                   :uses="transition.targetUses"
                   :wildcard="wildcard"
-                  :clickable="transition.targetID && target != selectedObject" />
+                  :clickable="transition.targetID && target?.id !== selectedObject?.id" />
 
       <ObjectImage class="transitionObject"
                   v-else-if="transition.targetPlayer"
@@ -50,7 +50,7 @@
                   :uses="transition.newActorUses"
                   :move="transition.move"
                   :object="newActor"
-                  :clickable="newActor && newActor != selectedObject" />
+                  :clickable="newActor && newActor?.id !== selectedObject?.id" />
 
       <div class="gap" v-if="showNewActor"></div>
 
@@ -64,7 +64,7 @@
                   :wildcard="wildcard"
                   :object="newTarget"
                   :extraObject="newExtraTarget"
-                  :clickable="newTarget && newTarget != selectedObject" />
+                  :clickable="newTarget && newTarget?.id !== selectedObject?.id" />
 
       <ObjectImage class="transitionObject"
                   v-else
@@ -75,42 +75,63 @@
 </template>
 
 <script>
+import { defineComponent, computed } from 'vue';
 import GameObject from '../models/GameObject';
-
 import ObjectImage from './ObjectImage';
 
-export default {
-  props: ['transition', 'selectedObject'],
-  components: {
-    ObjectImage
+export default defineComponent({
+  props: {
+    transition: Object,
+    selectedObject: Object,
   },
-  computed: {
-    twoOnLeft() {
-      return this.transition.actorID || this.transition.decay || this.transition.hand;
-    },
-    actor () {
-      return GameObject.find(this.transition.actorID);
-    },
-    target () {
-      return GameObject.find(this.transition.targetID);
-    },
-    newActor () {
-      return GameObject.find(this.transition.newActorID);
-    },
-    newTarget () {
-      return GameObject.find(this.transition.newTargetID);
-    },
-    newExtraTarget () {
-      return GameObject.find(this.transition.newExtraTargetID);
-    },
-    showNewActor() {
-      return !this.transition.decay;
-    },
-    wildcard() {
-      return this.showNewActor && (this.transition.targetID || 0) < 1 && (this.transition.newTargetID || 0) < 1;
-    }
-  }
-}
+  components: {
+    ObjectImage,
+  },
+  setup(props) {
+    const twoOnLeft = computed(() => {
+      return props.transition.actorID || props.transition.decay || props.transition.hand;
+    });
+
+    const actor = computed(() => {
+      return GameObject.find(props.transition.actorID);
+    });
+
+    const target = computed(() => {
+      return GameObject.find(props.transition.targetID);
+    });
+
+    const newActor = computed(() => {
+      return GameObject.find(props.transition.newActorID);
+    });
+
+    const newTarget = computed(() => {
+      return GameObject.find(props.transition.newTargetID);
+    });
+
+    const newExtraTarget = computed(() => {
+      return GameObject.find(props.transition.newExtraTargetID);
+    });
+
+    const showNewActor = computed(() => {
+      return !props.transition.decay;
+    });
+
+    const wildcard = computed(() => {
+      return showNewActor.value && (props.transition.targetID || 0) < 1 && (props.transition.newTargetID || 0) < 1;
+    });
+
+    return {
+      twoOnLeft,
+      actor,
+      target,
+      newActor,
+      newTarget,
+      newExtraTarget,
+      showNewActor,
+      wildcard,
+    };
+  },
+});
 </script>
 
 <style scoped>

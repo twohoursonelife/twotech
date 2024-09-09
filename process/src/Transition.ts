@@ -1,15 +1,44 @@
 "use strict";
 
-const Depth = require('./Depth');
+import { Depth } from "./Depth";
+import { GameObject } from "./GameObject";
 
 class Transition {
-  constructor(dataText, filename) {
-    this.depth = new Depth({});
+  depth: Depth;
+  lastUseActor: boolean;
+  lastUseTarget: boolean;
+  actorID: string;
+  targetID: string;
+  newActorID: string;
+  newTargetID: string;
+  autoDecaySeconds: number;
+  actorMinUseFraction: number;
+  targetMinUseFraction: number;
+  reverseUseActor: boolean;
+  reverseUseTarget: boolean;
+  move: number;
+  desiredMoveDist: number;
+  noUseActor: boolean;
+  noUseTarget: boolean;
+  playerActor: boolean;
+  tool: boolean;
+  targetRemains: boolean;
+  decay: string;
+  actor: GameObject;
+  target: GameObject;
+  newActor: GameObject;
+  newTarget: GameObject;
+  newExtraTarget: GameObject;
+  newExtraTargetID: string;
+  newActorWeight: number;
+  newTargetWeight: number;
+  constructor(dataText: string, filename: string) {
+    this.depth = new Depth({craftable: false, difficulty: 0});
     this.parseFilename(filename);
     this.parseData(dataText);
   }
 
-  parseFilename(filename) {
+  parseFilename(filename: string): void {
     const parts = filename.split('.')[0].split('_');
     this.lastUseActor = (parts[2] === 'LA');
     this.lastUseTarget = (parts[2] === 'LT' || parts[2] === 'L');
@@ -17,29 +46,29 @@ class Transition {
     this.targetID = parts[1];
   }
 
-  parseData(dataText) {
+  parseData(dataText: string): void {
     const data = dataText.split(' ');
 
-    this.newActorID = data[0] || 0;
-    this.newTargetID = data[1] || 0;
-    this.autoDecaySeconds = data[2] || 0;
-    this.actorMinUseFraction = data[3] || 0;
-    this.targetMinUseFraction = data[4] || 0;
-    this.reverseUseActor = data[5] == '1';
-    this.reverseUseTarget = data[6] == '1';
-    this.move = parseInt(data[7] || 0);
-    this.desiredMoveDist = data[8] || 1;
-    this.noUseActor = data[9] == '1';
-    this.noUseTarget = data[10] == '1';
+    this.newActorID = data[0] || '0';
+    this.newTargetID = data[1] || '0';
+    this.autoDecaySeconds = parseInt(data[2]) || 0;
+    this.actorMinUseFraction = parseInt(data[3]) || 0;
+    this.targetMinUseFraction = parseInt(data[4]) || 0;
+    this.reverseUseActor = data[5] === '1';
+    this.reverseUseTarget = data[6] === '1';
+    this.move = parseInt(data[7] || '0');
+    this.desiredMoveDist = parseInt(data[8]) || 1;
+    this.noUseActor = data[9] === '1';
+    this.noUseTarget = data[10] === '1';
 
-    this.playerActor = this.actorID == 0;
-    this.tool = this.actorID >= 0 && this.actorID == this.newActorID;
-    this.targetRemains = this.targetID >= 0 && this.targetID == this.newTargetID;
+    this.playerActor = this.actorID === '0';
+    this.tool = parseInt(this.actorID) >= 0 && this.actorID === this.newActorID;
+    this.targetRemains = parseInt(this.targetID) >= 0 && this.targetID === this.newTargetID;
 
     this.decay = this.calculateDecay(this.autoDecaySeconds);
   }
 
-  calculateDecay(seconds) {
+  calculateDecay(seconds: number): string {
     if (seconds < 0)
       return -seconds + "h";
     if (seconds > 0 && seconds % 60 == 0)
@@ -48,7 +77,7 @@ class Transition {
       return seconds + "s";
   }
 
-  addToObjects(objects) {
+  addToObjects(objects: Record<string, GameObject>): void {
     this.actor = objects[this.actorID];
     this.target = objects[this.targetID];
     this.newActor = objects[this.newActorID];
@@ -71,63 +100,63 @@ class Transition {
       this.newExtraTarget.transitionsToward.push(this);
   }
 
-  isGeneric() {
+  isGeneric(): boolean {
     return this.targetID === '-1' && this.newTargetID === '0' && this.actorID != this.newActorID;
   }
 
-  matchesGenericTransition(transition) {
+  matchesGenericTransition(transition: Transition): boolean {
     if (this == transition)
       return false;
     return this.matchesGenericActor(transition) || this.matchesGenericTarget(transition);
   }
 
-  matchesGenericActor(transition) {
-    return this.actorID == transition.actorID && this.tool && this.targetID > 0;
+  matchesGenericActor(transition: Transition): boolean {
+    return this.actorID == transition.actorID && this.tool && parseInt(this.targetID) > 0;
   }
 
-  matchesGenericTarget(transition) {
+  matchesGenericTarget(transition: Transition): boolean {
     if (transition.lastUseActor && !this.lastUseTarget)
       return false;
-    return this.targetID == transition.actorID && this.targetRemains && this.actorID > 0;
+    return this.targetID == transition.actorID && this.targetRemains && parseInt(this.actorID) > 0;
   }
 
-  isLastUse() {
+  isLastUse(): boolean {
     return this.lastUseActor || this.lastUseTarget;
   }
 
-  targetsPlayer() {
-    return this.targetID === '0' || this.targetID === '-1' && this.actor.data.foodValue > 0;
+  targetsPlayer(): boolean {
+    return this.targetID === '0' || this.targetID === '-1' && (this.actor.data.foodValue[0] + this.actor.data.foodValue[1]) > 0;
   }
 
-  totalDecaySeconds() {
+  totalDecaySeconds(): number {
     if (this.autoDecaySeconds > 0 && this.target.data.numUses > 1 && this.lastUseTarget)
-      return parseInt(this.autoDecaySeconds) * this.target.data.numUses;
+      return this.autoDecaySeconds * this.target.data.numUses;
     return this.autoDecaySeconds;
   }
 
-  clone() {
+  clone(): Transition {
     return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
   }
 
-  applyActorUse() {
+  applyActorUse(): boolean {
     return !this.noUseActor && (
             this.tool ||
             this.newActor &&
             this.newActor.data.numUses === this.actor.data.numUses);
   }
 
-  applyTargetUse() {
+  applyTargetUse(): boolean {
     return !this.noUseTarget && (
             this.targetRemains ||
             this.newTarget &&
             this.newTarget.data.numUses === this.target.data.numUses);
   }
 
-  hand() {
+  hand(): boolean {
     return !this.decay && (this.playerActor || !(this.actor && (this.actor.canMove() || this.actor.isGlobalTrigger())));
   }
 
-  totalDepth() {
+  totalDepth(): number {
     let total = 0;
     if (this.actor) {
       total += this.actor.depth.value;
@@ -138,8 +167,8 @@ class Transition {
     return total;
   }
 
-  jsonData() {
-    const result = {}
+  jsonData(): ExportedTransitionData {
+    const result: ExportedTransitionData = {}
 
     if (this.actor) {
       result.actorID = this.actor.id;
@@ -217,4 +246,24 @@ class Transition {
   }
 }
 
-module.exports = Transition;
+interface ExportedTransitionData {
+  actorID?: string;
+  actorUses?: string;
+  newActorWeight?: number;
+  newActorUses?: string;
+  targetID?: string;
+  targetUses?: string;
+  newTargetWeight?: number;
+  newTargetUses?: string;
+  newActorID?: string;
+  newTargetID?: string;
+  newExtraTargetID?: string;
+  targetPlayer?: boolean;
+  targetRemains?: boolean;
+  hand?: boolean;
+  tool?: boolean;
+  decay?: string;
+  move?: number;
+}
+
+export { Transition, ExportedTransitionData }

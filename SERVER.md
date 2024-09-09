@@ -81,7 +81,7 @@ Then run it:
 
 ```
 cd onetech
-node process download
+npm run process -- download
 ```
 
 ## Cron

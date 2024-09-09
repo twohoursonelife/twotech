@@ -1,39 +1,56 @@
 <template>
-  <div class="techTree">
-    <h2><router-link :to="object.url()">{{object.name}}</router-link></h2>
+  <div class="techTree" v-if="object && object.data">
+    <h2><router-link :to="object.url()">{{ object.name }}</router-link></h2>
     <h3>Tech Tree</h3>
 
     <TechTreeView :object="object" />
   </div>
+  <div v-else>
+    Loading or object not found...
+  </div>
 </template>
 
 <script>
+import { defineComponent, ref, watch, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import GameObject from '../models/GameObject';
-
 import TechTreeView from './TechTreeView';
 
-export default {
+export default defineComponent({
   components: {
-    TechTreeView
+    TechTreeView,
   },
-  data() {
+  setup() {
+    const route = useRoute();
+    const router = useRouter();
+    const object = ref(null);
+
+    const loadObject = async () => {
+      object.value = await GameObject.findAndLoad(route.params.id);
+      if (!object.value) {
+        router.replace('/not-found');
+      }
+    };
+
+    watch(
+      () => route.params.id,
+      () => {
+        loadObject();
+      }
+    );
+
+    onMounted(() => {
+      loadObject();
+    });
+
     return {
-      object: GameObject.findAndLoad(this.$route.params.id),
+      object,
     };
   },
-  created() {
-    if (!this.object)
-      this.$router.replace("/not-found");
-  },
-  watch: {
-    '$route' (to, from) {
-      this.object = GameObject.findAndLoad(this.$route.params.id);
-    }
-  },
   metaInfo() {
-    return {title: `${this.object.name} Tech Tree`};
-  }
-}
+    return { title: `${this.object?.name || 'Tech Tree'} Tech Tree` };
+  },
+});
 </script>
 
 <style scoped>

@@ -1,19 +1,25 @@
 <template>
-  <div class="biomeImage" :style="{backgroundImage: `url('${imageUrl}')`}">
+  <div class="biomeImage" :style="{ backgroundImage: `url('${imageUrl}')` }">
   </div>
 </template>
 
 <script>
-export default {
-  props: [
-    'biome',
-  ],
-  computed: {
-    imageUrl() {
-      return `${global.staticPath}/ground/ground_${this.biome.id}.png`;
-    }
-  }
-}
+import { defineComponent, computed } from 'vue';
+
+export default defineComponent({
+  props: {
+    biome: Object,
+  },
+  setup(props) {
+    const imageUrl = computed(() => {
+      return `${global.staticPath}/ground/ground_${props.biome.id}.png`;
+    });
+
+    return {
+      imageUrl,
+    };
+  },
+});
 </script>
 
 <style scoped>

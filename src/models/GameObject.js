@@ -68,6 +68,7 @@ export default class GameObject {
 
   static find(id) {
     if (!id) return;
+    // Only grab the number in the beginning of the id.
     return this.objectsMap[id.split("-")[0]] || this.legacyObjectsMap[id.split("-")[0]];
   }
 
@@ -76,29 +77,31 @@ export default class GameObject {
     return Object.values(this.objectsMap).find(o => o.name == name);
   }
 
-  static findAndLoad(id) {
+  static async findAndLoad(id) {
     const object = this.find(id);
-    if (!object) return;
-    object.loadData();
-    return object;
+    if (!object) return await Promise.resolve(null);
+    return await object.loadData().then(() => object);
   }
 
-  static findAndLoadByName(name) {
+  static async findAndLoadByName(name) {
     const object = this.findByName(name);
-    if (!object) return;
-    object.loadData();
-    return object;
+    if (!object) return await Promise.resolve(null);
+    return await object.loadData().then(() => object);
   }
 
-  static findFilter(key_path) {
-    if (!key_path) {
-      return null;
+  static findFilter(key_path_parts) {
+    if (typeof key_path_parts=== 'string') {
+      key_path_parts = [key_path_parts];
     }
-    let parts = key_path.split('/');
-    let filter = this.filters[parts.shift()];
-    for (let part of parts) (
-      filter = filter.subfilters[part]
-    )
+
+    let filter = this.filters[key_path_parts.shift()];
+    for (let part of key_path_parts) {
+      if (filter && filter.subfilters) {
+        filter = filter.subfilters[part];
+      } else {
+        return null; // Return null if any part of the path is invalid
+      }
+    }
     return filter;
   }
 
@@ -175,13 +178,16 @@ export default class GameObject {
     return +(num*100).toFixed(places);
   }
 
-  loadData() {
-    if (this.data || this.loading) return;
+  async loadData() {
+    if (this.data || this.loading) return await Promise.resolve(this.data);
     this.loading = true;
-    this.fetchData(data => {
-      this.loading = false;
-      this.data = data;
-    });
+    return await fetch(`${global.staticPath}/objects/${this.id}.json`)
+      .then(data => data.json())
+      .then(data => {
+        this.loading = false;
+        this.data = data;
+        return this.data;
+      });
   }
 
   sizeText(size) {

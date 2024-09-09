@@ -1,14 +1,17 @@
 "use strict";
 
-const RecipeGenerator = require('./RecipeGenerator');
-const RecipeNode = require('./RecipeNode');
+import { GameObject } from "./GameObject";
+import { RecipeGenerator } from "./RecipeGenerator";
+import { ExportedRecipeNodeJson, RecipeNode } from "./RecipeNode";
 
 class Recipe {
-  constructor(object) {
+  object: GameObject;
+  nodes: RecipeNode[];
+  constructor(object: GameObject) {
     this.object = object;
   }
 
-  generate() {
+  generate(): void {
     // if (this.object.id == 2620) {
       // global.debug = true;
     // }
@@ -17,12 +20,12 @@ class Recipe {
     this.nodes = generator.nodes;
   }
 
-  hasData() {
+  hasData(): boolean {
     return this.nodes.length > 1;
   }
 
-  jsonData() {
-    const data = {steps: RecipeNode.steps(this.nodes)};
+  jsonData(): ExportedRecipeJson {
+    const data: ExportedRecipeJson = {steps: RecipeNode.steps(this.nodes)};
 
     // For now let's just merge tools and ingredients together when displaying
     // We may eventually split them up for the user
@@ -39,12 +42,12 @@ class Recipe {
     return data;
   }
 
-  tools() {
+  tools(): GameObject[] {
     return this.nodes.filter(n => n.tool && !n.parentsAreTools()).map(n => n.object);
   }
 
-  ingredients() {
-    const ingredients = [];
+  ingredients(): GameObject[] {
+    const ingredients: GameObject[] = [];
     const nodes = this.nodes.filter(n => n.isIngredient());
     for (let node of nodes) {
       const count = node.count();
@@ -56,4 +59,10 @@ class Recipe {
   }
 }
 
-module.exports = Recipe;
+interface ExportedRecipeJson {
+  steps?: ExportedRecipeNodeJson[][];
+  ingredients?: string[];
+  uncraftables?: string[];
+}
+
+export { Recipe, ExportedRecipeJson }

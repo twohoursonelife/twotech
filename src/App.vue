@@ -1,13 +1,12 @@
 <template>
   <div id="app">
     <h1>
-      <router-link to="/">Crafting Reference for {{gameName}}</router-link>
+      <router-link to="/">Crafting Reference for {{ gameName }}</router-link>
     </h1>
 
     <h2 v-if="loading">Loading...</h2>
 
     <div v-else>
-
       <div v-if="onEdge">
         <div class="edgeTitle">Browsing Unreleased</div>
         <div class="subtitle">
@@ -15,32 +14,36 @@
             <router-link to="/versions">What's new in Unreleased</router-link>
             |
           </span>
-          <a :href="releasedContentUrl()">
-            See Released Content
-          </a>
+          <a :href="releasedContentUrl()">See Released Content</a>
         </div>
       </div>
       <div class="subtitle" v-else-if="gameUrl">
-        <a :href="gameUrl">Visit {{gameName}}</a>
+        <a :href="gameUrl">Visit {{ gameName }}</a>
       </div>
       <div class="subtitle" v-else>
         <span v-if="showWhatsNew">
-          <router-link to="/versions">What's new in v{{latestVersion}}</router-link>
+          <router-link to="/versions">What's new in v{{ latestVersion }}</router-link>
           |
         </span>
-        <a :href="unreleasedContentUrl()">
-          See Unreleased Content
-        </a>
+        <a :href="unreleasedContentUrl()">See Unreleased Content</a>
       </div>
 
-      <ObjectSearch />
+      <ObjectSearch :hide-uncraftable="hideUncraftable"/>
 
-      <router-view />
+      <router-view
+        :hide-uncraftable="hideUncraftable"
+        :toggle-hide-uncraftable="toggleHideUncraftable"
+      />
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onBeforeMount } from 'vue';
+import { useHead } from '@vueuse/head';
+import { useRouter } from 'vue-router';
+
+import BrowserStorage from './models/BrowserStorage';
 import GameObject from './models/GameObject';
 import Biome from './models/Biome';
 
@@ -54,88 +57,73 @@ import BiomeInspector from './components/BiomeInspector';
 import ChangeLog from './components/ChangeLog';
 import NotFound from './components/NotFound';
 
-export default {
-  name: 'app',
-  components: {
-    ObjectSearch,
-  },
-  data () {
-    return {
-      loading: true,
-    }
-  },
-  beforeMount () {
-    this.redirectOldHash();
-    GameObject.load((data) => {
-      Biome.setup(data.biomeIds, data.biomeNames);
-      this.loading = false;
-    });
-  },
-  computed: {
-    lastDate() {
-      const months = [
-        "January", "February", "March",
-        "April", "May", "June", "July",
-        "August", "September", "October",
-        "November", "December"
-      ];
-      var month = GameObject.date.getMonth();
-      var day = GameObject.date.getDate();
-      var year = GameObject.date.getFullYear();
-      return `${months[month]} ${day}, ${year}`;
-    },
-    latestVersion() {
-      return GameObject.versions[0];
-    },
-    showWhatsNew() {
-      if (process.env.ONETECH_MOD_NAME)
-        return false;
-      if (this.$route.path == "/versions")
-        return false;
-      return true;
-    },
-    gameName() {
-      return process.env.ONETECH_MOD_NAME || "Two Hours One Life";
-    },
-    gameUrl() {
-      return process.env.ONETECH_MOD_URL;
-    },
-    onEdge() {
-      return global.edge;
-    }
-  },
-  methods: {
-    redirectOldHash() {
-      if (!window.location.hash) return;
-      const path = window.location.hash.substr(1).split("/");
-      if (parseInt(path[0]) > 0) // Object ID route
-        path.unshift([path.shift(), path.shift()].join("-"));
-      this.$router.replace("/" + path.join("/"));
-    },
-    unreleasedContentUrl() {
-      return "https://edge.twotech.twohoursonelife.com" + window.location.pathname;
-    },
-    releasedContentUrl() {
-      return "https://twotech.twohoursonelife.com" + window.location.pathname;
-    }
-  },
-  metaInfo: {
-    title: "Crafting reference for Two Hours One Life",
-    titleTemplate: '%s | twotech'
-  },
-  routes: [
-    {path: "/", component: ObjectBrowser},
-    {path: "/not-found", component: NotFound},
-    {path: "/filter/:filter*", component: ObjectBrowser},
-    {path: "/letters", component: RecipeForLetters},
-    {path: "/versions", component: ChangeLog},
-    {path: "/versions/:id", component: ChangeLog},
-    {path: "/biomes/:id", component: BiomeInspector},
-    {path: "/:id/tech-tree", component: TechTree},
-    {path: "/:id/recipe", component: Recipe},
-    {path: "/:id", component: ObjectInspector},
-    {path: "*", redirect: "/not-found"},
-  ]
+const loading = ref(true);
+const router = useRouter();
+
+useHead({
+  title: 'Crafting reference for Two Hours One Life',
+  titleTemplate: '%s | twotech',
+});
+
+const lastDate = computed(() => {
+  const months = [
+    'January', 'February', 'March',
+    'April', 'May', 'June', 'July',
+    'August', 'September', 'October',
+    'November', 'December'
+  ];
+  const month = GameObject.date.getMonth();
+  const day = GameObject.date.getDate();
+  const year = GameObject.date.getFullYear();
+  return `${months[month]} ${day}, ${year}`;
+});
+
+const hideUncraftable = ref(BrowserStorage.getItem("ObjectBrowser.hideUncraftable") !== null
+  ? BrowserStorage.getItem("ObjectBrowser.hideUncraftable") === "true"
+  : true);
+
+const toggleHideUncraftable = () => {
+  hideUncraftable.value = !hideUncraftable.value;
+  BrowserStorage.setItem("ObjectBrowser.hideUncraftable", hideUncraftable.value);
+};
+
+const latestVersion = computed(() => GameObject.versions[0]);
+
+const showWhatsNew = computed(() => {
+  if (process.env.ONETECH_MOD_NAME) return false;
+  if (router.currentRoute.value.path === '/versions') return false;
+  return true;
+});
+
+const gameName = computed(() => process.env.ONETECH_MOD_NAME || 'Two Hours One Life');
+
+const gameUrl = computed(() => process.env.ONETECH_MOD_URL);
+
+const onEdge = computed(() => global.edge);
+
+onBeforeMount(() => {
+  redirectOldHash();
+  GameObject.load((data) => {
+    Biome.setup(data.biomeIds, data.biomeNames);
+    loading.value = false;
+  });
+});
+
+function redirectOldHash() {
+  if (!window.location.hash) return;
+  const path = window.location.hash.substr(1).split('/');
+  if (parseInt(path[0]) > 0) {
+    path.unshift([path.shift(), path.shift()].join('-'));
+  }
+  router.replace('/' + path.join('/'));
+}
+
+function unreleasedContentUrl() {
+  return 'https://edge.twotech.twohoursonelife.com' + window.location.pathname;
+}
+
+function releasedContentUrl() {
+  return 'https://twotech.twohoursonelife.com' + window.location.pathname;
 }
 </script>
 
