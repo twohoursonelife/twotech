@@ -199,14 +199,6 @@ class GameObject {
     this.assignData(attribute, values);
   }
 
-  // parseValue(value) {
-  //   if (isNaN(value))
-  //     return value;
-  //   if (value.includes("."))
-  //     return parseFloat(value);
-  //   return parseInt(value);
-  // }
-
   assignData(attribute: string, values: string[]): void {
     if (!attribute) return;
     // Parse attributes. Try to keep this alphabetized, for sanity's sake

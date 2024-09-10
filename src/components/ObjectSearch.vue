@@ -53,7 +53,6 @@ export default {
         } else {
           let newSelectedObject = GameObject.find(route?.params?.id.split('-')[0]);
           selectedObject.value = GameObject.find(route?.params?.id.split('-')[0]);
-          if (VueSelectElem.value) VueSelectElem.value.search = newSelectedObject.name;
           if (VueSelectElem.value) VueSelectElem.value.mutableValue = newSelectedObject.name;
         }
       }),
@@ -67,7 +66,8 @@ export default {
         newSelectedObject = object;
       }
       if (newSelectedObject === selectedObject.value) return;
-      router.push(newSelectedObject ? newSelectedObject.url() : '/');
+      if (newSelectedObject)
+        router.push(newSelectedObject.url());
     };
 
     return {

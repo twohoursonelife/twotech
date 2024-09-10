@@ -125,11 +125,6 @@ class GameData {
     calculator.calculate();
   }
 
-  // generateTechTree() {
-  //   var generator = new TechTreeGenerator();
-  //   generator.generate(Object.values(this.objects));
-  // }
-
   exportObjects(): void {
     this.populateFilters();
     this.saveJSON("objects.json", this.objectsJsonData());
