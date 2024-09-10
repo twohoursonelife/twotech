@@ -154,12 +154,16 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const router = useRouter();
-    const object = ref(null);
+    const object = ref(GameObject.find(route.params.id));
     const loading = ref(true);
 
     const loadObject = async () => {
+      // Set basic data to new GameObject, so loading screen has correct object's data
+      object.value = GameObject.find(route.params.id);
+      // Set loading flag while we're loading the full item data
       loading.value = true;
       object.value = await GameObject.findAndLoad(route.params.id);
+      // Item data is loaded, and the page is ready to be shown
       loading.value = false;
       if (!object.value) {
         router.replace("/not-found");
@@ -243,6 +247,10 @@ export default defineComponent({
       return `Holds ${object.value.data.numSlots} ${object.value.slotSize()} items`;
     });
 
+    const isLetterOrSign = computed(() => {
+      return object.value.name.includes("Letter") || object.value.name.includes("Sign");
+    });
+
     const pickupText = computed(() => {
       if (!object.value?.data?.minPickupAge) return;
       return `Pickup at Age: ${object.value.data.minPickupAge}`;
@@ -308,6 +316,7 @@ export default defineComponent({
       useWord,
       sizeText,
       containerText,
+      isLetterOrSign,
       pickupText,
       speedPercent,
       modName,

@@ -99,12 +99,6 @@ export default defineComponent({
 
 <style lang="scss">
 .biomeInspector {
-  .loading {
-    text-align: center;
-    padding: 20px;
-    font-size: 18px;
-    color: #aaa;
-  }
   .biomes {
     background-color: #222;
     border-radius: 5px;

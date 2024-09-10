@@ -7,7 +7,7 @@
       v-tippy="{theme: 'twotech', animation: 'scale'}"
       class="biome"
       :key="biome.id"
-      :class="{ selected: biome === selectedBiome }"
+      :class="{ selected: biome?.name === selectedBiome?.name }"
       ref="biomeLink"
     >
       <BiomeImage :biome="biome" />

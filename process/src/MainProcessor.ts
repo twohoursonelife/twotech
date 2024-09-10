@@ -149,6 +149,7 @@ class MainProcessor {
       console.time("Generating sitemap took");
       gameData.generateSitemap();
       console.timeEnd("Generating sitemap took");
+      console.timeEnd("Processing took");
       return null;
     }
 

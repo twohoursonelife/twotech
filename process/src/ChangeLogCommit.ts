@@ -250,7 +250,6 @@ interface ExportedChangeLogCommitData {
   date: Date;
   addedObjectIDs?: string[];
   removedObjectIDs?: string[];
-  // TODO: Change this to ExportedTransitionData when it gets defined.
   addedTransitions?: ExportedTransitionData[];
   removedTransitions?: ExportedTransitionData[];
   objectChanges?: ObjectChange[];
