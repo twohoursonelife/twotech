@@ -47,6 +47,7 @@ sudo apt-get install imagemagick libcairo2-dev libjpeg-dev libpango1.0-dev libgi
 
 See [SERVER.md](/SERVER.md) for a thorough deployment setup guide.
 
+#### Setup
 ``` bash
 cd process
 
@@ -54,6 +55,11 @@ cd process
 npm install
 
 cd ..
+
+```
+
+#### Process all
+``` bash
 
 # run script including downloading latest data and processing sprites
 npm run process -- download
@@ -66,6 +72,19 @@ npm run process -- sounds
 
 # or process without generating sprites
 npm run process
+```
+
+#### Process specifc objects
+You can selectively process the sprites of specific objects.
+
+This can be useful for local development of Twotech or OneLifeData7.
+
+``` bash
+# Download argument required first run
+npm run process-specific-objects 404 download
+
+# Many objects can be specified
+npm run process-specific-objects 15633,11106,404
 ```
 
 ### Processing Script (Docker version)
