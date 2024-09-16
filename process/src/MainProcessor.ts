@@ -31,6 +31,20 @@ class MainProcessor {
     const gameData = new GameData(this.processDir, this.dataDir(), this.staticDir(false));
     console.time("Processing specific objects took");
 
+    if (this.doDownload) {
+      console.log("\nDownloading data...");
+      console.time("Downloading data took");
+      gameData.download(this.gitUrl());
+      console.timeEnd("Downloading data took");
+    } else {
+      gameData.verifyDownloaded();
+    }
+
+    console.log("\nPreparing directories...");
+    console.time("Preparing directories took");
+    gameData.prepareStaticDir();
+    console.timeEnd("Preparing directories took");
+
     console.log("\nImporting specific objects...");
     console.time("Importing specific objects took");
     gameData.importSpecificObjects(ids);

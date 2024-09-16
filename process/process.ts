@@ -4,9 +4,13 @@ if (!process.env.ONETECH_FOOD_BONUS) {
   process.env.ONETECH_FOOD_BONUS = '0';
 }
 
-import {MainProcessor} from './src/MainProcessor';
+import { MainProcessor } from './src/MainProcessor';
 
 const processor = new MainProcessor(__dirname);
+
+processor.doDownload = process.argv.includes('download');
+processor.doSprites = processor.doDownload || process.argv.includes('sprites');
+processor.doSounds = processor.doDownload || process.argv.includes('sounds');
 
 if (process.argv.includes('specific-objects')) {
   let objects_str = process.argv[process.argv.indexOf('specific-objects') + 1];
@@ -22,11 +26,6 @@ if (process.argv.includes('specific-objects')) {
   processor.processSpecificObjects(objects);
   process.exit(0);
 }
-
-
-processor.doDownload = process.argv.includes('download');
-processor.doSprites = processor.doDownload || process.argv.includes('sprites');
-processor.doSounds = processor.doDownload || process.argv.includes('sounds');
 
 console.log("--- Processing static-edge ---");
 const unprocessedVersion = processor.process(null);
