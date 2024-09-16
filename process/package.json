@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "process": "node_modules/.bin/ts-node process",
-    "process-specific-sprites": "node_modules/.bin/ts-node process specific-sprites"
+    "process-specific-objects": "node_modules/.bin/ts-node process specific-objects"
   },
   "author": "",
   "license": "ISC",

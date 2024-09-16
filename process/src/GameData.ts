@@ -50,7 +50,7 @@ class GameData {
 
   verifyDownloaded(): void {
     if (!fs.existsSync(this.dataDir)) {
-      throw "OneLifeData7 not found, first run `node process dev download`"
+      throw "OneLifeData7 not found, first run with 'download' argument";
     }
   }
 

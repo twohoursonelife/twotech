@@ -8,8 +8,8 @@ import {MainProcessor} from './src/MainProcessor';
 
 const processor = new MainProcessor(__dirname);
 
-if (process.argv.includes('specific-sprites')) {
-  let objects_str = process.argv[process.argv.indexOf('specific-sprites') + 1];
+if (process.argv.includes('specific-objects')) {
+  let objects_str = process.argv[process.argv.indexOf('specific-objects') + 1];
   if (!objects_str) {
     console.log("Please provide a comma-separated list of object IDs.")
     process.exit(1);
