@@ -53,7 +53,7 @@ export default {
         } else {
           let newSelectedObject = GameObject.find(route?.params?.id.split('-')[0]);
           selectedObject.value = GameObject.find(route?.params?.id.split('-')[0]);
-          if (VueSelectElem.value) VueSelectElem.value.mutableValue = newSelectedObject.name;
+          if (VueSelectElem.value) VueSelectElem.value.mutableValue = newSelectedObject;
         }
       }),
     );

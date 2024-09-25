@@ -15,9 +15,9 @@
 
     <h3 v-if="loading || !objectData">Loading...</h3>
     <div v-else class="steps">
-      <RecipeIngredients v-if="objectData.recipe.ingredients" :ingredients="objectData.recipe.ingredients" :rightClickObject="filterObject" />
+      <RecipeIngredients v-if="objectData.recipe?.ingredients" :ingredients="objectData.recipe?.ingredients" :rightClickObject="filterObject" />
 
-      <RecipeIngredients v-if="objectData.recipe.uncraftables" title="UNCRAFTABLE Ingredients" :ingredients="objectData.recipe.uncraftables" :rightClickObject="filterObject" />
+      <RecipeIngredients v-if="objectData.recipe?.uncraftables" title="UNCRAFTABLE Ingredients" :ingredients="objectData.recipe?.uncraftables" :rightClickObject="filterObject" />
 
       <div class="filterHeadline" v-if="filteredObject">
         <h4>Filter:</h4>
@@ -31,7 +31,7 @@
       </div>
 
       <RecipeStep
-        v-for="(transitions, index) in objectData.recipe.steps"
+        v-for="(transitions, index) in objectData.recipe?.steps"
         :transitions="transitions"
         :number="index + 1"
         :key="index"
