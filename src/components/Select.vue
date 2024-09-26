@@ -491,77 +491,6 @@
         return !multipleProp.value && !open.value && mutableValue.value != null
       });
 
-
-      // Watchers
-      watch(search, (curr, prev) => {
-        if (curr.length > 0) {
-          onSearchProp.value(curr, toggleLoading);
-          emit('search', curr, toggleLoading);
-        }
-      });
-
-      watch(displayedOptions, async(curr, prev) => {
-        typeAheadPointer.value = 0;
-      });
-
-      watch(typeAheadPointer, async(curr, prev) => {
-        maybeAdjustScroll();
-      });
-
-      watch(loadingProp, (val) => {
-        mutableLoading.value = val;
-      });
-
-      /**
-       * When the value prop changes, update
-       * the internal mutableValue.
-       * @param  {mixed} val
-       * @return {void}
-       */
-      watch(valueProp, async(curr, prev) => {
-        mutableValue.value = curr;
-      });
-
-      /**
-       * Maybe run the onChange callback.
-       * @param  {string|object} val
-       * @param  {string|object} old
-       * @return {void}
-       */
-      watch(mutableValue, (curr, prev) => {
-        if (multipleProp.value) {
-          onChangeProp.value ? onChangeProp.value(curr) : null;
-        } else {
-          (onChangeProp.value && curr !== prev) ? onChangeProp.value(curr) : null;
-        }
-      });
-
-      /**
-       * When options change, update
-       * the internal mutableOptions.
-       * @param  {array} val
-       * @return {void}
-       */
-      watch(optionsProp, (curr, prev) => {
-        mutableOptions.value = curr;
-      });
-
-      /**
-			 * Maybe reset the mutableValue
-       * when mutableOptions change.
-       * @return {[type]} [description]
-       */
-      watch(mutableOptions, (curr, prev) => {
-        if (!taggableProp.value && resetOnOptionsChangeProp.value) {
-					mutableValue.value = multipleProp.value ? [] : null
-        }
-      });
-
-      watch(multipleProp, (curr, prev) => {
-				mutableValue.value = curr ? [] : null
-      });
-
-
       // Methods
       const toggleLoading = (toggle = null) => {
         if (toggle == null) {
@@ -957,6 +886,75 @@
           console.error("can't use guessing engine, web worker not supported on this browser.")
         }
 
+        // Watchers
+        watch(search, (curr, prev) => {
+          if (curr.length > 0) {
+            onSearchProp.value(curr, toggleLoading);
+            emit('search', curr, toggleLoading);
+          }
+        });
+
+        watch(displayedOptions, async(curr, prev) => {
+          typeAheadPointer.value = 0;
+        });
+
+        watch(typeAheadPointer, async(curr, prev) => {
+          maybeAdjustScroll();
+        });
+
+        watch(loadingProp, (val) => {
+          mutableLoading.value = val;
+        });
+
+        /**
+         * When the value prop changes, update
+         * the internal mutableValue.
+         * @param  {mixed} val
+         * @return {void}
+         */
+        watch(valueProp, async(curr, prev) => {
+          mutableValue.value = curr;
+        });
+
+        /**
+         * Maybe run the onChange callback.
+         * @param  {string|object} val
+         * @param  {string|object} old
+         * @return {void}
+         */
+        watch(mutableValue, (curr, prev) => {
+          if (multipleProp.value) {
+            onChangeProp.value ? onChangeProp.value(curr) : null;
+          } else {
+            (onChangeProp.value && curr !== prev) ? onChangeProp.value(curr) : null;
+          }
+        });
+
+        /**
+         * When options change, update
+         * the internal mutableOptions.
+         * @param  {array} val
+         * @return {void}
+         */
+        watch(optionsProp, (curr, prev) => {
+          mutableOptions.value = curr;
+        });
+
+        /**
+         * Maybe reset the mutableValue
+         * when mutableOptions change.
+         * @return {[type]} [description]
+         */
+        watch(mutableOptions, (curr, prev) => {
+          if (!taggableProp.value && resetOnOptionsChangeProp.value) {
+            mutableValue.value = multipleProp.value ? [] : null
+          }
+        });
+
+        watch(multipleProp, (curr, prev) => {
+          mutableValue.value = curr ? [] : null
+        });
+
         watch(mutableOptions, () => doSearch());
         watch(taggableProp, () => doSearch());
         watch(filterableProp, () => doSearch());
@@ -1048,12 +1046,6 @@
       }
     },
 
-    /**
-     * Clone props into mutable values,
-     * attach any event listeners.
-     */
-    created() {
-    },
   }
 </script>
 

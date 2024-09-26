@@ -174,6 +174,13 @@ export default {
       loadObject();
     });
 
+    watch(
+      () => route.params.id,
+      () => {
+        loadObject();
+      }
+    );
+
     const biomes = computed(() => {
       return object.value?.data?.biomes?.map(biomeData => Biome.find(biomeData.id.toString())) || [];
     });
