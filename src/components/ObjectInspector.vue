@@ -145,7 +145,7 @@ import 'tippy.js/animations/scale.css'
 import 'tippy.js/animations/shift-away.css'
 import 'tippy.js/animations/shift-toward.css'
 
-export default defineComponent({
+export default {
   components: {
     ObjectImage,
     BiomeImage,
@@ -170,16 +170,16 @@ export default defineComponent({
       }
     };
 
+    onMounted(() => {
+      loadObject();
+    });
+
     watch(
       () => route.params.id,
       () => {
         loadObject();
       }
     );
-
-    onMounted(() => {
-      loadObject();
-    });
 
     const biomes = computed(() => {
       return object.value?.data?.biomes?.map(biomeData => Biome.find(biomeData.id.toString())) || [];
@@ -333,7 +333,7 @@ export default defineComponent({
   metaInfo() {
     return { title: this.object?.name };
   },
-});
+};
 </script>
 
 <style scoped lang="scss">
