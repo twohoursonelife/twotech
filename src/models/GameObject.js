@@ -156,7 +156,8 @@ export default class GameObject {
       return "/not-found";
     const path = [`${this.id}-${this.name.replace(/\W+/g, '-')}`];
     if (subpath) path.push(subpath);
-    return '/' + path.map(encodeURIComponent).join("/");
+    let ret = '/' + path.map(encodeURIComponent).join("/");
+    return ret;
   }
 
   clothingPart() {
