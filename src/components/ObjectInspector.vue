@@ -74,7 +74,7 @@
       </ul>
     </div>
     <div class="transitionsPanels" v-if="!loading && object.data">
-      <div class="transitionsPanel" v-if="object.data.transitionsToward.length > 0 || object.data.mapChance">
+      <div class="transitionsPanel" v-if="filteredTransitionsToward.length > 0 || object.data.mapChance">
         <h3>How to get</h3>
         <div class="actions" v-if="object.data && (object.data.recipe || object.data.techTree)">
           <router-link :to="object.url('tech-tree')" v-if="object.data.techTree" title="Tech Tree" v-tippy="{theme: 'twotech', animation: 'scale'}">
@@ -104,23 +104,23 @@
         </div>
         <TransitionsList
           :limit="object.data.mapChance ? '0' : '1'"
-          :transitions="object.data.transitionsToward"
+          :transitions="filteredTransitionsToward"
           :selectedObject="object"
         />
       </div>
-      <div class="transitionsPanel" v-if="object.data.transitionsTimed.length > 0">
+      <div class="transitionsPanel" v-if="filteredTransitionsTimed.length > 0">
         <h3>Changes over time</h3>
         <TransitionsList
           limit="3"
-          :transitions="object.data.transitionsTimed"
+          :transitions="filteredTransitionsTimed"
           :selectedObject="object"
         />
       </div>
-      <div class="transitionsPanel" v-if="object.data.transitionsAway.length > 0">
+      <div class="transitionsPanel" v-if="filteredTransitionsAway.length > 0">
         <h3>How to use</h3>
         <TransitionsList
           limit="10"
-          :transitions="object.data.transitionsAway"
+          :transitions="filteredTransitionsAway"
           :selectedObject="object"
         />
       </div>
@@ -151,11 +151,68 @@ export default {
     BiomeImage,
     TransitionsList,
   },
-  setup() {
+  props: {
+    hideUncraftable: Boolean,
+  },
+  setup(props) {
     const route = useRoute();
     const router = useRouter();
     const object = ref(GameObject.find(route.params.id));
     const loading = ref(true);
+    const filteredTransitionsToward = computed(() => {
+      if (loading.value === false) {
+        if (!object.value.data.transitionsToward) return [];
+        if (typeof object.value.data.transitionsToward !== "object") return [];
+        // If hideUncraftable is toggled, filter out transitions with actors or targets that are not craftable
+        if (props.hideUncraftable) {
+          return object.value.data.transitionsToward.filter(t => {
+            const actor = GameObject.find(t.actorID);
+            const target = GameObject.find(t.targetID);
+            return ((!actor || actor.craftable) && (!target || target.craftable));
+          });
+        } else {
+          return object.value.data.transitionsToward;
+        }
+      } else {
+        return [];
+      }
+    });
+    const filteredTransitionsAway = computed(() => {
+      if (loading.value === false) {
+        if (!object.value.data.transitionsAway) return [];
+        if (typeof object.value.data.transitionsAway !== "object") return [];
+        // If hideUncraftable is toggled, filter out transitions with actors or targets that are not craftable
+        if (props.hideUncraftable) {
+          return object.value.data.transitionsAway.filter(t => {
+            const actor = GameObject.find(t.actorID);
+            const target = GameObject.find(t.targetID);
+            return ((!actor || actor.craftable) && (!target || target.craftable));
+          });
+        } else {
+          return object.value.data.transitionsAway;
+        }
+      } else {
+        return [];
+      }
+    });
+    const filteredTransitionsTimed = computed(() => {
+      if (loading.value === false) {
+        if (!object.value.data.transitionsTimed) return [];
+        if (typeof object.value.data.transitionsTimed !== "object") return [];
+        // If hideUncraftable is toggled, filter out transitions with actors or targets that are not craftable
+        if (props.hideUncraftable) {
+          return object.value.data.transitionsTimed.filter(t => {
+            const actor = GameObject.find(t.actorID);
+            const target = GameObject.find(t.targetID);
+            return ((!actor || actor.craftable) && (!target || target.craftable));
+          });
+        } else {
+          return object.value.data.transitionsTimed;
+        }
+      } else {
+        return [];
+      }
+    });
 
     const loadObject = async () => {
       // Set basic data to new GameObject, so loading screen has correct object's data
@@ -328,6 +385,9 @@ export default {
       soundPath,
       playSound,
       finishSound,
+      filteredTransitionsToward,
+      filteredTransitionsAway,
+      filteredTransitionsTimed,
     };
   },
   metaInfo() {
