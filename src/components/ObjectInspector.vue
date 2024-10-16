@@ -257,7 +257,7 @@ export default {
         "Very Hard",
         "Extremely Hard",
       ];
-      return levels[Math.floor(object.value.difficulty * levels.length)];
+      return levels[Math.floor(object.value.difficulty * (levels.length-1))];
     });
 
     const difficultyTip = computed(() => {
