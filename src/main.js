@@ -6,6 +6,8 @@ import './css/tippy.css';
 import VueTippy from 'vue-tippy';
 import App from './App.vue';
 
+import * as Sentry from "@sentry/vue";
+
 if (window.location.hostname.startsWith('edge')) {
   global.edge = true;
   global.staticPath = ROOT_PATH + 'static-edge';
@@ -47,6 +49,17 @@ const router = createRouter({
   scrollBehavior(to, from, savedPosition) {
     return savedPosition || { x: 0, y: 0 };
   },
+});
+
+Sentry.init({
+  app,
+  dsn: "https://30058b6a4ad33eea2e51df7b70ba9e32@o4508150301065216.ingest.us.sentry.io/4508183709876224",
+  integrations: [
+    Sentry.replayIntegration(),
+  ],
+  // Session Replay
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
 });
 
 // Configure and use VueUse head plugin for meta info
