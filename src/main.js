@@ -55,7 +55,10 @@ Sentry.init({
   app,
   dsn: "https://30058b6a4ad33eea2e51df7b70ba9e32@o4508150301065216.ingest.us.sentry.io/4508183709876224",
   integrations: [
-    Sentry.replayIntegration(),
+    Sentry.replayIntegration({
+      maskAllText: false,
+      blockAllMedia: false,
+    }),
   ],
   // Session Replay
   replaysSessionSampleRate: 0.1,
