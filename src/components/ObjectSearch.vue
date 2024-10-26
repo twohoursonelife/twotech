@@ -50,8 +50,8 @@ export default {
           if (VueSelectElem.value) VueSelectElem.value.search = "";
           if (VueSelectElem.value) VueSelectElem.value.mutableValue = null;
           placeholderVal.value = "Search";
-        } else {
-          let newSelectedObject = GameObject.find(route?.params?.id.split('-')[0]);
+        } else if (route.params.id) {
+          let newSelectedObject = GameObject.find(route.params.id.split('-')[0]);
           if (VueSelectElem.value) VueSelectElem.value.mutableValue = newSelectedObject;
         }
       }),
