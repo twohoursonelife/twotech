@@ -57,7 +57,7 @@ class Sprite {
     if (!attribute) return;
     // Strings first
     if (attribute === "spriteID") {
-      this.id = values[0].toString();
+      this.id = values[0].toString().trim();
     }
     // Floats next
     else if (attribute === "rot") {

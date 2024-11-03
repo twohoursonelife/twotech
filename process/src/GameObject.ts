@@ -101,7 +101,7 @@ class GameObject {
     this.parseData(dataText);
     if (!this.data.id)
       return;
-    this.id = this.data.id.toString();
+    this.id = this.data.id.toString().trim();
     this.name = this.data.name;
   }
 
@@ -131,7 +131,7 @@ class GameObject {
     const pairs = data.split(',');
     pairs[1] = pairs[0] + "," + pairs[1];
     pairs.shift();
-  
+
     for (const pair of pairs) {
       const [key, value] = pair.split('=');
 
@@ -211,7 +211,7 @@ class GameObject {
     } else if (attribute === "bodyIndex") {
       this.data.bodyIndex = values.map(v => parseInt(v));
     } else if (attribute === "clothing") {
-      this.data.clothing = values[0];
+      this.data.clothing = values[0].trim();
     } else if (attribute === "clothingOffset") {
       this.data.clothingOffset = [values[0], values[1]].map(v => parseInt(v));
     } else if (attribute === "containOffset") {
@@ -262,7 +262,7 @@ class GameObject {
     } else if (attribute === "minPickupAge") {
       this.data.minPickupAge = parseInt(values[0]);
     } else if (attribute === "name") {
-      this.data.name = values[0];
+      this.data.name = values[0].trim();
     } else if (attribute === "noFlip") {
       this.data.noFlip = parseInt(values[0]);
     } else if (attribute === "noSpawn") {
