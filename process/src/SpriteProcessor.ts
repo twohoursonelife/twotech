@@ -136,10 +136,10 @@ class SpriteProcessor {
   }
 
   drawSpriteDirectly(sprite: Sprite, context: Canvas.CanvasRenderingContext2D): void {
-    this.drawSpriteImage(sprite, context);
-
     if (sprite.color.find(c => c < 1.0) !== undefined) {
       this.overlayColor(sprite, context)
+    } else {
+      this.drawSpriteImage(sprite, context);
     }
   }
 
