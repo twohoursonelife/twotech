@@ -22,12 +22,16 @@ class SpriteProcessor {
   pngDir: string;
   canvas: Canvas.Canvas;
   context: Canvas.CanvasRenderingContext2D;
+  maskCanvas: Canvas.Canvas;
+  maskContext: Canvas.CanvasRenderingContext2D;
 
   constructor(spritesDir: string, pngDir: string) {
     this.spritesDir = spritesDir;
     this.pngDir = pngDir;
     this.canvas = Canvas.createCanvas(512, 1024);
     this.context = this.canvas.getContext('2d');
+    this.maskCanvas = Canvas.createCanvas(this.canvas.width, this.canvas.height);
+    this.maskContext = this.maskCanvas.getContext('2d');
   }
 
   process(objects: Record<string, GameObject>): void {
@@ -82,7 +86,9 @@ class SpriteProcessor {
 
   renderSprites(sprites: Sprite[], name: string): void {
     this.context.setTransform(new Canvas.DOMMatrix([1, 0, 0, 1, 0, 0]));
+    this.maskContext.setTransform(new Canvas.DOMMatrix([1, 0, 0, 1, 0, 0]));
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.maskContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     for (var sprite of sprites) {
       this.parseSpriteFile(sprite);
@@ -121,18 +127,36 @@ class SpriteProcessor {
 
   drawSprite(sprite: Sprite): void {
     if (sprite.additiveBlend()) {
-      this.drawSpriteWithOperation(sprite, "screen");
+      this.drawSpriteWithAdditiveBlend(sprite)
     } else {
       this.drawSpriteDirectly(sprite, this.context);
     }
   }
 
-  drawSpriteWithOperation(sprite: Sprite, operation: Canvas.GlobalCompositeOperation): void {
-    const newCanvas = Canvas.createCanvas(this.canvas.width, this.canvas.height);
-    const newContext = newCanvas.getContext('2d');
+  drawSpriteWithAdditiveBlend(sprite: Sprite): void {
+    const spriteCanvas = Canvas.createCanvas(this.canvas.width, this.canvas.height);
+    const spriteContext = spriteCanvas.getContext('2d');
+    this.drawSpriteDirectly(sprite, spriteContext);
 
-    this.drawSpriteDirectly(sprite, newContext);
-    this.overlayCanvas(newCanvas, this.context, operation);
+    // Objects which include additive blend sprites need a background to blend with, however adding one to the whole object and removing it later 
+    // results in a halo type affect, due to semi-transparent areas taking on extra colour, so it needs to be added with the sprite.
+    const tempCanvas = Canvas.createCanvas(this.canvas.width, this.canvas.height);
+    const tempContext = tempCanvas.getContext('2d');
+    tempContext.fillStyle = "#505050";
+    tempContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // The maskCanvas is used to ensure that any semi-transparent areas of the object only ever have the background placed under 
+    // them once, and the colour doesn't build up.
+    this.overlayCanvas(this.maskCanvas, tempContext, "destination-out");
+
+    this.overlayCanvas(this.canvas, tempContext, "source-over");
+    this.overlayCanvas(spriteCanvas, tempContext, "lighter");
+    this.overlayCanvas(spriteCanvas, tempContext, "destination-in");
+
+    this.overlayCanvas(tempCanvas, this.context, "destination-out");
+    this.overlayCanvas(tempCanvas, this.context, "source-over");
+
+    this.overlayCanvas(tempCanvas, this.maskContext, "source-over");
   }
 
   drawSpriteDirectly(sprite: Sprite, context: Canvas.CanvasRenderingContext2D): void {
