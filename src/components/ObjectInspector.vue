@@ -298,10 +298,10 @@ export default {
     const tapoutText = computed(() => {
       if (!object.value?.data?.tapoutTrigger) return;
       const tapoutData = object.value.data.tapoutTrigger;
-      const mode = tapoutData[0];
+      const mode = object.value.data.tapoutMode;
       if (mode === 1) {
-        // Tile tapout. Effects a specific tile, so no limit.
-        return `Effected tile: (${tapoutData[1]},${tapoutData[2]})`;
+        // Tile tapout. Affects a specific tile, so no limit.
+        return `Affected tile: (${tapoutData[1]},${tapoutData[2]})`;
       };
       const limit = object.value?.data?.tapoutLimit;
       const objectWord = limit === 0 || limit > 1 ? "objects" : "object"
@@ -312,29 +312,28 @@ export default {
         locationText = `in a ${tapoutData[1] * 2 + 1}x${tapoutData[2] * 2 + 1} area`;
       };
       if (mode === 2) {
-        // Directional tapout. Uusally only 1 direction, but allows for multiple.
+        // Directional tapout. Usually only 1 direction, but allows for multiple.
         let dirArray = [];
         if (tapoutData[1] > 0) dirArray.push(`${tapoutData[1]} ` + (tapoutData[1] > 1 ? "tiles" : "tile") + " North");
         if (tapoutData[2] > 0) dirArray.push(`${tapoutData[2]} ` + (tapoutData[2] > 1 ? "tiles" : "tile") + " East");
         if (tapoutData[3] > 0) dirArray.push(`${tapoutData[3]} ` + (tapoutData[3] > 1 ? "tiles" : "tile") + " South");
         if (tapoutData[4] > 0) dirArray.push(`${tapoutData[4]} ` + (tapoutData[4] > 1 ? "tiles" : "tile") + " West");
-        const directions = dirArray.length < 2 ? dirArray.join(", ") : dirArray.slice(0, -1).join(", ") + " or " + dirArray[dirArray.length - 1];
-        locationText = "up to " + directions;
+        locationText = "up to " + dirArray.join(", ");
       };
-      return "Can effect " + limitPhrase + " " + locationText;
+      return "Can affect " + limitPhrase + " " + locationText;
     });
 
     const tapoutTip = computed(() => {
       if (!object.value?.data?.tapoutTrigger) return;
-      if (object.value?.data?.tapoutTrigger[0] === 1) return "Coordinates of effected tile relative to this object";
+      if (object.value?.data?.tapoutMode === 1) return "Coordinates of affected tile relative to this object";
       let limitText = "";
       if (object.value?.data?.tapoutLimit > 0) {
-        if (object.value?.data?.tapoutTrigger[0] === 0) {
-          limitText = `${object.value.data.tapoutLimit} ` + (object.value.data.tapoutLimit === 1 ? "is" : "are") + " effected randomly";
+        if (object.value?.data?.tapoutMode === 0) {
+          limitText = `${object.value.data.tapoutLimit} ` + (object.value.data.tapoutLimit === 1 ? "is" : "are") + " affected randomly";
         };
-        if (object.value?.data?.tapoutTrigger[0] === 2) limitText = `effects closest ${object.value.data.tapoutLimit}`;
+        if (object.value?.data?.tapoutMode === 2) limitText = `affects closest ${object.value.data.tapoutLimit}`;
       }
-      else limitText = "effects all of them";
+      else limitText = "affects all of them";
       return "If multiple valid objects in range: " + limitText;
     });
 
