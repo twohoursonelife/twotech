@@ -53,6 +53,10 @@
         <li v-if="containerText">{{ containerText }}</li>
         <li v-if="object.data.blocksWalking">Blocks walking</li>
         <li v-if="object.data.deadlyDistance">Deadly</li>
+        <li v-if="tapoutText">
+          {{ tapoutText }}
+          <span class="helpTip" v-tippy="{theme: 'twotech', animation: 'scale'}" :title="tapoutTip" v-if="tapoutTip">?</span>
+        </li>
         <li v-if="difficultyText">
           Difficulty: {{ difficultyText }}
           <span class="helpTip" v-tippy="{theme: 'twotech', animation: 'scale'}" :title="difficultyTip">?</span>
@@ -291,6 +295,49 @@ export default {
 
     const useWord = computed(() => (object.value?.data?.moveDistance ? "move" : "use"));
 
+    const tapoutText = computed(() => {
+      if (!object.value?.data?.tapoutTrigger) return;
+      const tapoutData = object.value.data.tapoutTrigger;
+      const mode = tapoutData[0];
+      if (mode === 1) {
+        // Tile tapout. Effects a specific tile, so no limit.
+        return `Effected tile: (${tapoutData[1]},${tapoutData[2]})`;
+      };
+      const limit = object.value?.data?.tapoutLimit;
+      const objectWord = limit === 0 || limit > 1 ? "objects" : "object"
+      const limitPhrase = limit > 0 ? `${object.value.data.tapoutLimit} ` + objectWord : objectWord;
+      let locationText = "";
+      if (mode === 0) {
+        // Area tapout
+        locationText = `in a ${tapoutData[1] * 2 + 1}x${tapoutData[2] * 2 + 1} area`;
+      };
+      if (mode === 2) {
+        // Directional tapout. Uusally only 1 direction, but allows for multiple.
+        let dirArray = [];
+        if (tapoutData[1] > 0) dirArray.push(`${tapoutData[1]} ` + (tapoutData[1] > 1 ? "tiles" : "tile") + " North");
+        if (tapoutData[2] > 0) dirArray.push(`${tapoutData[2]} ` + (tapoutData[2] > 1 ? "tiles" : "tile") + " East");
+        if (tapoutData[3] > 0) dirArray.push(`${tapoutData[3]} ` + (tapoutData[3] > 1 ? "tiles" : "tile") + " South");
+        if (tapoutData[4] > 0) dirArray.push(`${tapoutData[4]} ` + (tapoutData[4] > 1 ? "tiles" : "tile") + " West");
+        const directions = dirArray.length < 2 ? dirArray.join(", ") : dirArray.slice(0, -1).join(", ") + " or " + dirArray[dirArray.length - 1];
+        locationText = "up to " + directions;
+      };
+      return "Can effect " + limitPhrase + " " + locationText;
+    });
+
+    const tapoutTip = computed(() => {
+      if (!object.value?.data?.tapoutTrigger) return;
+      if (object.value?.data?.tapoutTrigger[0] === 1) return "Coordinates of effected tile relative to this object";
+      let limitText = "";
+      if (object.value?.data?.tapoutLimit > 0) {
+        if (object.value?.data?.tapoutTrigger[0] === 0) {
+          limitText = `${object.value.data.tapoutLimit} ` + (object.value.data.tapoutLimit === 1 ? "is" : "are") + " effected randomly";
+        };
+        if (object.value?.data?.tapoutTrigger[0] === 2) limitText = `effects closest ${object.value.data.tapoutLimit}`;
+      }
+      else limitText = "effects all of them";
+      return "If multiple valid objects in range: " + limitText;
+    });
+
     const sizeText = computed(() => {
       if (!object.value?.data?.size) {
         if (!object.value?.data?.minPickupAge) return;
@@ -376,6 +423,8 @@ export default {
       isLetterOrSign,
       pickupText,
       speedPercent,
+      tapoutText,
+      tapoutTip,
       modName,
       foodBase,
       foodBaseBonus,

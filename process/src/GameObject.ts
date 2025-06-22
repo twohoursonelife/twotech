@@ -66,6 +66,7 @@ interface GameObjectData {
   speedMult?: number;
   sprites?: Sprite[];
   spritesAdditiveBlend?: number[];
+  tapoutTrigger?: number[];
   timeStretch?: number;
   useAppearIndex?: number[];
   useChance?: number;
@@ -304,6 +305,9 @@ class GameObject {
       this.data.speedMult = parseFloat(values[0]);
     } else if (attribute === "spritesAdditiveBlend") {
       this.data.spritesAdditiveBlend = values.map(v => parseInt(v));
+    } else if (attribute === "tapoutTrigger") {
+      if (values[0] == "1") values.shift();
+      this.data.tapoutTrigger = values.map(v => parseInt(v));
     } else if (attribute === "timeStretch") {
       this.data.timeStretch = parseInt(values[0]);
     } else if (attribute === "useAppearIndex") {
@@ -458,6 +462,13 @@ class GameObject {
       return 0;
   }
 
+  tapoutLimit(tapoutData: number[]) {
+    const mode = tapoutData[0];
+    if (mode == 0) return tapoutData.length > 3 ? tapoutData[3] : 0;
+    if (mode == 2) return tapoutData.length > 5 ? tapoutData[5] : 0;
+    return 0;
+  }
+
   jsonData(): ExportedGameObjectData {
     const transitionsToward = this.transitionsToward;
     const transitionsAway = this.transitionsAway.filter(t => !t.decay);
@@ -534,6 +545,14 @@ class GameObject {
       result.blocksWalking = true;
     }
 
+    // The game supports tapout data both as a separate line in the object file, or as a comment in the object name.
+    // Tapout data in comments is not currently being utilised, and not supported here, however will still display 
+    // in its raw form with other object comments.
+    if (this.data.tapoutTrigger && this.data.tapoutTrigger.length > 1) {
+      result.tapoutTrigger = this.data.tapoutTrigger;
+      result.tapoutLimit = this.tapoutLimit(this.data.tapoutTrigger);
+    }
+
     const sounds = this.sounds();
     if (sounds.length > 0) {
       result.sounds = sounds;
@@ -591,6 +610,8 @@ interface ExportedGameObjectData {
   minPickupAge?: number;
   speedMult?: number;
   blocksWalking?: boolean;
+  tapoutTrigger?: number[];
+  tapoutLimit?: number;
   sounds?: number[];
   moveType?: number;
   moveDistance?: number;
