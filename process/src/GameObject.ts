@@ -66,6 +66,8 @@ interface GameObjectData {
   speedMult?: number;
   sprites?: Sprite[];
   spritesAdditiveBlend?: number[];
+  tapoutMode?: number;
+  tapoutTrigger?: number[];
   timeStretch?: number;
   useAppearIndex?: number[];
   useChance?: number;
@@ -181,6 +183,12 @@ class GameObject {
   parseName(name: string): void {
     if (name)
       this.data.name = name.replace(/#/g, ' - ');
+  }
+
+  parseTapout(tapoutData: string[]): void {
+    tapoutData.shift();
+    this.data.tapoutTrigger = tapoutData.map(v => parseInt(v));
+    this.data.tapoutMode = this.data.tapoutTrigger[0];
   }
 
   parseLine(line: string): void {
@@ -304,6 +312,8 @@ class GameObject {
       this.data.speedMult = parseFloat(values[0]);
     } else if (attribute === "spritesAdditiveBlend") {
       this.data.spritesAdditiveBlend = values.map(v => parseInt(v));
+    } else if (attribute === "tapoutTrigger") {
+      if (values[0] == "1") this.parseTapout(values);
     } else if (attribute === "timeStretch") {
       this.data.timeStretch = parseInt(values[0]);
     } else if (attribute === "useAppearIndex") {
@@ -458,6 +468,16 @@ class GameObject {
       return 0;
   }
 
+  tapoutLimit(): number {
+    const tapoutData = this.data.tapoutTrigger;
+    // Area and directional tapouts can both have an optional tapout limit, but each takes a different number of arguments before that.
+    // If no arugment is found at the given index, it should be assumed to be 0 and unlimited.
+    let i = 0;
+    if (this.data.tapoutMode == 0) i = 3; // Area tapout
+    if (this.data.tapoutMode == 2) i = 5; // Directional tapout
+    return tapoutData.length > i ? tapoutData[i] : 0;
+  }
+
   jsonData(): ExportedGameObjectData {
     const transitionsToward = this.transitionsToward;
     const transitionsAway = this.transitionsAway.filter(t => !t.decay);
@@ -534,6 +554,15 @@ class GameObject {
       result.blocksWalking = true;
     }
 
+    // The game supports tapout data both as a separate line in the object file, or as a comment in the object name.
+    // Tapout data in comments is not currently being utilised, and not supported here, however will still display 
+    // in its raw form with other object comments.
+    if (this.data.tapoutTrigger) {
+      result.tapoutMode = this.data.tapoutMode;
+      result.tapoutTrigger = this.data.tapoutTrigger;
+      result.tapoutLimit = this.tapoutLimit();
+    }
+
     const sounds = this.sounds();
     if (sounds.length > 0) {
       result.sounds = sounds;
@@ -591,6 +620,9 @@ interface ExportedGameObjectData {
   minPickupAge?: number;
   speedMult?: number;
   blocksWalking?: boolean;
+  tapoutMode?: number;
+  tapoutTrigger?: number[];
+  tapoutLimit?: number;
   sounds?: number[];
   moveType?: number;
   moveDistance?: number;
