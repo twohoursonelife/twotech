@@ -30,7 +30,7 @@
   "devDependencies": {
     "@babel/core": "^7.27.4",
     "@babel/preset-env": "^7.27.2",
-    "@vue/compiler-sfc": "^3.4.38",
+    "@vue/compiler-sfc": "^3.5.17",
     "ajv": "^8.17.1",
     "babel-loader": "^10.0.0",
     "cross-env": "^7.0.3",
