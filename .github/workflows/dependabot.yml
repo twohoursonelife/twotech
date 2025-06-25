@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      web:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "npm"
+    directory: "process/"
+    schedule:
+      interval: "weekly"
+    groups:
+      process:
+        patterns:
+          - "*"
