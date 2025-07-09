@@ -1,2 +1,6 @@
 [tools]
 node = "24"
+
+[env]
+ONETECH_MOD_NAME = "Two Hours One Life"
+ONETECH_PROCESS_GIT_URL = "https://github.com/twohoursonelife/OneLifeData7"
