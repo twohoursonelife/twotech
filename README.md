@@ -17,6 +17,8 @@ The project is split into two parts:
 - A node script that processes the latest data from the game data repository
 - The site itself, built in VueJS
 
+The project uses [mise](https://github.com/jdx/mise) for version management.
+
 
 ### Site
 
