@@ -1,4 +1,4 @@
-FROM node:18-bookworm AS process
+FROM node:24-bookworm AS process
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -35,7 +35,7 @@ ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["/bin/bash"]
 
 
-FROM node:18-alpine AS build
+FROM node:24-alpine AS build
 
 WORKDIR /usr/local/twotech
 
