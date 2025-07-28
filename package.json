@@ -13,12 +13,12 @@
     "process-specific-objects": "cd process && npm run process -- specific-objects"
   },
   "dependencies": {
-    "@sentry/vue": "^9.32.0",
+    "@sentry/vue": "^9.42.0",
     "@vueuse/head": "^2.0.0",
     "lodash": "^4.17.21",
     "pug": "^3.0.3",
     "style-loader": "^4.0.0",
-    "vue": "^3.5.17",
+    "vue": "^3.5.18",
     "vue-router": "^4.5.1",
     "vue-tippy": "^6.7.1"
   },
@@ -33,13 +33,13 @@
     "@vue/compiler-sfc": "^3.5.17",
     "ajv": "^8.17.1",
     "babel-loader": "^10.0.0",
-    "cross-env": "^7.0.3",
-    "css-loader": ">=5.2.7 <6.0.0",
+    "cross-env": "^10.0.0",
+    "css-loader": ">=5.2.7 <8.0.0",
     "file-loader": "^6.2.0",
     "sass": "^1.89.2",
     "sass-loader": "^16.0.5",
     "vue-loader": "^17.4.2",
-    "webpack": "^5.99.9",
+    "webpack": "^5.100.2",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2"
   }
