@@ -14,13 +14,13 @@ const Clothing_Head: ObjectFilter = {
   }
 }
 
-const Clothing_Top: ObjectFilter = {
-  key: "top",
-  name: "Top",
+const Clothing_Chest: ObjectFilter = {
+  key: "chest",
+  name: "Chest",
   path: "",
   subfilters: {},
   filter_single(object) {
-    return object.isClothing() && object.data.clothing == "t";
+    return object.isClothing() && object.data.clothing == "c";
   }
 }
 
@@ -60,7 +60,7 @@ const Clothing: ObjectFilter = {
   path: "",
   subfilters: {
     head: Clothing_Head,
-    top: Clothing_Top,
+    chest: Clothing_Chest,
     pack: Clothing_Pack,
     bottom: Clothing_Bottom,
     shoe: Clothing_Shoe,
