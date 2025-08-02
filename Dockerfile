@@ -1,3 +1,4 @@
+FROM node:24-alpine AS site
 
 ENV ONETECH_MOD_NAME="Two Hours One Life"
 ENV ONETECH_MOD_URL="https://twohoursonelife.com/"
@@ -16,7 +17,7 @@ COPY webpack.config.js .
 # TODO how to cache
 RUN npm run build
 
-FROM node:22-bookworm-slim AS process
+FROM node:24-bookworm-slim AS process
 
 ENV DEBIAN_FRONTEND=noninteractive
 
