@@ -5,15 +5,6 @@ updates:
     schedule:
       interval: "monthly"
     groups:
-      web:
-        patterns:
-          - "*"
-
-  - package-ecosystem: "npm"
-    directory: "process/"
-    schedule:
-      interval: "monthly"
-    groups:
-      process:
+      twotech:
         patterns:
           - "*"
