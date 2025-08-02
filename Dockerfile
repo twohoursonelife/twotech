@@ -1,4 +1,7 @@
-FROM node:22-alpine AS site
+
+ENV ONETECH_MOD_NAME="Two Hours One Life"
+ENV ONETECH_MOD_URL="https://twohoursonelife.com/"
+ENV ONETECH_PROCESS_GIT_URL="https://github.com/twohoursonelife/OneLifeData7"
 
 WORKDIR /var/www/twotech
 
@@ -16,6 +19,10 @@ RUN npm run build
 FROM node:22-bookworm-slim AS process
 
 ENV DEBIAN_FRONTEND=noninteractive
+
+ENV ONETECH_MOD_NAME="Two Hours One Life"
+ENV ONETECH_MOD_URL="https://twohoursonelife.com/"
+ENV ONETECH_PROCESS_GIT_URL="https://github.com/twohoursonelife/OneLifeData7"
 
 RUN apt-get update && apt-get install \
   --yes --no-install-recommends \
@@ -50,6 +57,10 @@ WORKDIR /var/www/twotech
 
 # Remove any default sites.
 RUN rm /etc/nginx/conf.d/*.conf
+
+# TODO use this for local dev
+# and disable .dockerignore
+COPY --chown=nginx public ./public
 
 # TODO cache process heavily
 COPY --from=process --chown=nginx /var/www/twotech/public/ ./public

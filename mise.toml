@@ -5,4 +5,4 @@ podman = "latest"
 [tasks]
 # See package.json for direct npm tasks.
 build = "podman build -f Dockerfile . -t twotech"
-run-dev = "podman run -p 8080:8080 --rm twotech"
+run-dev = "podman run -p 80:8080 --rm twotech"
