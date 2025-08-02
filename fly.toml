@@ -40,3 +40,7 @@ primary_region = "iad"
 
 # NOTE: Cloudflare free plan prohibits subdomains more than one level deep from being granted certificates.
 # TODO: Handle edge domain?
+
+[env]
+  ONETECH_MOD_URL = "https://twohoursonelife.com/"
+
