@@ -1,23 +1,12 @@
 .DS_Store
-node_modules/
-npm-debug.log
-yarn-error.log
+node_modules
 public.zip
-/process-docker
 
-# Editor directories and files
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
+/process-docker
 process/OneLifeData7
-process/OneLifeData7-master/
-sprites/sprite_*.png
-sprite_*.png
-pretty-json
-static
-static-edge
-static-dev
-sitemap.xml
-dist
+process/node_modules
+
+public/static
+public/static-edge
+public/sitemap.xml
+public/dist

@@ -1,21 +1,42 @@
-app = 'twotech'
-primary_region = 'iad'
+app = "twotech"
+primary_region = "iad"
 
 [build]
 
 [http_service]
-  internal_port = 80
+  internal_port = 8080
   force_https = true
-  auto_stop_machines = 'stop'
+  auto_stop_machines = "suspend"
   auto_start_machines = true
   min_machines_running = 0
-  processes = ['app']
+
+[http_service.concurrency]
+  type = "requests"
+
+  # Not an exact science.
+  # wrk -t12 -c700 -d1m https://twotech.fly.dev/
+
+  # These settings are a "finger in the air" after some exploratory testing.
+  # Its expected we refine this under real load.
+  soft_limit = 500
+  # hard_limit = 1000 # Dont set until were confident of accuracy.
+
+  # Machines are still far too bursty. I need to see how this performs in production.
+
+[[http_service.checks]]
+  # Health checks seem to flap around the time a machine suspends or resumes
+  grace_period = "10s"
+  interval = "30s"
+  method = "GET"
+  timeout = "5s"
+  path = "/"
+
+[[restart]]
+  policy = "on-failure"
 
 [[vm]]
-  size = 'shared-cpu-1x'
+  size = "shared-cpu-1x"
+  memory = "256mb"
 
-[schedule]
-  schedule = "daily"
-
-
-
+# NOTE: Cloudflare free plan prohibits subdomains more than one level deep from being granted certificates.
+# TODO: Handle edge domain?

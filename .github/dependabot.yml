@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     groups:
       web:
         patterns:
@@ -12,7 +12,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "process/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     groups:
       process:
         patterns:

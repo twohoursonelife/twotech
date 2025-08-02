@@ -1,6 +1,8 @@
 [tools]
-node = "24"
+node = "22"
+podman = "latest"
 
-[env]
-ONETECH_MOD_NAME = "Two Hours One Life"
-ONETECH_PROCESS_GIT_URL = "https://github.com/twohoursonelife/OneLifeData7"
+[tasks]
+# See package.json for direct npm tasks.
+build = "podman build -f Dockerfile . -t twotech"
+run-dev = "podman run -p 8080:8080 --rm twotech"

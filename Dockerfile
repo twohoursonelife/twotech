@@ -1,63 +1,64 @@
-FROM node:24-bookworm AS process
+FROM node:22-alpine AS site
+
+WORKDIR /var/www/twotech
+
+RUN apk upgrade --no-cache
+
+COPY package*.json .
+RUN npm clean-install
+
+COPY src/ ./src/
+COPY webpack.config.js .
+
+# TODO how to cache
+RUN npm run build
+
+FROM node:22-bookworm-slim AS process
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-WORKDIR /usr/local/twotech
-
 RUN apt-get update && apt-get install \
-    --yes --no-install-recommends \
-    build-essential \
-    git \
-    gosu \
-    g++ \
-    imagemagick \
-    libcairo2-dev \
-    libjpeg-dev \
-    libpango1.0-dev \
-    libgif-dev \
-    libsox-fmt-mp3 \
-    sox \
-    && rm -rf /var/lib/apt/lists/
+  --yes --no-install-recommends \
+  ca-certificates \
+  build-essential \
+  git \
+  g++ \
+  imagemagick \
+  libcairo2-dev \
+  libjpeg-dev \
+  libpango1.0-dev \
+  libgif-dev \
+  libsox-fmt-mp3 \
+  sox \
+  && rm -rf /var/lib/apt/lists/
 
-COPY process/package*.json process/
+USER node
 
-COPY process/ process/
-COPY public/ public/
+WORKDIR /var/www/twotech/process
 
-#RUN node process download
-
-
-FROM process AS build_env
-
-WORKDIR /usr/local/twotech
-COPY patch /
-ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ["/bin/bash"]
-
-
-FROM node:24-alpine AS build
-
-WORKDIR /usr/local/twotech
-
-RUN apk add --no-cache \
-    nginx
-
-COPY package*.json ./
-
+COPY --chown=node process/package*.json .
 RUN npm clean-install
 
-COPY . .
+COPY --chown=node process/ .
+COPY --chown=node public/ ../public/
 
-RUN npm run build
+RUN npm run process download
 
+FROM nginx:alpine AS twotech
 
+WORKDIR /var/www/twotech
 
-FROM nginx:alpine
+# Remove any default sites.
+RUN rm /etc/nginx/conf.d/*.conf
 
-COPY --from=process /usr/local/twotech/public/ /usr/share/nginx/html/
-COPY --from=build /usr/local/twotech/public/ /usr/share/nginx/html/
+# TODO cache process heavily
+COPY --from=process --chown=nginx /var/www/twotech/public/ ./public
+COPY --from=site --chown=nginx /var/www/twotech/public/ ./public
+
+# TODO always run
+RUN apk upgrade --no-cache
 
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY twotech.twohoursonelife.com /etc/nginx/conf/
+COPY twotech.conf /etc/nginx/conf.d/
 
-EXPOSE 80 443
+EXPOSE 8080
