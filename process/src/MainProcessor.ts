@@ -158,14 +158,12 @@ class MainProcessor {
     gameData.exportBiomes();
     console.timeEnd("Exporting biomes took");
 
-    if (version) {
-      console.log("\nGenerating sitemap...");
-      console.time("Generating sitemap took");
-      gameData.generateSitemap();
-      console.timeEnd("Generating sitemap took");
-      console.timeEnd("Processing took");
-      return null;
-    }
+    // TODO: re disable for edge
+    // ONETECH_MOD_NAME causes ONLY edge to generate
+    console.log("\nGenerating sitemap...");
+    console.time("Generating sitemap took");
+    gameData.generateSitemap();
+    console.timeEnd("Generating sitemap took");
 
     console.timeEnd("Processing took");
 
