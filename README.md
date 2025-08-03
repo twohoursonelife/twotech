@@ -81,6 +81,8 @@ You can selectively process the sprites of specific objects.
 
 This can be useful for local development of Twotech or OneLifeData7.
 
+You must have completed a full process at least once locally before you can use this.
+
 ``` bash
 # Download argument required first run
 npm run process-specific-objects 404 download
