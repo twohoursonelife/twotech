@@ -17,7 +17,7 @@ COPY webpack.config.js .
 # TODO how to cache
 RUN npm run build
 
-FROM node:24-bookworm-slim AS process
+FROM node:22-bookworm-slim AS process
 
 ENV DEBIAN_FRONTEND=noninteractive
 
