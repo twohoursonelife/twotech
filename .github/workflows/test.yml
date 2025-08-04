@@ -10,9 +10,9 @@ jobs:
       - name: Purge Cloudflare cache
         run: |
           if curl https://api.cloudflare.com/client/v4/zones/$ZONE_ID/purge_cache \
-            -H 'Content-Type: application/json' \
-            -H 'Authorization: Bearer $CLOUDFLARE_API_TOKEN' \
-            -d '{"hosts": ["twotech.twohoursonelife.com"]}' \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -d "{\"hosts\": [\"twotech.twohoursonelife.com\"]}" \
             | grep -q "\"success\":false"; then
             echo "Error: Cloudflare API failed." >&2
             exit 1
