@@ -32,7 +32,6 @@ jobs:
         with:
           environment: production
 
-      # TODO auth fail
       - name: Purge Cloudflare cache
         run: |
           curl https://api.cloudflare.com/client/v4/zones/$ZONE_ID/purge_cache \
