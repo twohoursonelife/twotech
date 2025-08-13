@@ -1,5 +1,5 @@
 app = "twotech"
-primary_region = "iad"
+primary_region = "ewr"
 
 [build]
 
