@@ -20,7 +20,7 @@ const Clothing_Chest: ObjectFilter = {
   path: "",
   subfilters: {},
   filter_single(object) {
-    return object.isClothing() && object.data.clothing == "c";
+    return object.isClothing() && object.data.clothing == "t";
   }
 }
 
