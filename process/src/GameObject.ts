@@ -336,7 +336,18 @@ class GameObject {
   }
 
   canPickup(): boolean {
-    return this.data.permanent == 0 && this.data.floor == 0;
+    if (this.data.permanent == 0 && this.data.floor != 1 && !this.data.person) return true;
+    // Some objects are permanent, but can be picked up via transition.
+    // Most change into a new object eg. "Show Horse - dappled,ground" becomes "Show Horse -dappled,riding"
+    for (var transition of this.transitionsToward) {
+      if (transition.newTargetID == '0' && !transition.isGeneric()) return true;
+    }
+    // There are a few final objects eg. ladle cart, which don't change so aren't seen as a transitionToward.
+    // The check to see that targetID == newActorID filters out a lot of decay and movement transitions. 
+    for (var transition of this.transitionsAway) {
+      if (transition.newTargetID == '0' && !transition.isGeneric() && transition.targetID == transition.newActorID) return true;
+    }
+    return false;
   }
 
   canMove(): boolean {
@@ -543,7 +554,7 @@ class GameObject {
     }
 
     if (this.canPickup()) {
-      result.minPickupAge = this.data.minPickupAge || 3;
+      result.minPickupAge = this.data.minPickupAge;
     }
 
     if (this.data.speedMult != 1) {
