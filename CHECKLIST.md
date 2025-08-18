@@ -61,3 +61,12 @@ This is a list of items and transitions to check to ensure everything is correct
 * [Glass Bottle](https://twotech.twohoursonelife.com/3338-Glass-Bottle): it should not be white
 * [Floor Blueprint](https://twotech.twohoursonelife.com/14064-Floor-Blueprint): should appear blue
 * [Green Linen Top](https://twotech.twohoursonelife.com/14730-Green-Linen-Top): should appear green
+
+
+### Pickup Age Display
+
+* [Saddled Bison with Plough](https://twotech.twohoursonelife.com/7058-Saddled-Bison-with-Plough): Should display age
+* [Horse - dappled,lead](https://twotech.twohoursonelife.com/11718-Horse-dappled-lead): Should display age
+* [Rabbit Toy](https://twotech.twohoursonelife.com/16028-Rabbit-Toy): Pickup age should be 0
+* [Cut Stones with Chisel](https://twotech.twohoursonelife.com/883-Cut-Stones-with-Chisel): Shouldn't display age
+* [Adobe Forge - justCooled](https://twotech.twohoursonelife.com/13531-Adobe-Forge-justCooled): Shouldn't display age

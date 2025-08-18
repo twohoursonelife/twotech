@@ -355,7 +355,7 @@ export default {
     });
 
     const pickupText = computed(() => {
-      if (!object.value?.data?.minPickupAge) return;
+      if (object.value?.data?.minPickupAge == null) return;
       return `Pickup at Age: ${object.value.data.minPickupAge}`;
     });
 
