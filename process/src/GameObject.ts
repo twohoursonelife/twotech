@@ -430,7 +430,7 @@ class GameObject {
   }
 
   canFilter(): boolean {
-    return this.depth.craftable && !this.isGlobalTrigger();
+    return !this.isGlobalTrigger() && this.isVisible();
   }
 
   sounds(): number[] {
