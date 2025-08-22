@@ -5,13 +5,14 @@
   "main": "process.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "process": "node_modules/.bin/ts-node process",
-    "process-specific-objects": "node_modules/.bin/ts-node process specific-objects"
+    "process": "node -r ts-node/register ./process.ts",
+    "process-specific-objects": "node_modules/.bin/ts-node process specific-objects",
+    "process:debug": "node --inspect-brk -r ts-node/register ./process.ts > gc.log 2>&1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "canvas": "^2.1",
+    "canvas": "^3.0",
     "lodash": "^4.17.21",
     "node-fetch": "^3.3.2",
     "sitemap": "^5.1.0 <6.0.0"

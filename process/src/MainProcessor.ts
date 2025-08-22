@@ -98,38 +98,38 @@ class MainProcessor {
 
     console.log("\nImporting categories...");
     console.time("Importing categories took");
-    gameData.importCategories();
+    // gameData.importCategories();
     console.timeEnd("Importing categories took");
 
     console.log("\nImporting transitions...");
     console.time("Importing transitions took");
-    gameData.importTransitions();
+    // gameData.importTransitions();
     console.timeEnd("Importing transitions took");
 
     console.log("\nImporting biomes...");
     console.time("Importing biomes took");
-    gameData.importBiomes();
+    // gameData.importBiomes();
     console.timeEnd("Importing biomes took");
 
     console.log("\nPopulating versions...");
     console.time("Populating versions took");
-    gameData.populateVersions();
+    // gameData.populateVersions();
     console.timeEnd("Populating versions took");
 
     console.log("\nCalculating object depth...");
     console.time("Calculating object depth took");
-    gameData.calculateObjectDepth();
+    // gameData.calculateObjectDepth();
     console.timeEnd("Calculating object depth took");
 
     if (this.doSprites) {
       console.log("\nConverting sprite images...");
       console.time("Converting sprite images took");
-      gameData.convertSpriteImages();
+      // gameData.convertSpriteImages();
       console.timeEnd("Converting sprite images took");
 
       console.log("\nConverting ground images...");
       console.time("Converting ground images took");
-      gameData.convertGroundImages();
+      // gameData.convertGroundImages();
       console.timeEnd("Converting ground images took");
 
       console.log("\nProcessing sprites...");
@@ -141,7 +141,7 @@ class MainProcessor {
     if (this.doSounds) {
       console.log("\nConverting sound files...");
       console.time("Converting sound files took");
-      gameData.convertSounds();
+      // gameData.convertSounds();
       console.timeEnd("Converting sound files took");
     }
 

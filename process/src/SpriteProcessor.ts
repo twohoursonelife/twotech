@@ -41,6 +41,8 @@ class SpriteProcessor {
   }
 
   processObject(object: GameObject): void {
+    console.log(`Processing object ${object.id}`)
+
     this.renderSprites(this.visibleSprites(object), object.id);
 
     // Draw only the last sprite
@@ -92,7 +94,7 @@ class SpriteProcessor {
 
     for (var sprite of sprites) {
       this.parseSpriteFile(sprite);
-      this.drawSprite(sprite);
+      this.drawSprite(sprite); // Problem within
     }
 
     const bounds = this.spritesBounds(sprites);
@@ -133,19 +135,20 @@ class SpriteProcessor {
     }
   }
 
+  // In here
   drawSpriteWithAdditiveBlend(sprite: Sprite): void {
     const spriteCanvas = Canvas.createCanvas(this.canvas.width, this.canvas.height);
     const spriteContext = spriteCanvas.getContext('2d');
     this.drawSpriteDirectly(sprite, spriteContext);
 
-    // Objects which include additive blend sprites need a background to blend with, however adding one to the whole object and removing it later 
+    // Objects which include additive blend sprites need a background to blend with, however adding one to the whole object and removing it later
     // results in a halo type affect, due to semi-transparent areas taking on extra colour, so it needs to be added with the sprite.
     const tempCanvas = Canvas.createCanvas(this.canvas.width, this.canvas.height);
     const tempContext = tempCanvas.getContext('2d');
     tempContext.fillStyle = "#505050";
     tempContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // The maskCanvas is used to ensure that any semi-transparent areas of the object only ever have the background placed under 
+    // The maskCanvas is used to ensure that any semi-transparent areas of the object only ever have the background placed under
     // them once, and the colour doesn't build up.
     this.overlayCanvas(this.maskCanvas, tempContext, "destination-out");
 
@@ -167,6 +170,7 @@ class SpriteProcessor {
     }
   }
 
+  // In here
   drawSpriteImage(sprite: Sprite, context: Canvas.CanvasRenderingContext2D): void {
     const img = new Canvas.Image;
     img.src = fs.readFileSync(`${this.pngDir}/sprite_${sprite.id}.png`);
