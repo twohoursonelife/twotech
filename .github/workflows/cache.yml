@@ -1,0 +1,26 @@
+name: Purge Cloudflare cache
+on:
+  workflow_call:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Purge Cloudflare cache
+        run: |
+          response=$(
+            curl https://api.cloudflare.com/client/v4/zones/$ZONE_ID/purge_cache \
+              -H "Content-Type: application/json" \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              -d '{"hosts": ["twotech.twohoursonelife.com"]}'
+          )
+
+          echo "$response"
+
+          if echo "$response" | grep -q '"success":false'; then
+            echo "Error: Cloudflare API failed." >&2
+            exit 1
+          fi
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ZONE_ID: ${{ vars.ZONE_ID }}
