@@ -1,7 +1,9 @@
 name: Update data
 
 on:
-  repository_dispatch:
+  # Some day we can automate this.
+  # Schedule is too finnicky to check for a recent tag.
+  # Repository dispatch requires managing credentials.
   workflow_dispatch:
 
 # Forces no caching of image build, guaranteeing data will be reprocessed.
@@ -27,6 +29,6 @@ jobs:
       # Though I acknowledge it is technically different, I'm not concerned.
 
   purge-cloudflare-cache:
-    needs: deploy
+    needs: update-data
     uses: ./.github/workflows/cache.yml
     secrets: inherit
