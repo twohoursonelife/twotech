@@ -1,9 +1,10 @@
 name: Purge Cloudflare cache
+
 on:
   workflow_call:
 
 jobs:
-  deploy:
+  purge:
     runs-on: ubuntu-latest
     steps:
       - name: Purge Cloudflare cache

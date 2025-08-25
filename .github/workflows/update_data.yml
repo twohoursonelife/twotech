@@ -1,0 +1,32 @@
+name: Update data
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+
+# Forces no caching of image build, guaranteeing data will be reprocessed.
+# A future improvement may involve removing the data from within the image.
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    concurrency: deploy-group
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io
+        run: flyctl deploy --no-cache
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      # A Sentry release is intentionally not created in this case.
+      # Though I acknowledge it is technically different, I'm not concerned.
+
+  purge-cloudflare-cache:
+    needs: deploy
+    uses: ./.github/workflows/cache.yml
+    secrets: inherit
