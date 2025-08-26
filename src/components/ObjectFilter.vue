@@ -23,7 +23,12 @@ export default defineComponent({
   },
   setup(props) {
     const url = computed(() => {
-      return props.selected ? '/' : `${props.filter.path}`;
+      if (props.selected) {
+        const parts = props.filter.path.split('/');
+        parts.pop();
+        return parts.join('/') || '/';
+      }
+      return props.filter.path;
     });
 
     return { url };
@@ -46,20 +51,20 @@ export default defineComponent({
 
   .objectFilter h3 {
     text-align: center;
-    margin: 10px 5px;
+    margin: 10px 30px;
   }
 
   .objectFilter .deselect {
     position: absolute;
-    right: 15px;
-    top: 13px;
-    width: 20px;
-    height: 20px;
+    right: 5px;
+    top: 11px;
+    width: 22px;
+    height: 22px;
     border-radius: 10px;
     font-size: 16px;
     background-color: #555;
     font-weight: bold;
-    line-height: 18px;
+    line-height: 22px;
     text-align: center;
   }
 
@@ -77,9 +82,13 @@ export default defineComponent({
     .objectFilter.selected:hover {
       background-color: #777;
     }
+    
+    .objectFilter .deselect {
+      display: none;
+    }
 
     .objectFilter:hover .deselect {
-      background-color: #222;
+      display: inline;
     }
   }
 
@@ -97,8 +106,8 @@ export default defineComponent({
     }
 
     .objectFilter .deselect {
-      right: 8px;
-      top: 11px;
+      right: 4px;
+      top: 8px;
     }
   }
 </style>
