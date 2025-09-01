@@ -11,10 +11,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "canvas": "^2.1",
+    "canvas": "^3.2",
     "lodash": "^4.17.21",
     "node-fetch": "^3.3.2",
-    "sitemap": "^5.1.0 <6.0.0"
+    "sitemap": "^5.1.0 <9.0.0"
   },
   "devDependencies": {
     "@types/canvasjs": "^1.9.11",
