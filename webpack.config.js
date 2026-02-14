@@ -82,9 +82,6 @@ module.exports = {
     extensions: ['*', '.js', '.vue', '.json']
   },
   devServer: {
-    headers: {
-      'Content-Security-Policy': "worker-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.usefathom.com;",
-    },
     static: {
       directory: path.join(__dirname, 'public'),
     },
