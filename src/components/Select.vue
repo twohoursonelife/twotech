@@ -719,7 +719,7 @@
        * @return {this.value}
        */
       const maybeDeleteValue = () => {
-        if (!search.value.value.length && mutableValue.value) {
+        if (!search.value.length && mutableValue.value) {
           return multipleProp.value ? mutableValue.value.pop() : mutableValue.value = null;
         }
       };
