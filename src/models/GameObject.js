@@ -17,8 +17,11 @@ export default class GameObject {
   }
 
   static fetchObjects(callback) {
-    fetch(`${global.staticPath}/objects.json`).
-      then(data => data.json()).
+    fetch(`${global.staticPath}/objects.json`)
+      .then(data => {
+        if (!data.ok) throw new Error("HTTP error " + data.status);
+        return data.json();
+      }).
       then(callback);
   }
 
@@ -183,7 +186,10 @@ export default class GameObject {
     if (this.data || this.loading) return await Promise.resolve(this.data);
     this.loading = true;
     return await fetch(`${global.staticPath}/objects/${this.id}.json`)
-      .then(data => data.json())
+      .then(data => {
+        if (!data.ok) throw new Error("HTTP error " + data.status);
+        return data.json();
+      })
       .then(data => {
         this.loading = false;
         this.data = data;
@@ -225,8 +231,11 @@ export default class GameObject {
   }
 
   fetchData(callback) {
-    fetch(`${global.staticPath}/objects/${this.id}.json`).
-      then(data => data.json()).
+    fetch(`${global.staticPath}/objects/${this.id}.json`)
+      .then(data => {
+        if (!data.ok) throw new Error("HTTP error " + data.status);
+        return data.json();
+      }).
       then(callback).
       catch(error => {
         console.error("Failed to fetch object data:", error);

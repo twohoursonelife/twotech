@@ -37,8 +37,11 @@ export default class Version {
   }
 
   fetchData(callback) {
-    fetch(`${global.staticPath}/versions/${this.id}.json`).
-      then(data => data.json()).
+    fetch(`${global.staticPath}/versions/${this.id}.json`)
+      .then(data => {
+        if (!data.ok) throw new Error("HTTP error " + data.status);
+        return data.json();
+      }).
       then(callback).
       catch(error => {
         this.loading = false;

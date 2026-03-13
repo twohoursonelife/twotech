@@ -41,7 +41,10 @@ export default class Biome {
     if (this.data || this.loading) return Promise.resolve(this.data);
     this.loading = true;
     return fetch(`${global.staticPath}/biomes/${this.id}.json`)
-      .then(data => data.json())
+      .then(data => {
+        if (!data.ok) throw new Error("HTTP error " + data.status);
+        return data.json();
+      })
       .then(data => {
         this.loading = false;
         this.data = data;
