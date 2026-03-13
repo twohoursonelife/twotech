@@ -39,6 +39,10 @@ export default class Version {
   fetchData(callback) {
     fetch(`${global.staticPath}/versions/${this.id}.json`).
       then(data => data.json()).
-      then(callback);
+      then(callback).
+      catch(error => {
+        this.loading = false;
+        console.error("Failed to fetch version data:", error);
+      });
   }
 }

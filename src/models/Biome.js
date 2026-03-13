@@ -46,6 +46,11 @@ export default class Biome {
         this.loading = false;
         this.data = data;
         return this.data;
+      })
+      .catch(error => {
+        this.loading = false;
+        console.error("Failed to load biome data", error);
+        return null;
       });
   }
 

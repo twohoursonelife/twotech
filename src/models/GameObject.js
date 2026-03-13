@@ -188,6 +188,11 @@ export default class GameObject {
         this.loading = false;
         this.data = data;
         return this.data;
+      })
+      .catch(error => {
+        this.loading = false;
+        console.error("Failed to load object data", error);
+        return null;
       });
   }
 
@@ -222,6 +227,9 @@ export default class GameObject {
   fetchData(callback) {
     fetch(`${global.staticPath}/objects/${this.id}.json`).
       then(data => data.json()).
-      then(callback);
+      then(callback).
+      catch(error => {
+        console.error("Failed to fetch object data:", error);
+      });
   }
 }
