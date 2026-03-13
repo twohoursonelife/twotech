@@ -1,5 +1,5 @@
 <template>
-  <router-link v-if="clickable"
+  <router-link v-if="clickable && object"
     :class="className"
     :title="title"
     v-tippy="{theme: 'twotech', animation: 'scale'}"
