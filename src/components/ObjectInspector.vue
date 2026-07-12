@@ -163,60 +163,19 @@ export default {
     const router = useRouter();
     const object = ref(GameObject.find(route.params.id));
     const loading = ref(true);
-    const filteredTransitionsToward = computed(() => {
-      if (loading.value === false) {
-        if (!object.value.data.transitionsToward) return [];
-        if (typeof object.value.data.transitionsToward !== "object") return [];
-        // If hideUncraftable is toggled, filter out transitions with actors or targets that are not craftable
-        if (props.hideUncraftable) {
-          return object.value.data.transitionsToward.filter(t => {
-            const actor = GameObject.find(t.actorID);
-            const target = GameObject.find(t.targetID);
-            return ((!actor || actor.craftable) && (!target || target.craftable));
-          });
-        } else {
-          return object.value.data.transitionsToward;
-        }
-      } else {
-        return [];
-      }
-    });
-    const filteredTransitionsAway = computed(() => {
-      if (loading.value === false) {
-        if (!object.value.data.transitionsAway) return [];
-        if (typeof object.value.data.transitionsAway !== "object") return [];
-        // If hideUncraftable is toggled, filter out transitions with actors or targets that are not craftable
-        if (props.hideUncraftable) {
-          return object.value.data.transitionsAway.filter(t => {
-            const actor = GameObject.find(t.actorID);
-            const target = GameObject.find(t.targetID);
-            return ((!actor || actor.craftable) && (!target || target.craftable));
-          });
-        } else {
-          return object.value.data.transitionsAway;
-        }
-      } else {
-        return [];
-      }
-    });
-    const filteredTransitionsTimed = computed(() => {
-      if (loading.value === false) {
-        if (!object.value.data.transitionsTimed) return [];
-        if (typeof object.value.data.transitionsTimed !== "object") return [];
-        // If hideUncraftable is toggled, filter out transitions with actors or targets that are not craftable
-        if (props.hideUncraftable) {
-          return object.value.data.transitionsTimed.filter(t => {
-            const actor = GameObject.find(t.actorID);
-            const target = GameObject.find(t.targetID);
-            return ((!actor || actor.craftable) && (!target || target.craftable));
-          });
-        } else {
-          return object.value.data.transitionsTimed;
-        }
-      } else {
-        return [];
-      }
-    });
+    const objectTransitions = (key) => {
+      // If we're still loading, don't try to access the object data yet
+      if (loading.value) return [];
+      const transitions = object.value?.data?.[key];
+      // If the object doesn't have any transitions, return an empty array
+      if (!transitions || typeof transitions !== "object") return [];
+      // Return transitions as an array of objects
+      return transitions;
+    };
+    // Filtered transitions for each type of transition
+    const filteredTransitionsToward = computed(() => objectTransitions("transitionsToward"));
+    const filteredTransitionsAway = computed(() => objectTransitions("transitionsAway"));
+    const filteredTransitionsTimed = computed(() => objectTransitions("transitionsTimed"));
 
     const loadObject = async () => {
       // Set basic data to new GameObject, so loading screen has correct object's data
