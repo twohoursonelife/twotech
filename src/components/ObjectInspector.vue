@@ -24,6 +24,12 @@
       </div>
 
       <ul v-if="!loading && object.data">
+        <li v-if="hasTransitions" class="transitionFilterToggle">
+          <label>
+            <input type="checkbox" v-model="hideUncraftableTransitions" />
+            Hide uncraftable transitions
+          </label>
+        </li>
         <li v-if="foodWithBothBonus">
           Food: {{ foodBase }}
           <span class="details"> + {{ foodBaseBonus }} bonus</span>
@@ -163,21 +169,36 @@ export default {
     const router = useRouter();
     const object = ref(GameObject.find(route.params.id));
     const loading = ref(true);
+    const hideUncraftableTransitions = ref(false);
+
+    const transitionInputsAreCraftable = (transition) => {
+      const actor = GameObject.find(transition.actorID);
+      const target = GameObject.find(transition.targetID);
+      return ((!actor || actor.craftable) && (!target || target.craftable));
+    };
+
     const objectTransitions = (key) => {
-      // If we're still loading, don't try to access the object data yet
       if (loading.value) return [];
       const transitions = object.value?.data?.[key];
-      // If the object doesn't have any transitions, return an empty array
-      if (!transitions || typeof transitions !== "object") return [];
-      // Return transitions as an array of objects
-      return transitions;
+      if (!Array.isArray(transitions)) return [];
+      if (!hideUncraftableTransitions.value) return transitions;
+      return transitions.filter(transitionInputsAreCraftable);
     };
+
+    const hasTransitions = computed(() => {
+      if (loading.value) return false;
+      return ["transitionsToward", "transitionsAway", "transitionsTimed"].some((key) => {
+        return Array.isArray(object.value?.data?.[key]) && object.value.data[key].length > 0;
+      });
+    });
+
     // Filtered transitions for each type of transition
     const filteredTransitionsToward = computed(() => objectTransitions("transitionsToward"));
     const filteredTransitionsAway = computed(() => objectTransitions("transitionsAway"));
     const filteredTransitionsTimed = computed(() => objectTransitions("transitionsTimed"));
 
     const loadObject = async () => {
+      hideUncraftableTransitions.value = false;
       // Set basic data to new GameObject, so loading screen has correct object's data
       object.value = GameObject.find(route.params.id);
       // Set loading flag while we're loading the full item data
@@ -366,6 +387,8 @@ export default {
     return {
       object,
       loading,
+      hideUncraftableTransitions,
+      hasTransitions,
       biomes,
       spawnText,
       difficultyText,
@@ -471,6 +494,18 @@ export default {
   }
   .objectInspector .info li .details {
     color: #999;
+  }
+  .objectInspector .info li.transitionFilterToggle {
+    padding: 6px 0 10px;
+  }
+  .objectInspector .transitionFilterToggle label {
+    color: #ddd;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  .objectInspector .transitionFilterToggle input {
+    margin-right: 6px;
+    vertical-align: 1px;
   }
 
   .objectInspector .actions {
