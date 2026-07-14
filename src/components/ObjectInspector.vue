@@ -24,10 +24,11 @@
       </div>
 
       <ul v-if="!loading && object.data">
+        <!-- Show the transition filter toggle only if the object has any transitions -->
         <li v-if="hasTransitions" class="transitionFilterToggle">
           <label>
             <input type="checkbox" v-model="hideUncraftableTransitions" />
-            Hide uncraftable transitions
+            Only craftable transitions
           </label>
         </li>
         <li v-if="foodWithBothBonus">
@@ -169,22 +170,29 @@ export default {
     const router = useRouter();
     const object = ref(GameObject.find(route.params.id));
     const loading = ref(true);
+    // By default, item pages will show all transitions on each page load
     const hideUncraftableTransitions = ref(false);
 
     const transitionInputsAreCraftable = (transition) => {
       const actor = GameObject.find(transition.actorID);
       const target = GameObject.find(transition.targetID);
+      // Actor and target must be either craftable or not exist (for transitions that don't have an actor or target)
       return ((!actor || actor.craftable) && (!target || target.craftable));
     };
 
     const objectTransitions = (key) => {
+      // If we're still loading, don't try to access the object data yet
       if (loading.value) return [];
       const transitions = object.value?.data?.[key];
-      if (!Array.isArray(transitions)) return [];
+      // If the object doesn't have any transitions, return an empty array
+      if (!transitions || typeof transitions !== "object") return [];
+      // If we're not hiding uncraftable transitions, return all transitions
       if (!hideUncraftableTransitions.value) return transitions;
+      // Otherwise, filter the transitions to only include those that are craftable
       return transitions.filter(transitionInputsAreCraftable);
     };
 
+    // Check if the object has any transitions of any type
     const hasTransitions = computed(() => {
       if (loading.value) return false;
       return ["transitionsToward", "transitionsAway", "transitionsTimed"].some((key) => {
