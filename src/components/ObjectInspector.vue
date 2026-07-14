@@ -170,8 +170,8 @@ export default {
     const router = useRouter();
     const object = ref(GameObject.find(route.params.id));
     const loading = ref(true);
-    // By default, item pages will show all transitions on each page load
-    const hideUncraftableTransitions = ref(false);
+    // Craftable item pages start with the same transition filter as the main page
+    const hideUncraftableTransitions = ref(props.hideUncraftable);
 
     const transitionInputsAreCraftable = (transition) => {
       const actor = GameObject.find(transition.actorID);
@@ -206,9 +206,10 @@ export default {
     const filteredTransitionsTimed = computed(() => objectTransitions("transitionsTimed"));
 
     const loadObject = async () => {
-      hideUncraftableTransitions.value = false;
       // Set basic data to new GameObject, so loading screen has correct object's data
       object.value = GameObject.find(route.params.id);
+      // Direct links to uncraftable items show all transitions by default
+      hideUncraftableTransitions.value = object.value?.craftable === false ? false : props.hideUncraftable;
       // Set loading flag while we're loading the full item data
       loading.value = true;
       object.value = await GameObject.findAndLoad(route.params.id);
