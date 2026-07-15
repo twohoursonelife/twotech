@@ -121,6 +121,13 @@ class ChangeLogCommit {
       return this.objects[id];
     }
 
+    // Renumbered objects should use their current sprite and link, not a legacy placeholder.
+    // Legacy objects are only for objects that have been removed from the current version, not for objects that have been renumbered.
+    const currentPath = this.git.currentPath(this.sha, path);
+    const currentID = currentPath.split("/")[1].split(".")[0];
+    if (this.objects[currentID])
+      return this.objects[currentID];
+
     if (this.legacyObjects[id])
       return this.legacyObjects[id];
 

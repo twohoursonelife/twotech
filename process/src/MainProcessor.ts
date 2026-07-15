@@ -152,7 +152,7 @@ class MainProcessor {
 
     console.log("\nExporting versions...");
     console.time("Exporting versions took");
-    gameData.exportVersions();
+    gameData.exportVersions(!this.doDownload);
     console.timeEnd("Exporting versions took");
 
     console.log("\nExporting biomes...");
