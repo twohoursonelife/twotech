@@ -124,7 +124,11 @@ class ChangeLogCommit {
     if (this.legacyObjects[id])
       return this.legacyObjects[id];
 
-    const data = this.fileContent(path, mode);
+    const sha = (mode == "D" ? `${this.sha}^` : this.sha);
+    // Create minimal object for unknown objects, so there's something to reference.
+    const data = this.git.fileExists(sha, path)
+      ? this.git.fileContent(sha, path)
+      : `id=${id}\nUnknown object ${id}`;
 
     const object = new GameObject(data);
     object.legacy = true;
