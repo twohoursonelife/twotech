@@ -28,7 +28,7 @@
       <input
               ref="searchInput"
               :value="search"
-              @input="event => (search = event.target.value)"
+              @input="event => (search = event.target.value || '')"
               @keydown.delete="maybeDeleteValue"
               @keyup.esc="onEscape"
               @keydown.up.prevent="typeAheadUp"
@@ -67,7 +67,7 @@
     </div>
 
     <transition :name="transition">
-      <ul ref="dropdownMenu" v-if="dropdownOpen && search.length > 0" class="dropdown-menu" :style="{ 'max-height': maxHeight }">
+      <ul ref="dropdownMenu" v-if="dropdownOpen && hasSearchText" class="dropdown-menu" :style="{ 'max-height': maxHeight }">
         <li v-if="!processing && maybeInaccurate" class="no-options">
           <slot name="no-options" style="display: inline-block">
             <p>Showing inaccurate results, check spelling.
@@ -404,6 +404,11 @@
         return option;
       }
 
+      // Either use search prop, or if it's empty, an empty string. Then we'll use searchText() in computed properties to avoid null values.
+      // We could make this computed, but don't need to because we only use it either in other computed properties or in methods, which get called on user interaction anyway
+      // Plus making it computed would have us using .value all over unnecessarily.
+      const searchText = () => search.value || '';
+
       const dropdownClasses = computed(() => {
         return {
           open: dropdownOpen.value,
@@ -431,7 +436,7 @@
        * @return {Boolean} True if non empty value
        */
       const searching = computed(() => {
-        return !!search.value
+        return !!searchText()
       });
 
       /**
@@ -442,6 +447,9 @@
       const dropdownOpen = computed(() => {
         return noDropProp.value ? false : open.value && !mutableLoading.value
       });
+
+      // Any time the search text changes, keep track of whether there is any text in the search input.
+      const hasSearchText = computed(() => searchText().length > 0);
 
       /**
        * Return the placeholder string if it's set
@@ -515,17 +523,17 @@
           }
           let options = mutableOptions.value.filter((option) => {
             if (typeof option === 'object' && option.hasOwnProperty(labelProp.value)) {
-              return option[labelProp.value].toLowerCase().indexOf(search.value.toLowerCase()) > -1
+              return option[labelProp.value].toLowerCase().indexOf(searchText().toLowerCase()) > -1
             } else if (typeof option === 'object' && !option.hasOwnProperty(labelProp.value)) {
               return console.warn(`[vue-select warn]: Label key "option.${labelProp.value}" does not exist in options object.\nhttp://sagalbot.github.io/vue-select/#ex-labels`)
             }
-            return option.toLowerCase().indexOf(search.value.toLowerCase()) > -1
+            return option.toLowerCase().indexOf(searchText().toLowerCase()) > -1
           })
-          if (taggableProp.value && search.value.length && !optionExists(search.value)) {
+          if (taggableProp.value && hasSearchText.value && !optionExists(search.value)) {
             options.unshift(search.value)
           }
           if (options.length === 0 && useGuessingEngineProp.value) {
-            const query = search.value.toLowerCase()
+            const query = searchText().toLowerCase()
             options = await new Promise(resolve => {
               worker_promises.value.push(resolve);
               worker.value.postMessage({
@@ -683,7 +691,7 @@
        * @return {void}
        */
       const onEscape = () => {
-        if (!search.value.length) {
+        if (!hasSearchText.value) {
           searchInput.value.blur();
         } else {
           search.value = '';
@@ -719,7 +727,7 @@
        * @return {this.value}
        */
       const maybeDeleteValue = () => {
-        if (!search.value.length && mutableValue.value) {
+        if (!hasSearchText.value && mutableValue.value) {
           return multipleProp.value ? mutableValue.value.pop() : mutableValue.value = null;
         }
       };
@@ -794,7 +802,7 @@
       const typeAheadSelect = () => {
         if (displayedOptions.value[typeAheadPointer.value]) {
           select(displayedOptions.value[typeAheadPointer.value]);
-        } else if (taggableProp.value && search.value.length) {
+        } else if (taggableProp.value && hasSearchText.value) {
           select(search.value);
         }
 
@@ -888,7 +896,7 @@
 
         // Watchers
         watch(search, (curr, prev) => {
-          if (curr.length > 0) {
+          if ((curr || '').length > 0) {
             onSearchProp.value(curr, toggleLoading);
             emit('search', curr, toggleLoading);
           }
@@ -1012,6 +1020,7 @@
         clearSearchOnBlur,
         searching,
         dropdownOpen,
+        hasSearchText,
         searchPlaceholder,
         isValueEmpty,
         valueAsArray,
