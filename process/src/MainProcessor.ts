@@ -150,8 +150,10 @@ class MainProcessor {
     gameData.exportObjects();
     console.timeEnd("Exporting objects took");
 
-    // console.log("\nExporting versions...");
-    // gameData.exportVersions();
+    console.log("\nExporting versions...");
+    console.time("Exporting versions took");
+    gameData.exportVersions();
+    console.timeEnd("Exporting versions took");
 
     console.log("\nExporting biomes...");
     console.time("Exporting biomes took");

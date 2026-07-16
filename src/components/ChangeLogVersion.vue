@@ -15,23 +15,26 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed, onMounted } from 'vue';
+import { defineComponent, ref, computed } from 'vue';
 import Version from '../models/Version';
 import ChangeLogCommit from './ChangeLogCommit';
 
 export default defineComponent({
   props: {
-    id: String,
+    id: {
+      type: String,
+      required: true,
+    },
   },
   components: {
     ChangeLogCommit,
   },
   setup(props) {
-    const version = ref(null);
-
-    onMounted(() => {
-      version.value = Version.fetch(props.id);
-    });
+    // Fetch the version data based on the provided id prop
+    // Do this instead of onMounted so that the data is available immediately for rendering
+    // If we set this to ref(null) and then fetch in onMounted, the component will render once with null data for version,
+    // which means date and isEmptyUnreleased will attempt to access properties of null and throw an error. By fetching the version data immediately, we avoid this issue.
+    const version = ref(Version.fetch(props.id));
 
     const date = computed(() => {
       if (!version.value?.data?.date) return;

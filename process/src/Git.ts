@@ -38,19 +38,11 @@ class Git {
     return this.runLines("diff", "--name-status", `${from}..${to}`).map(line => line.split(/\s+/));
   }
 
+  fileExists(sha: string, path: string): boolean {
+    return this.runLines("ls-tree", "--name-only", sha, "--", path).includes(path);
+  }
+
   fileContent(sha: string, path: string): string {
-    // Dear future reader
-    // Curse object 8316. This is a last ditch effort to fix it.
-    // Broken commit causing errors. An object was removed before all references to it was.
-    // https://github.com/twohoursonelife/OneLifeData7/commit/8833527cbbb2d5d3d65f174a7d412cfa7fe5cbbe
-    if (path == "objects/8316.txt") {
-      path = "objects/8317.txt";
-    }
-
-    if (path == "objects/13507.txt") {
-      path = "objects/8317.txt"
-    }
-
     // Another unpleasant fix for Data7 issues.
     // https://github.com/twohoursonelife/twotech/issues/15
     if (path == "transitions/11104_11110_CONT") {

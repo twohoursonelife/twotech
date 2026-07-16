@@ -1,3 +1,5 @@
+import { reactive } from 'vue';
+
 export default class Version {
   static fetch(id) {
     if (!id) return;
@@ -5,8 +7,12 @@ export default class Version {
       this.versionsMap = {};
     if (this.versionsMap[id])
       return this.versionsMap[id];
-    const version = new Version(id);
+    // Create a reactive version instance and store it in the versionsMap
+    // This ensures that when loadData fetches the data and updates the version instance,
+    // any components using this version will reactively update as well.
+    const version = reactive(new Version(id));
     this.versionsMap[id] = version;
+    version.loadData();
     return version;
   }
 
@@ -24,7 +30,6 @@ export default class Version {
     this.id = id;
     this.data = null;
     this.loading = false;
-    this.loadData();
   }
 
   loadData() {
