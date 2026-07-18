@@ -5,7 +5,7 @@
       label="lowerCaseName"
       :use-guessing-engine="true"
       :options="objects"
-      v-model="selectedObject"
+      :value="selectedObject"
       @change="selectObject"
       :placeholder="placeholderVal"
     >
@@ -43,19 +43,11 @@ export default {
     const selectedObject = ref(GameObject.find(route.params.id));
     const objects = computed(() => GameObject.byNameLength(props.hideUncraftable));
 
-    watch(
-      (route, (to, from) => {
-        if (VueSelectElem.value) VueSelectElem.value.search = "";
-        if (Object.keys(route.params).length <= 0) {
-          if (VueSelectElem.value) VueSelectElem.value.search = "";
-          if (VueSelectElem.value) VueSelectElem.value.mutableValue = null;
-          placeholderVal.value = "Search";
-        } else if (route.params.id) {
-          let newSelectedObject = GameObject.find(route.params.id.split('-')[0]);
-          if (VueSelectElem.value) VueSelectElem.value.mutableValue = newSelectedObject;
-        }
-      }),
-    );
+    watch(() => route.params.id, (id) => {
+      if (VueSelectElem.value) VueSelectElem.value.search = "";
+      selectedObject.value = id ? GameObject.find(id.split('-')[0]) : null;
+      placeholderVal.value = "Search";
+    });
 
     const selectObject = (object) => {
       let newSelectedObject = null;
