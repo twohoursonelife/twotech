@@ -28,17 +28,19 @@ app.use(VueTippy, {
   hideOnClick: false,
 });
 
+// Define routes for the application. If header title is variable based on a route parameter (e.g. :filter, :id),
+// use 'titleFrom' to specify the route param to use for the title. If a suffix is needed (e.g. ' Tech Tree' or ' Recipe'), use 'titleSuffix'.
 const routes = [
   { path: '/', component: () => import('./components/ObjectBrowser.vue') },
-  { path: '/not-found', component: () => import('./components/NotFound.vue') },
-  { path: '/filter/:filter*', component: () => import('./components/ObjectBrowser.vue') },
-  { path: '/letters', component: () => import('./components/RecipeForLetters.vue') },
-  { path: '/versions', component: () => import('./components/ChangeLog.vue') },
-  { path: '/versions/:id', component: () => import('./components/ChangeLog.vue') },
-  { path: '/biomes/:id', component: () => import('./components/BiomeInspector.vue') },
-  { path: '/:id/tech-tree', component: () => import('./components/TechTree.vue') },
-  { path: '/:id/recipe', component: () => import('./components/Recipe.vue') },
-  { path: '/:id', component: () => import('./components/ObjectInspector.vue'), props: true },
+  { path: '/not-found', component: () => import('./components/NotFound.vue'), meta: { title: 'Not Found' } },
+  { path: '/filter/:filter*', component: () => import('./components/ObjectBrowser.vue'), meta: { titleFrom: 'filter' } },
+  { path: '/letters', component: () => import('./components/RecipeForLetters.vue'), meta: { title: 'Letters' } },
+  { path: '/versions', component: () => import('./components/ChangeLog.vue'), meta: { title: 'Versions' } },
+  { path: '/versions/:id', component: () => import('./components/ChangeLog.vue'), meta: { titleFrom: 'version' } },
+  { path: '/biomes/:id', component: () => import('./components/BiomeInspector.vue'), meta: { titleFrom: 'biome' } },
+  { path: '/:id/tech-tree', component: () => import('./components/TechTree.vue'), meta: { titleFrom: 'object', titleSuffix: ' Tech Tree' } },
+  { path: '/:id/recipe', component: () => import('./components/Recipe.vue'), meta: { titleFrom: 'object', titleSuffix: ' Recipe' } },
+  { path: '/:id', component: () => import('./components/ObjectInspector.vue'), props: true, meta: { titleFrom: 'object' } },
   { path: '/:catchAll(.*)', redirect: '/not-found' }, // Catch-all route for 404
 ];
 
