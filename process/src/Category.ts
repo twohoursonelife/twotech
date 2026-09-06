@@ -8,6 +8,7 @@ class Category {
   parentID: string;
   pattern: boolean;
   probSet: boolean;
+  contSet: boolean;
   parent: GameObject;
   objects: GameObject[];
   constructor(dataText: string) {
@@ -30,6 +31,7 @@ class Category {
       case "parentID":   this.parentID = parts[1]; break;
       case "pattern":    this.pattern = true; break;
       case "probSet":    this.probSet = true; break;
+      case "contSet":    this.contSet = true; break;
       case "numObjects": return false; // Done processing headers
       default:           throw `Unknown category header: ${parts[0]}`;
     }
@@ -40,7 +42,7 @@ class Category {
     const parts = line.split(' ');
     if (parts[0]) {
       this.objectIDs.push(parts[0]);
-      if (this.probSet) {
+      if (this.probSet || this.contSet) {
         this.objectWeights.push(parseFloat(parts[1]));
       }
     }
