@@ -1,0 +1,22 @@
+name: Test data
+
+# runs /procces to verify changes to data processing.
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Build with Fly.io
+        run: flyctl deploy --no-cache --build-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
