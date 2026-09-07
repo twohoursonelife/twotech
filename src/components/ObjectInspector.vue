@@ -24,6 +24,13 @@
       </div>
 
       <ul v-if="!loading && object.data">
+        <!-- Show the transition filter toggle only if the object has any transitions -->
+        <li v-if="hasTransitions" class="transitionFilterToggle">
+          <label>
+            <input type="checkbox" v-model="hideUncraftableTransitions" />
+            Only craftable transitions
+          </label>
+        </li>
         <li v-if="foodWithBothBonus">
           Food: {{ foodBase }}
           <span class="details"> + {{ foodBaseBonus }} bonus</span>
@@ -163,64 +170,46 @@ export default {
     const router = useRouter();
     const object = ref(GameObject.find(route.params.id));
     const loading = ref(true);
-    const filteredTransitionsToward = computed(() => {
-      if (loading.value === false) {
-        if (!object.value.data.transitionsToward) return [];
-        if (typeof object.value.data.transitionsToward !== "object") return [];
-        // If hideUncraftable is toggled, filter out transitions with actors or targets that are not craftable
-        if (props.hideUncraftable) {
-          return object.value.data.transitionsToward.filter(t => {
-            const actor = GameObject.find(t.actorID);
-            const target = GameObject.find(t.targetID);
-            return ((!actor || actor.craftable) && (!target || target.craftable));
-          });
-        } else {
-          return object.value.data.transitionsToward;
-        }
-      } else {
-        return [];
-      }
+    // Craftable item pages start with the same transition filter as the main page
+    const hideUncraftableTransitions = ref(props.hideUncraftable);
+
+    const transitionInputsAreCraftable = (transition) => {
+      const actor = GameObject.find(transition.actorID);
+      const target = GameObject.find(transition.targetID);
+      // Actor and target must be either craftable or not exist (for transitions that don't have an actor or target)
+      return ((!actor || actor.craftable) && (!target || target.craftable));
+    };
+
+    const objectTransitions = (key) => {
+      // If we're still loading, don't try to access the object data yet
+      if (loading.value) return [];
+      const transitions = object.value?.data?.[key];
+      // If the object doesn't have any transitions, return an empty array
+      if (!transitions || typeof transitions !== "object") return [];
+      // If we're not hiding uncraftable transitions, return all transitions
+      if (!hideUncraftableTransitions.value) return transitions;
+      // Otherwise, filter the transitions to only include those that are craftable
+      return transitions.filter(transitionInputsAreCraftable);
+    };
+
+    // Check if the object has any transitions of any type
+    const hasTransitions = computed(() => {
+      if (loading.value) return false;
+      return ["transitionsToward", "transitionsAway", "transitionsTimed"].some((key) => {
+        return Array.isArray(object.value?.data?.[key]) && object.value.data[key].length > 0;
+      });
     });
-    const filteredTransitionsAway = computed(() => {
-      if (loading.value === false) {
-        if (!object.value.data.transitionsAway) return [];
-        if (typeof object.value.data.transitionsAway !== "object") return [];
-        // If hideUncraftable is toggled, filter out transitions with actors or targets that are not craftable
-        if (props.hideUncraftable) {
-          return object.value.data.transitionsAway.filter(t => {
-            const actor = GameObject.find(t.actorID);
-            const target = GameObject.find(t.targetID);
-            return ((!actor || actor.craftable) && (!target || target.craftable));
-          });
-        } else {
-          return object.value.data.transitionsAway;
-        }
-      } else {
-        return [];
-      }
-    });
-    const filteredTransitionsTimed = computed(() => {
-      if (loading.value === false) {
-        if (!object.value.data.transitionsTimed) return [];
-        if (typeof object.value.data.transitionsTimed !== "object") return [];
-        // If hideUncraftable is toggled, filter out transitions with actors or targets that are not craftable
-        if (props.hideUncraftable) {
-          return object.value.data.transitionsTimed.filter(t => {
-            const actor = GameObject.find(t.actorID);
-            const target = GameObject.find(t.targetID);
-            return ((!actor || actor.craftable) && (!target || target.craftable));
-          });
-        } else {
-          return object.value.data.transitionsTimed;
-        }
-      } else {
-        return [];
-      }
-    });
+
+    // Filtered transitions for each type of transition
+    const filteredTransitionsToward = computed(() => objectTransitions("transitionsToward"));
+    const filteredTransitionsAway = computed(() => objectTransitions("transitionsAway"));
+    const filteredTransitionsTimed = computed(() => objectTransitions("transitionsTimed"));
 
     const loadObject = async () => {
       // Set basic data to new GameObject, so loading screen has correct object's data
       object.value = GameObject.find(route.params.id);
+      // Direct links to uncraftable items show all transitions by default
+      hideUncraftableTransitions.value = object.value?.craftable === false ? false : props.hideUncraftable;
       // Set loading flag while we're loading the full item data
       loading.value = true;
       object.value = await GameObject.findAndLoad(route.params.id);
@@ -407,6 +396,8 @@ export default {
     return {
       object,
       loading,
+      hideUncraftableTransitions,
+      hasTransitions,
       biomes,
       spawnText,
       difficultyText,
@@ -512,6 +503,18 @@ export default {
   }
   .objectInspector .info li .details {
     color: #999;
+  }
+  .objectInspector .info li.transitionFilterToggle {
+    padding: 6px 0 10px;
+  }
+  .objectInspector .transitionFilterToggle label {
+    color: #ddd;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  .objectInspector .transitionFilterToggle input {
+    margin-right: 6px;
+    vertical-align: 1px;
   }
 
   .objectInspector .actions {
