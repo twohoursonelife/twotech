@@ -121,10 +121,21 @@ class ChangeLogCommit {
       return this.objects[id];
     }
 
+    // Renumbered objects should use their current sprite and link, not a legacy placeholder.
+    // Legacy objects are only for objects that have been removed from the current version, not for objects that have been renumbered.
+    const currentPath = this.git.currentPath(this.sha, path);
+    const currentID = currentPath.split("/")[1].split(".")[0];
+    if (this.objects[currentID])
+      return this.objects[currentID];
+
     if (this.legacyObjects[id])
       return this.legacyObjects[id];
 
-    const data = this.fileContent(path, mode);
+    const sha = (mode == "D" ? `${this.sha}^` : this.sha);
+    // Create minimal object for unknown objects, so there's something to reference.
+    const data = this.git.fileExists(sha, path)
+      ? this.git.fileContent(sha, path)
+      : `id=${id}\nUnknown object ${id}`;
 
     const object = new GameObject(data);
     object.legacy = true;
