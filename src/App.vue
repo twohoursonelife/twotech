@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <h1>
-      <router-link to="/">Crafting Reference for {{ gameName }}</router-link>
+      <router-link to="/">{{ pageTitle }}</router-link>
     </h1>
 
     <h2 v-if="loading">Loading...</h2>
@@ -60,11 +60,6 @@ import NotFound from './components/NotFound';
 const loading = ref(true);
 const router = useRouter();
 
-useHead({
-  title: 'Crafting reference for Two Hours One Life',
-  titleTemplate: '%s | twotech',
-});
-
 const lastDate = computed(() => {
   const months = [
     'January', 'February', 'March',
@@ -97,6 +92,32 @@ const showWhatsNew = computed(() => {
 
 const gameName = computed(() => process.env.ONETECH_MOD_NAME || 'Two Hours One Life');
 
+const defaultTitle = computed(() => "Crafting reference for " + gameName.value);
+
+const pageTitle = computed(() => {
+  const route = router.currentRoute.value;
+  if (route.meta.title) return route.meta.title;
+  if (loading.value) return defaultTitle.value;
+
+  switch (route.meta.titleFrom) {
+    case 'filter':
+      return GameObject.findFilter(filterParamParts(route.params.filter))?.name || defaultTitle.value;
+    case 'version':
+      return `Version ${route.params.id}`;
+    case 'biome':
+      return Biome.find(route.params.id)?.name || defaultTitle.value;
+    case 'object':
+      return objectTitle(route.params.id, route.meta.titleSuffix);
+    default:
+      return defaultTitle.value;
+  }
+});
+
+useHead({
+  title: pageTitle,
+  titleTemplate: "%s | twotech",
+});
+
 const gameUrl = computed(() => process.env.ONETECH_MOD_URL);
 
 const onEdge = computed(() => global.edge);
@@ -116,6 +137,15 @@ function redirectOldHash() {
     path.unshift([path.shift(), path.shift()].join('-'));
   }
   router.replace('/' + path.join('/'));
+}
+
+function filterParamParts(filter) {
+  return Array.isArray(filter) ? [...filter] : filter;
+}
+
+function objectTitle(id, suffix = "") {
+  const object = GameObject.find(id);
+  return object ? object.name + suffix : defaultTitle.value;
 }
 
 function unreleasedContentUrl() {
